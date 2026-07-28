@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Observation Contract — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / How they connect / Observation contract</div>
+    <p class="kicker">The typed joint between document and theory</p>
+    <h1>How LongTextJS and CircuitJS actually connect</h1>
+    <p class="lead">They do not connect because two fields happen to share a name. A compiled CircuitJS graph publishes an observation contract. Qualification proves that approved LongTextJS producers can satisfy it. A production run proves that this document satisfied it now.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  THEORY[CircuitJS graph] --> CONTRACT[Derived observation contract]
+  PRODUCERS[LongTextJS producers] --> GATE{Alignment + run compatibility}
+  CONTRACT --> GATE
+  GATE --> RESULT[Ready circuit or precise blocked gap]
+    </pre>
+    <p class="diagram-caption"><strong>One contract, two checks.</strong> Release alignment establishes a valid production path in general. Run compatibility establishes that the concrete source, observations, statuses, resources, and coverage satisfy that path.</p>
+
+    <h2 id="contract">What the contract contains</h2>
+    <p>For each external input port that can affect an output, the contract records the nominal types, version, cardinality, accepted epistemic statuses, required coverage, criticality, scope relation, and guarantee requirements. The current weak-phrase circuit compiles to this contract:</p>
+    <pre><code>{
+  "kind": "ObservationContract",
+  "schemaVersion": 1,
+  "circuit": "editorial.weak-phrase@2.0.0",
+  "ports": [{
+    "name": "paragraphs",
+    "types": ["document.paragraph@1"],
+    "cardinality": "many",
+    "statuses": ["extracted"],
+    "coverage": "closed-world",
+    "critical": true,
+    "scopeRelation": null,
+    "guarantee": null
+  }]
+}</code></pre>
+    <p>This says more than “the circuit reads paragraphs.” It says that model-proposed paragraphs are not an acceptable substitute, that the full qualifying paragraph domain must be covered, and that failure to provide the port blocks this circuit.</p>
+
+    <h2 id="four-moments">The connection is checked at four moments</h2>
+    <ol class="step-list">
+      <li><strong>Circuit compilation derives actual demand.</strong> <code>src/circuit/compiler.mjs</code> walks backward from declared outputs through <code>emit</code>, <code>verify</code>, calls, joins, and derivations. Only external ports that can influence the result enter the contract. A circuit cannot hide an undeclared premise on a dead side path.</li>
+      <li><strong>Qualification links producers.</strong> <code>src/release/manager.mjs</code> builds a producer-consumer matrix. Built-in Markdown structure, released extraction profiles, and approved adapters are compared with each critical port’s type, statuses, coverage, and guarantee. A critical port without a compatible producer rejects the candidate.</li>
+      <li><strong>Production checks materialization.</strong> <code>src/runtime/compatibility.mjs</code> evaluates the actual LongTextJS program. It checks observations, cardinality, statuses, capabilities, gaps, channels, structures, coverage, operational resources, and profile limits. A declared producer cannot manufacture evidence that this document did not yield.</li>
+      <li><strong>Execution verifies a witness.</strong> A ready circuit may compute candidates, but its finding contract still controls publication. The registered verifier checks the precise witness against source and released policy. Compatibility answers “may this theory run?”; verification answers “does this candidate support this claim?”</li>
+    </ol>
+
+    <h2 id="worked-example">Worked example: “de fapt” in narration</h2>
+    <p>The current <code>editorial-demo</code> makes the complete joint visible:</p>
+    <ol class="step-list">
+      <li>The Markdown compiler produces every paragraph as <code>document.paragraph@1</code> with <code>extracted</code> status, exact anchors, stable order, and verified closed-world structural coverage.</li>
+      <li>The CircuitJS port asks for exactly that type, status, and coverage. Release qualification links it to <code>markdown-structural@1</code>.</li>
+      <li>During a run, compatibility confirms that the concrete <code>view:whole</code> has qualifying paragraph observations and no blocking structural gap.</li>
+      <li>The lexical operator searches those observations using the released Romanian phrase rule and dialogue-prefix exclusion. It returns candidates with anchors and rule provenance.</li>
+      <li>The exact-match verifier reads the source range again. Only accepted candidates become findings. The report can therefore claim an exact occurrence in released scope, not a general aesthetic truth.</li>
+    </ol>
+
+    <h2 id="semantic-example">What changes for semantic observations</h2>
+    <p>Suppose a continuity circuit consumes <code>narrative.object-event@1</code>. Its released extraction profile may produce <code>proposed</code> leave, retrieve, transfer, and use events. Qualification can prove that a producer exists and that natural benchmark cases give the type operational meaning. Production can prove that candidate events were anchored and that the required scope was processed. A state verifier can replay the released transition policy.</p>
+    <p>None of those steps turns model interpretation into mechanical fact. The final guarantee is bounded by the event status, identity evidence, and coverage. If the phone identity is ambiguous or the intervening chapters were not materially covered, the correct result is ambiguous or incomplete. This is why the connector includes status and coverage rather than just a JSON schema.</p>
+
+    <h2 id="failure">What a failed connection looks like</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Failure</th><th>Example</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>No producer</td><td>A circuit consumes <code>normative.notification@2</code>, but the release ships neither a structural producer nor an extraction profile.</td><td>Candidate qualification fails.</td></tr>
+        <tr><td>Wrong semantics</td><td>A dramatic “scene” is mapped to a narrative scene type only because their names match.</td><td>Adapter or semantic probe is required; the circuit remains blocked.</td></tr>
+        <tr><td>Wrong status</td><td>A critical port requires <code>human-confirmed</code>, but the run has only <code>proposed</code> observations.</td><td>Run compatibility blocks the port.</td></tr>
+        <tr><td>Insufficient coverage</td><td>A rule concludes that no notification exists from a few retrieved emails.</td><td>The negative conclusion is forbidden; the run stops or reports narrower limits.</td></tr>
+        <tr><td>Missing context</td><td>A deadline circuit knows the timestamp type but lacks the required jurisdiction calendar.</td><td>Operational incompatibility produces a precise gap.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="why">Why this architecture works</h2>
+    <p>The document compiler is guided without being told which verdict to produce. The theory is reusable without pretending to understand every source. Static linking catches impossible packages before release. Runtime compatibility catches concrete documents outside the calibrated domain. Witness verification catches bad candidates after execution. Each failure lands at a named boundary that can later become a targeted learning task.</p>
+    <p>The same joint supports both CNL profiles. Planning circuits demand structural or semantic observations from the idea and emit an idea-specific CNL specification with verified rule-to-plan coverage. Validation circuits demand observations from an existing or realized document and emit findings assembled into a CNL audit. Neither output copies the rulebook or bypasses its observation contract.</p>
+
+    <nav class="page-nav" aria-label="Connection reading path">
+      <strong>See the contract in motion</strong>
+      <a href="verification.html">During one production verification</a>
+      <a href="learning-architecture.html">During learning and qualification</a>
+      <a href="benchmark.html">Through natural alignment cases</a>
+    </nav>
+
+    <footer>Normative connector contract: <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, supported by <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> and <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "kind": "NaturalLanguageLinterBenchmarkCase",
+  "rule": "ED-001",
+  "family": "adversarial",
+  "validationStatus": "human-confirmed",
+  "reportComparison": "structured"
+}

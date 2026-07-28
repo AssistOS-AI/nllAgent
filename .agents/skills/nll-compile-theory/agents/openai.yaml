@@ -1,0 +1,6 @@
+interface:
+  display_name: "Compile Natural Linter Theory"
+  short_description: "Compile rules into typed CircuitJS theory artifacts."
+  default_prompt: "Use $nll-compile-theory to compile the supplied authority into candidate theory artifacts."
+policy:
+  allow_implicit_invocation: false

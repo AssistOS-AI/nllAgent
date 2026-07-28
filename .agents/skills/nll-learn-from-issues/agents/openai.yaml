@@ -1,0 +1,6 @@
+interface:
+  display_name: "Learn from Natural Linter Issues"
+  short_description: "Distill runtime issues into controlled candidate repairs."
+  default_prompt: "Use $nll-learn-from-issues to analyze selected agent issues and propose tested repairs."
+policy:
+  allow_implicit_invocation: false

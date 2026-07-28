@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operators and Verification — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Operators and verification</div>
+    <p class="kicker">From typed observations to replayable findings</p>
+    <h1>Reasoning operators and verifiers</h1>
+    <p class="lead">CircuitJS describes a method without embedding arbitrary executable code. Operators provide the approved algorithms behind that method; verifiers independently check the witness required to publish a finding. The scheduler connects both while preserving types, provenance, budgets, and failure states.</p>
+
+    <h2 id="why-operators">Why circuits call a registry</h2>
+    <p>Different rules need genuinely different algorithms. Phrase linting needs exact source scanning. Continuity needs ordered events and state transitions. Normative deadlines need temporal calculation and explicit exception policy. Technical consistency may need unit conversion or constraint comparison. Flattening all of these into a single generic “reason” operation would hide the real semantics and make independent verification impossible.</p>
+    <p>A circuit therefore refers to an exact versioned operator identifier. The trusted registry binds that identifier to an implementation contract: input and output shapes, determinism, effects, capabilities, resource limits, cost, sandbox policy, and witness requirements. Static compilation fails when an operator or verifier is absent, unknown, or not permitted by the release.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  PORT[Typed observations] --> OP[Registered operator]
+  OP --> VER{Candidate witness verified?}
+  VER -->|accept| PUB[Publish bounded finding]
+  VER -->|reject| DIAG[Reject + diagnostic]
+    </pre>
+    <p class="diagram-caption"><strong>The solver is not its own judge.</strong> An operator can be complex, but publication depends on a verifier checking concrete properties of its witness. Rejection remains evidence and never becomes a finding.</p>
+
+    <h2 id="scheduler">How the scheduler executes a circuit</h2>
+    <ol>
+      <li><strong>Bind external ports.</strong> The runtime selects LongTextJS observations by nominal type and version, accepted epistemic statuses, scope, and cardinality. It propagates the weakest premise guarantee.</li>
+      <li><strong>Build a dependency plan.</strong> Node references form a directed graph. Filters can move ahead of expensive joins only when equivalence is preserved. Ready pure nodes may run concurrently without changing deterministic output order.</li>
+      <li><strong>Resolve every executable node.</strong> Relational and control primitives use built-in semantics; <code>call</code>, state, temporal, search, judge, and verification nodes resolve exact registry entries and declared capabilities.</li>
+      <li><strong>Execute with immutable values.</strong> Nodes receive plain-data inputs and return plain-data outputs with provenance. A node cannot mutate LongTextJS, release data, or another node’s result.</li>
+      <li><strong>Route controlled outcomes.</strong> Empty results, not-applicable conditions, budget exhaustion, operator faults, and verifier rejection follow declared routes rather than becoming thrown-away logs.</li>
+      <li><strong>Persist the trace.</strong> The run records the plan, resolved versions, node inputs and outputs, budgets, witnesses, verifier decisions, and findings needed for replay and review.</li>
+    </ol>
+
+    <h2 id="regimes">Implemented reasoning regimes</h2>
+    <p>The standard registry supplies reusable mechanisms, not domain understanding. A release still has to qualify the LongTextJS producers and natural cases that give each operator’s inputs meaning.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Operator</th><th>What it computes</th><th>What its verifier rechecks</th></tr></thead>
+      <tbody>
+        <tr><td><code>text.lexical-occurrences@1</code></td><td>Literal occurrences under case, word-boundary, paragraph-type, and excluded-prefix policy.</td><td><code>text.exact-match@1</code> rereads each canonical source range.</td></tr>
+        <tr><td><code>text.frequency-threshold@1</code></td><td>Counts exact term spans inside each configured scope and reports threshold candidates.</td><td>Rereads every occurrence and recomputes the configured maximum.</td></tr>
+        <tr><td><code>narrative.object-continuity@1</code></td><td>Tracks leave, retrieve, transfer, replace, and use events by object identity.</td><td>Replays source event order and checks that no recovery transition exists in the witnessed interval.</td></tr>
+        <tr><td><code>logic.fixpoint@1</code></td><td>Finite positive Datalog-style closure with derivation provenance.</td><td>Recomputes closure from the original facts and rules.</td></tr>
+        <tr><td><code>argumentation.grounded@1</code></td><td>Grounded acceptance over a finite attack graph.</td><td>Recomputes the accepted and rejected argument sets.</td></tr>
+        <tr><td><code>temporal.deadline@1</code></td><td>Elapsed deadlines with restart or pause outage policy and open/closed evidence behavior.</td><td>Recomputes trigger, duration, outage adjustment, deadline, candidate action, and verdict.</td></tr>
+        <tr><td><code>state.timeline@1</code></td><td>Ordered state effects with inertia and explicit retraction.</td><td>Replays effects and compares the history and final state.</td></tr>
+        <tr><td><code>units.convert@1</code></td><td>Typed length, pressure, mass, and temperature conversion through canonical units.</td><td>Recomputes dimension compatibility and target value.</td></tr>
+        <tr><td><code>constraints.interval-conflicts@1</code></td><td>Finds disjoint intervals after key and scope alignment.</td><td>Checks aligned identity, shared applicability scope, and numerical disjointness.</td></tr>
+        <tr><td><code>graph.shortest-path@1</code></td><td>Bellman–Ford shortest path with negative edges and reachable negative-cycle detection.</td><td>Checks edge membership, total cost, and optimality.</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>If these roles are unfamiliar, the <a href="circuit-tutorial.html">interactive execution tutorial</a> shows the
+      exact lexical operator and verifier values before introducing the broader operator catalog.</p>
+
+    <h2 id="witness">A witness makes a result contestable</h2>
+    <p>A verdict such as “deadline missed” is too compressed to verify. Its witness must carry the trigger observation, rule identity and version, relevant calendar or elapsed-time policy, outage intervals, computed deadline, candidate actions, evidence coverage, and selected verdict. The temporal verifier recomputes those pieces instead of trusting the operator’s boolean.</p>
+    <p>The same principle applies to simpler cases. A lexical witness contains the rule, exact anchor, and matched span. A continuity witness contains the two material events, object identity, intervening event domain, transition policy, and state gap. A shortest-path witness contains the graph, path, cost, and any potential or optimality information needed by the checker.</p>
+    <p>Verifier output is not just accepted or rejected. It records the verifier identifier, checked properties, diagnostics, source dependencies, and guarantee obtained. This allows the report to say what was certified rather than displaying a generic “verified” badge.</p>
+
+    <h2 id="guarantees">Verification does not erase uncertain premises</h2>
+    <p>A verifier certifies only the property it replayed. If a semantic translator proposed that a sentence describes a retrieval event, deterministic state replay can certify the state calculation <em>given that event</em>; it cannot retroactively make the event classification mechanical. The finding’s guarantee is bounded by the weakest material premise and the verifier’s own contract.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Example</th><th>Verifier can establish</th><th>Remaining limit</th></tr></thead>
+      <tbody>
+        <tr><td>Exact forbidden phrase</td><td>The literal text occurs at the reported canonical span.</td><td>Usually none beyond declared lexical scope and coverage.</td></tr>
+        <tr><td>Object continuity from model-produced events</td><td>The transition history contains no qualifying recovery event among materialized events.</td><td>Event semantics, identity, and extraction coverage may remain model-assisted.</td></tr>
+        <tr><td>Policy deadline</td><td>The arithmetic and named exception policy produce the recorded deadline and action relation.</td><td>Trigger classification, legal authority, or register completeness may require human or source confirmation.</td></tr>
+        <tr><td>Editorial rubric judgment</td><td>The judge received the approved rubric and anchored evidence, and the explanation stays inside the finding envelope.</td><td>The aesthetic or semantic judgment remains model-assisted or review-required.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="coverage">Completeness-sensitive operations</h2>
+    <p>Anti-joins and “no event found” conclusions require a coverage token whose domain exactly matches the collection being excluded. The continuity verifier inspects all materialized intervening object events rather than trusting a candidate to list only convenient ones. Lexical completeness scans every qualifying block, not only retrieved passages. If the document source or extraction profile cannot establish the required domain, the circuit must return incomplete or undetermined.</p>
+
+    <h2 id="dynamic-demand">Dynamic observation requests</h2>
+    <p>An operator may discover a bounded semantic question that static planning could not specialize, such as “find every retrieval, transfer, or replacement event for this phone between scenes 4 and 12, including negated and hypothetical mentions.” It returns a typed <code>NeedObservation</code>, not a free-form model prompt. The analyzer materializes the request through the normal translation and anchoring path, then reruns the dependent portion of the circuit. Dynamic rounds and model calls consume explicit budgets and remain visible in the trace.</p>
+
+    <h2 id="budgets-cache">Budgets, caching, and isolation</h2>
+    <p>The scheduler enforces run, circuit, node, dynamic-demand, wall-time, memory, model-call, and operator-specific bounds. Search-style operators additionally bound expanded states and frontier size; fixpoint execution requires a finite domain and deduplication. Exhaustion may preserve a diagnostic candidate but cannot publish it as a verified result.</p>
+    <p>Deterministic node cache keys include the circuit and node versions, operator implementation, resolved inputs, the complete LongTextJS semantic program, and operational context. Including the full program matters because an operator or verifier may consult anchors, task policy, or coverage outside its immediate row array. Model calls are captured; they are reused deterministically only through an explicit replay capture.</p>
+    <p>Pure operators can run in process. Model, network, solver, native, or otherwise effectful operators require controlled adapters and may be placed in worker threads or child processes. A circuit receives only declared capabilities, never ambient filesystem or network access.</p>
+
+    <h2 id="add-operator">Add an operator without expanding hidden trust</h2>
+    <ol>
+      <li>Write down the semantic role, stable versioned input and output data, determinism, effects, limits, and failure modes.</li>
+      <li>Design the witness before the solver implementation. The witness should be smaller and easier to check than reproducing the whole search procedure.</li>
+      <li>Implement the operator outside agent-editable CircuitJS and register it under an exact identifier.</li>
+      <li>Implement an independent verifier or explicitly bound the result as model judgment. Test that corrupted witnesses are rejected.</li>
+      <li>Add unit tests for normal, boundary, invalid, adversarial, and exhausted cases, including provenance and deterministic ordering.</li>
+      <li>Add natural benchmark cases showing that real document observations reach the operator with the intended semantics.</li>
+      <li>Update the relevant DS, registry documentation, security capabilities, and candidate release. Registration alone does not qualify a domain use.</li>
+    </ol>
+
+    <h2 id="next">Where to go next</h2>
+    <p>Read <a href="circuitjs.html">The CircuitJS theory program</a> for graph authoring, <a href="benchmark.html">Benchmarks and qualification</a> for testing operator use through natural text, <a href="artifacts.html#run-directory">Artifacts</a> for plans and verifier records, and <a href="security.html#runtime-capabilities">Runtime boundaries</a> for capability control.</p>
+    <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, and <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CircuitJS Theory Program — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / CircuitJS / The theory program</div>
+    <p class="kicker">The theory side</p>
+    <h1>CircuitJS is a program of the rulebook</h1>
+    <p class="lead">CircuitJS turns reusable rule knowledge into a typed declarative graph. Validation graphs publish verified findings that become a CNL audit; planning graphs publish a verified CNL document specification. Both state what observations are required, how rules apply, and what must be checked before publication.</p>
+
+    <div class="callout"><strong>New to graph execution?</strong> Use the
+      <a href="circuit-tutorial.html">interactive circuit execution tutorial</a> first. It lets you move from a source
+      through LongTextJS, port binding, operator output, witness replay, <code>emit</code>, and both CNL profiles one
+      stage at a time.</div>
+
+    <h2 id="lifecycle">A theory has a different lifecycle</h2>
+    <p>A production document may change daily. A qualified rule theory should remain stable across many documents until authority, evidence, or feedback justifies a new release. CircuitJS is therefore authored and tested in learning, locked into an immutable release, and only read during production.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  AUTHOR[Rulebook → restricted author form] --> GRAPH[Canonical plain-data graph]
+  GRAPH --> STATIC[Static compilation + linking]
+  STATIC --> QUAL[Natural benchmark qualification]
+  QUAL --> REL[Immutable release]
+    </pre>
+    <p class="diagram-caption"><strong>The theory becomes production code only through qualification.</strong> The author notation cannot add executable capabilities. Static analysis and natural cases must agree before the graph is frozen into a release.</p>
+
+    <h2 id="real-circuit">A circuit that exists in the repository</h2>
+    <p>The <code>editorial-demo</code> candidate contains this restricted author module. It finds the exact Romanian phrase “de fapt” only in released narrative paragraph scope and publishes a finding only after replay verification:</p>
+    <pre><code>export default circuit({
+  kind: 'CircuitJS',
+  id: 'editorial.weak-phrase',
+  version: '2.0.0',
+  description: 'Find “de fapt” in narrative Markdown paragraphs.',
+  sourceRuleReferences: [
+    'authority/style-guide.md#rule-ed-001-weak-phrase-in-narration'
+  ],
+  inputs: {
+    paragraphs: {
+      type: 'document.paragraph@1',
+      cardinality: 'many',
+      statuses: ['extracted'],
+      coverage: 'closed-world',
+      critical: true
+    }
+  },
+  nodes: [
+    {
+      id: 'matches',
+      primitive: 'call',
+      operator: 'text.lexical-occurrences@1',
+      inputs: { observations: port('paragraphs'), rules: [/* ED-001 */] }
+    },
+    {
+      id: 'verified',
+      primitive: 'verify',
+      verifier: 'text.exact-match@1',
+      inputs: { candidates: node('matches') }
+    },
+    {
+      id: 'findings',
+      primitive: 'emit',
+      inputs: { verified: node('verified') }
+    }
+  ],
+  outputs: { findings: node('findings') },
+  budgets: { nodes: 12, wallTimeMs: 5000 }
+});</code></pre>
+
+    <h2 id="read-it">How to read the graph</h2>
+    <ol class="step-list">
+      <li><strong>Identity and authority.</strong> The circuit has a semantic version and a source-rule reference. A finding can therefore return to the rulebook passage that authorized it.</li>
+      <li><strong>Typed port.</strong> <code>paragraphs</code> accepts many <code>document.paragraph@1</code> observations, but only with <code>extracted</code> status and closed-world coverage. It is critical, so a missing producer blocks the circuit.</li>
+      <li><strong>Registered computation.</strong> <code>call</code> invokes <code>text.lexical-occurrences@1</code>. The circuit supplies policy data; the operator supplies reviewed executable behavior.</li>
+      <li><strong>Independent check.</strong> <code>verify</code> gives the candidate and source evidence to <code>text.exact-match@1</code>. A rejected candidate never reaches the output.</li>
+      <li><strong>Controlled publication.</strong> <code>emit</code> consumes only the verified result. Static analysis proves that every path to this output is verification-dominated.</li>
+    </ol>
+
+    <h2 id="restricted">Why the file looks like JavaScript but is not general JavaScript</h2>
+    <p>The loader accepts exactly one direct <code>export default circuit({...})</code> expression and injects the data constructors <code>circuit</code>, <code>port</code>, and <code>node</code>. It rejects imports, wrappers, functions, classes, control flow, asynchronous work, templates, dynamic code generation, process, filesystem, network, prototype mechanisms, accessors, cycles, non-finite numbers, and values that cannot be converted losslessly to plain data.</p>
+    <p>The expression is evaluated briefly in a restricted <code>node:vm</code> context and normalized. The CircuitJS compiler then treats the result exactly like JSON. Domain logic must live in a registered operator with a declared signature, effect set, budget, and verifier—not inside an author-supplied callback.</p>
+
+    <h2 id="ports">Ports are the public interface of a theory</h2>
+    <p>Inputs declare nominal type and version, cardinality, accepted statuses, coverage, criticality, scope relation, ordering, deduplication, and guarantee requirements. The compiler traces which inputs can actually affect an output and persists an <code>ObservationContract</code>. Dead declarations and hidden side paths are rejected.</p>
+    <p>This is how CircuitJS asks the document side for neutral premises without sending the desired verdict. The weak-phrase circuit asks for all qualifying paragraphs. A continuity circuit asks for leave, retrieve, transfer, and use events—including negated or hypothetical candidates—not for “evidence that continuity is broken.”</p>
+
+    <h2 id="execution">Primitives coordinate; operators reason</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Family</th><th>Examples</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Relational</td><td><code>select</code>, <code>filter</code>, <code>join</code>, <code>group</code>, <code>aggregate</code></td><td>Correlate typed observations while retaining provenance.</td></tr>
+        <tr><td>Inference and state</td><td><code>derive</code>, <code>fixpoint</code>, <code>maintain</code>, <code>retract</code></td><td>Build consequences, timelines, and revision-aware state.</td></tr>
+        <tr><td>Alternatives and services</td><td><code>choose</code>, <code>search</code>, <code>call</code>, <code>judge</code>, <code>invoke</code></td><td>Explore bounded alternatives or invoke registered capabilities.</td></tr>
+        <tr><td>Publication</td><td><code>verify</code>, <code>certify</code>, <code>explain</code>, <code>emit</code></td><td>Check witnesses and limit what a report may claim.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The runtime currently implements the static core and a set of deterministic relational, temporal, state, unit, interval, fixpoint, argumentation, lexical, semantic, and replay operators used by tests and example packages. The broader primitive catalog is an extension contract; unsupported semantics must block rather than appear to work.</p>
+
+    <h2 id="generation-purpose">Validation circuits and planning circuits</h2>
+    <p>A normal circuit has validation purpose and publishes findings. The runtime collects those findings into <code>CNLAuditReport</code>, the <code>CNL/Audit-1</code> profile. A <code>purpose: planning</code> circuit consumes LongTextJS observations of one high-level idea and publishes a verification-dominated <code>CNLGenerationPlan</code>, the <code>CNL/Plan-1</code> profile. Its construction node must map every applied rule to concrete locations in the plan. Validation circuits cannot embed CNL constraint projections: rules remain executable theory. Releases list the two graph families as <code>circuits</code> and <code>planningCircuits</code>.</p>
+
+    <h2 id="files">Where to inspect it</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Implementation</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>src/circuit/module-loader.mjs</code></td><td>Restricted <code>.circuit.mjs</code> capability analysis and lossless plain-data conversion.</td></tr>
+        <tr><td><code>src/circuit/compiler.mjs</code></td><td>Graph validation, registry linking, verification dominance, dead-declaration checks, and observation-contract derivation.</td></tr>
+        <tr><td><code>src/runtime/scheduler.mjs</code></td><td>Budgeted graph execution over immutable node inputs and outputs.</td></tr>
+        <tr><td><code>src/runtime/standard-operators.mjs</code></td><td>Standard operator and verifier registrations, including translation-backed operators.</td></tr>
+      </tbody>
+    </table></div>
+
+    <nav class="page-nav" aria-label="CircuitJS reading path">
+      <strong>Continue on the theory side</strong>
+      <a href="operators.html">How operators and verifiers execute</a>
+      <a href="benchmark.html">How natural cases qualify a theory</a>
+      <a href="connection.html">How ports connect to LongTextJS</a>
+    </nav>
+
+    <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, and <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

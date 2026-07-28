@@ -1,0 +1,6 @@
+interface:
+  display_name: "CNL Plan Realizer"
+  short_description: "Realize a released CNL plan as Markdown"
+  default_prompt: "Use $nll-realize-cnl to realize the supplied circuit-produced CNL plan as schema-valid Markdown."
+policy:
+  allow_implicit_invocation: false

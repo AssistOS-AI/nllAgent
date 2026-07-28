@@ -141,3 +141,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# NaturalLanguageLinterAgent local runtime artifacts
+data/*/runs/*
+data/*/learning-runs/*
+data/*/planning-runs/*
+data/*/issues/*.json
+data/*/locks/*
+data/*/cache/*

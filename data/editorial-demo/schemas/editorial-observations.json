@@ -1,0 +1,9 @@
+{
+  "kind": "ObservationSchemaPackage",
+  "namespace": "editorial-demo",
+  "requiredTypes": [
+    "document.paragraph@1"
+  ],
+  "schemaVersion": 1,
+  "version": "1.0.0"
+}

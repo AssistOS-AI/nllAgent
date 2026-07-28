@@ -1,0 +1,35 @@
+{
+  "benchmark": {
+    "failed": 0,
+    "families": {
+      "adversarial": 1,
+      "boundary": 1,
+      "exception": 3,
+      "negative": 2,
+      "positive": 2,
+      "scope": 1
+    },
+    "passed": 10,
+    "policyFailures": [],
+    "rules": {
+      "ED-001": 5,
+      "ED-002": 5
+    },
+    "total": 10
+  },
+  "checks": [
+    "manifest",
+    "circuit-static-analysis",
+    "operator-linking",
+    "verification-dominance",
+    "compatibility-profile",
+    "available-agent-benchmarks",
+    "semantic-diff-and-impact-map",
+    "release-file-digests"
+  ],
+  "kind": "QualificationResult",
+  "manifestDigest": "sha256:f9a51238f7493fb57630dc854c0bc344c842f3adcf0fdd375b6698b783d50bbc",
+  "release": "2.0.0",
+  "schemaVersion": 1,
+  "status": "qualified"
+}

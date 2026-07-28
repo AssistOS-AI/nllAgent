@@ -1,0 +1,69 @@
+{
+  "contracts": [
+    {
+      "circuit": "editorial.weak-phrase@3.0.0",
+      "kind": "ObservationContract",
+      "ports": [
+        {
+          "cardinality": "many",
+          "coverage": "closed-world",
+          "critical": true,
+          "guarantee": null,
+          "name": "paragraphs",
+          "scopeRelation": null,
+          "statuses": [
+            "extracted"
+          ],
+          "types": [
+            "document.paragraph@1"
+          ]
+        }
+      ],
+      "schemaVersion": 1
+    },
+    {
+      "circuit": "editorial.parca-frequency@3.0.0",
+      "kind": "ObservationContract",
+      "ports": [
+        {
+          "cardinality": "many",
+          "coverage": "closed-world",
+          "critical": true,
+          "guarantee": null,
+          "name": "paragraphs",
+          "scopeRelation": null,
+          "statuses": [
+            "extracted"
+          ],
+          "types": [
+            "document.paragraph@1"
+          ]
+        }
+      ],
+      "schemaVersion": 1
+    },
+    {
+      "circuit": "editorial.scene-cnl-plan@3.1.0",
+      "kind": "ObservationContract",
+      "ports": [
+        {
+          "cardinality": "at-least-one",
+          "coverage": "closed-world",
+          "critical": true,
+          "guarantee": null,
+          "name": "idea",
+          "scopeRelation": null,
+          "statuses": [
+            "extracted"
+          ],
+          "types": [
+            "document.line@1"
+          ]
+        }
+      ],
+      "schemaVersion": 1
+    }
+  ],
+  "kind": "ObservationContractBundle",
+  "schemaVersion": 1
+}

@@ -1,0 +1,43 @@
+{
+  "blockingSeverities": [
+    "error",
+    "critical",
+    "blocker"
+  ],
+  "circuits": [
+    "circuits/weak-phrase.circuit.json"
+  ],
+  "compatibilityProfile": "compatibility.json",
+  "description": "Qualified lexical editorial demonstration.",
+  "files": [
+    {
+      "digest": "sha256:d2a88f89aa0a1116c6d0329de7614b004c2edebc9f88a923050db15bb6500eac",
+      "path": "authority-map.json"
+    },
+    {
+      "digest": "sha256:793dfee03e9d42d6a5af591083ecf1712e350e11b336c9ea2af8101b271e871c",
+      "path": "circuits/weak-phrase.circuit.json"
+    },
+    {
+      "digest": "sha256:30c6cc00f084ff7f025e39a76d6fe619d97bfc6696f3208a87572178249814bf",
+      "path": "compatibility.json"
+    },
+    {
+      "digest": "sha256:9316cdaca1b605f9eead8a31633ea8b94114661f56a36bf3a664fcaad5b64db1",
+      "path": "impact-map.json"
+    },
+    {
+      "digest": "sha256:5a1c26769a93373771fa610fccce9bb6275755d0d675c715954b5a7aaa1b5fd8",
+      "path": "semantic-diff.json"
+    }
+  ],
+  "intendedUse": "Review Romanian Markdown paragraphs for ED-001.",
+  "kind": "NaturalLinterRelease",
+  "knownLimitations": [
+    "The lexical demonstration does not infer discourse mode."
+  ],
+  "lineage": null,
+  "qualifiedBy": "local-qualification@2",
+  "status": "qualified",
+  "version": "1.0.0"
+}

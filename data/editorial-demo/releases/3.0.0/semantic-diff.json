@@ -1,0 +1,31 @@
+{
+  "circuits": [
+    {
+      "afterDigest": "sha256:b186c4bfdda31234ccd8f69fb3f00ca10a7f2cc9981fd79e5181d3624c704302",
+      "beforeDigest": "sha256:3c9fefd2e432151540dc662f64a708918f815fdafc6b630276d881e18825a590",
+      "change": "changed",
+      "id": "editorial.parca-frequency"
+    },
+    {
+      "afterDigest": "sha256:1a9c3f238483ec8d4e3535ddc2f12e7cc491e39affde860ca2bd7f1c7975dbb4",
+      "beforeDigest": null,
+      "change": "added",
+      "id": "editorial.scene-cnl-plan"
+    },
+    {
+      "afterDigest": "sha256:3c1efb03b3722f045e35b152b2925ffe786a98f4a2615b1fc4b7d94b9337448f",
+      "beforeDigest": "sha256:773289e6c752ce27d120585444dd34da4de0e67e79ab7a18ef96165b1e2edd55",
+      "change": "changed",
+      "id": "editorial.weak-phrase"
+    }
+  ],
+  "compatibilityChanged": true,
+  "from": "2.0.0",
+  "kind": "SemanticDiff",
+  "knownLimitations": [
+    "Dialogue scope is recognized by the released em-dash or en-dash paragraph-prefix convention.",
+    "The demonstration planning circuit targets a short Romanian literary scene; final text realization is optional and model-assisted."
+  ],
+  "schemaVersion": 1,
+  "to": "3.0.0"
+}

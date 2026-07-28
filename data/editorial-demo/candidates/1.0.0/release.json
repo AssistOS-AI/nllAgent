@@ -1,0 +1,20 @@
+{
+  "blockingSeverities": [
+    "error",
+    "critical",
+    "blocker"
+  ],
+  "circuits": [
+    "circuits/weak-phrase.circuit.json"
+  ],
+  "compatibilityProfile": "compatibility.json",
+  "description": "Qualified lexical editorial demonstration.",
+  "intendedUse": "Review Romanian Markdown paragraphs for ED-001.",
+  "kind": "NaturalLanguageLinterRelease",
+  "knownLimitations": [
+    "The lexical demonstration does not infer discourse mode."
+  ],
+  "lineage": null,
+  "status": "candidate",
+  "version": "1.0.0"
+}

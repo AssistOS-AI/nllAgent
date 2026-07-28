@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture of Learning — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / How they connect / Learning architecture</div>
+    <p class="kicker">Learning-plane architecture</p>
+    <h1>Learning builds a new theory; it never edits a live one</h1>
+    <p class="lead">A learning job compiles rulebooks, calibration documents, review evidence, and production gaps into candidate LongTextJS producers, CircuitJS theories, and natural benchmark cases. Host-side audit and qualification decide what may become a release. Activation remains separate.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  INPUT[Rules + calibration + feedback] --> STAGE[Coding Agent builds candidate in staging]
+  STAGE --> GATE[Host audit + trusted qualification]
+  GATE --> REL[Immutable qualified release]
+  REL --> ACT[Explicit activation for future runs]
+    </pre>
+    <p class="diagram-caption"><strong>Learning is a build pipeline.</strong> Open-ended authoring happens only in staging. The promotion audit controls files, the release gate controls semantics, and activation controls production policy.</p>
+
+    <h2 id="input">What enters a learning job</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Input</th><th>Role</th><th>Authority limit</th></tr></thead>
+      <tbody>
+        <tr><td>Rulebook Markdown</td><td>Defines rules, terms, exceptions, priorities, and intended outcomes.</td><td>Only declared authority sources may define policy.</td></tr>
+        <tr><td>Calibration documents</td><td>Show real language, structure, long-range dependencies, and edge cases.</td><td>An example illustrates or challenges a rule; repetition does not make it authority.</td></tr>
+        <tr><td>Review feedback</td><td>Corrects an anchor, observation, identity, scope, rule, severity, explanation, or coverage claim.</td><td>The reviewer role determines what kind of correction it can authorize.</td></tr>
+        <tr><td>Production issues and LearningNeeds</td><td>Identify missing producers, schemas, context, coverage, circuits, or accepted limitations.</td><td>A blocked source fragment is calibration evidence, not a new rule.</td></tr>
+        <tr><td>Current release and trusted registries</td><td>Provide lineage, implemented capabilities, and immutable contracts.</td><td>The Coding Agent receives them as context and cannot modify them.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="steps">The learning path</h2>
+    <ol class="step-list">
+      <li><strong>Lock and snapshot the project.</strong> <code>src/learning/runner.mjs</code> acquires the named agent’s learning lock, copies the requested Markdown rules, selects open issues, records the active release, and creates <code>learning-runs/&lt;id&gt;/</code>. Each named agent therefore learns against its own authority, benchmark, and release lineage.</li>
+      <li><strong>Build a disposable workspace.</strong> The runner copies authoring roots—<code>circuits</code>, <code>schemas</code>, <code>extraction</code>, <code>candidates</code>, <code>benchmark</code>, and <code>proposals</code>—plus read-only context such as authority, feedback, issues, DS contracts, serious issues, the active release, and trusted registry descriptions.</li>
+      <li><strong>Expose only learning skills.</strong> <code>src/learning/workspace.mjs</code> links exactly five agent-local skills: scope the project, compile the theory, build the benchmark, learn from issues, and prepare qualification. Production translation and unrelated repository-maintenance skills are absent.</li>
+      <li><strong>Let the Coding Agent author a coherent candidate.</strong> The agent may add or change observation schemas, extraction profiles, restricted CircuitJS modules, natural microcases, proposals, and candidate packages. It returns a schema-valid terminal result and may write a qualification request. OpenAI Codex is the current reference adapter; the architecture depends on the generic staged-workspace and result contract.</li>
+      <li><strong>Audit every changed path.</strong> After the process exits, the host compares before and after snapshots. Deletions, symlinks, forbidden paths, non-regular files, absent output, and schema-invalid output reject promotion. Only whitelisted authoring files and current learning-run outputs are copied back to the real agent workspace.</li>
+      <li><strong>Validate the candidate structurally.</strong> Qualification reads the candidate manifest, compiles every circuit, links operators and verifiers, validates authority references and compatibility profiles, derives observation contracts, and builds the producer-consumer alignment report. A critical port without an approved producer fails here.</li>
+      <li><strong>Run natural benchmarks without mutable inputs.</strong> The gate snapshots candidate and agent benchmark bytes, runs all discovered suites and declared family requirements, then confirms neither snapshot changed. A failing benchmark or changed byte aborts qualification.</li>
+      <li><strong>Create an immutable release.</strong> A passing gate copies candidate and benchmark snapshots, writes benchmark results, semantic diff, impact map, observation contracts, alignment report, file digests, and qualification result, then atomically publishes <code>releases/&lt;version&gt;/</code>.</li>
+      <li><strong>Activate separately.</strong> Qualification does not edit <code>active-release.json</code>. An operator explicitly activates the qualified version. Only future runs use it; old runs and reports remain linked to their original release.</li>
+    </ol>
+
+    <h2 id="artifacts">What the Coding Agent is expected to build</h2>
+    <p>The open-ended work is not “write a better prompt.” A useful candidate contains coordinated artifacts on both sides of the contract:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Artifact</th><th>Question it answers</th></tr></thead>
+      <tbody>
+        <tr><td>Authority map and rule cards</td><td>Which passage defines the rule, scope, trigger, exception, priority, and intended result?</td></tr>
+        <tr><td>LongTextJS schemas and extraction profiles</td><td>What neutral, anchored observations must be materialized from production documents?</td></tr>
+        <tr><td>CircuitJS modules</td><td>How are those observations correlated, revised, searched, verified, and published?</td></tr>
+        <tr><td>Witness and verifier references</td><td>What concrete evidence allows a trusted checker to accept the candidate?</td></tr>
+        <tr><td>Natural benchmark cases</td><td>Which positive, close-negative, exception, boundary, ambiguity, and coverage texts fix operational meaning?</td></tr>
+        <tr><td>Compatibility profile and limitations</td><td>For which formats, languages, structures, producers, and evidence conditions is this theory qualified?</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="example">Worked repair: dialogue is not narration</h2>
+    <p>Assume a run reports the phrase “de fapt” inside a line of dialogue, but the style rule applies only to narration. A reviewer rejects the finding and marks the disputed scope. The learning system should not add a document-specific exception.</p>
+    <ol class="step-list">
+      <li>The issue is classified as a scope or observation-boundary failure, not a new normative rule.</li>
+      <li>The smallest reproducer becomes a natural regression family: one narrative positive, one dash-prefixed dialogue negative, and one nearby boundary case.</li>
+      <li>The candidate may change the structural producer, extraction profile, circuit scope policy, or their contract depending on where the trace shows the error. It states a falsifiable repair hypothesis.</li>
+      <li>Existing cases must still pass. The new dialogue case must stop producing the finding. Qualification verifies that the contract still has a producer and that the candidate and benchmark stayed unchanged during the gate.</li>
+      <li>After explicit activation, the original document may be rerun under the new release. The old incorrect run remains auditable rather than being rewritten.</li>
+    </ol>
+    <p>The current <code>editorial-demo</code> release embodies this distinction through its paragraph scope and released dash-prefix convention. Its benchmark contains positive, negative, exception, boundary, scope, and adversarial families rather than only the successful phrase match.</p>
+
+    <h2 id="modules">Code and artifact map</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Phase</th><th>Implementation</th><th>Primary output</th></tr></thead>
+      <tbody>
+        <tr><td>Job snapshot, adapter invocation, and path audit</td><td><code>src/learning/runner.mjs</code></td><td><code>learning-runs/&lt;id&gt;/learning.json</code>, events, diagnostics, changed-file inventory</td></tr>
+        <tr><td>Staging guidance and skill catalog</td><td><code>src/learning/workspace.mjs</code></td><td><code>workspace/AGENTS.md</code>, five skill links</td></tr>
+        <tr><td>Candidate validation and qualification</td><td><code>src/release/manager.mjs</code></td><td>alignment, benchmark result, semantic diff, impact map, immutable release</td></tr>
+        <tr><td>Natural case execution</td><td><code>src/benchmark/runner.mjs</code></td><td>structured case results and qualification summary</td></tr>
+        <tr><td>Production selection</td><td><code>activateRelease()</code> in <code>src/release/manager.mjs</code></td><td><code>active-release.json</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="limits">What the gate proves today</h2>
+    <p>The implemented gate validates manifests, circuits, operator and verifier links, verification dominance, compatibility profiles, observation-contract alignment, available agent benchmarks, byte stability, copied snapshot integrity, semantic diff, impact map, and release digests.</p>
+    <div class="callout warning"><strong>Current qualification limit.</strong> It does not yet generate mutated CircuitJS or LongTextJS programs and calculate a mutation score. It also does not execute differential implementations, shadow/canary traffic, or the complete ideal metric program. Natural cases stored in a <code>mutations</code> suite are valuable cases, but are not executed program mutation. The gate reports only checks it actually ran.</div>
+
+    <nav class="page-nav" aria-label="Learning reading path">
+      <strong>Continue through learning</strong>
+      <a href="learning.html">Commands and workspace details</a>
+      <a href="benchmark.html">Microcases and qualification</a>
+      <a href="connection.html">Producer-consumer alignment</a>
+      <a href="security.html">Trust boundaries</a>
+    </nav>
+
+    <footer>Normative learning contracts: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a> and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

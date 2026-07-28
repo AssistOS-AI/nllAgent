@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "circuit": { "status": "reported", "findingCount": 0, "findingRules": [] },
+  "observations": [{ "type": "document.paragraph@1", "quote": "— De fapt", "payload": { "structuralRole": "dialogue-line-candidate" } }]
+}

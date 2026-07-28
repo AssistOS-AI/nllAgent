@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NaturalLanguageLinterAgent — Start Here</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs">Documentation / Start here</div>
+    <p class="kicker">One rule technology, two verified CNL products</p>
+    <h1>NaturalLanguageLinterAgent</h1>
+    <p class="lead">nllAgent turns rules written for people into versioned, specialized document agents. The same LongTextJS–CircuitJS architecture has two explicit modes: audit an existing document into a <code>CNLAuditReport</code>, or compile an idea into a verified <code>CNLGenerationPlan</code> specification. Final prose may be realized later by an LLM, but the specification exists and is checked first.</p>
+
+    <div class="callout"><strong>Two modes, not two unrelated products.</strong> In audit mode, circuits publish verified observations about correctness, compliance, or quality as <code>CNL/Audit-1</code>. In specification mode, planning circuits publish <code>CNL/Plan-1</code>, an idea-specific plan for a document. Rules remain in CircuitJS in both modes; CNL is the controlled output.</div>
+
+    <p>New readers should begin with the <a href="quick-tutorial.html">Quick Tutorial</a>: one sentence, one rule,
+      one LongTextJS observation, and one three-node circuit. Continue with <a href="concepts.html">Concepts and
+      foundations</a> for vocabulary, scientific lineage, guarantee levels, and ethical commitments.</p>
+
+    <h2 id="problem">The problem it solves</h2>
+    <p>Organizations already have the knowledge needed to review or create documents, but it is scattered across style guides, laws, regulations, procedures, technical standards, examples, and reviewer decisions. A generic LLM prompt can read some of that material and produce a plausible answer, but it does not create a stable specialized agent: the applicable rule can drift between calls, a distant exception can be missed, an absent fact can be invented, and the model can write a convincing explanation for its own mistake.</p>
+    <p>Long documents make this worse. Placing a manuscript and an entire rulebook in one large context does not create persistent character identity, a timeline, rule priority, evidence coverage, or a replayable method. Information in the middle can be overlooked, and a larger context window still does not provide an independent verifier. nllAgent instead compiles each domain into a versioned agent whose observations, rules, exceptions, algorithms, benchmarks, and limits can be inspected and reused.</p>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>Specialized agent</th><th>Generate a CNL audit</th><th>Generate a CNL specification, then optionally realize it</th></tr></thead>
+      <tbody>
+        <tr><td>Literary and editorial</td><td>Check house style, focalization, dialogue exceptions, repetition, character knowledge, object continuity, chronology, and contradictions across chapters.</td><td>Turn a synopsis or scene idea into an ordered CNL plan for setting, characters, focalization, events, continuity, and style. A model or writer can then realize the plan, and the original linter can validate the result.</td></tr>
+        <tr><td>Legal and normative</td><td>Apply a qualified package compiled from identified laws, regulations, contracts, and policies: instantiate obligations, calculate deadlines, apply exceptions and authority priority, and refuse conclusions when evidence is incomplete.</td><td>Turn an intent such as “prepare incident 17's notice” into a CNL plan for jurisdiction, required facts, deadlines, exceptions, actions, evidence, and sections. Optional realization is checked against the same qualified package, not treated as universal legal truth.</td></tr>
+        <tr><td>Technical and scientific</td><td>Check definitions, versions, quantities and units, requirements, procedure order, evidence links, and claims whose validity depends on declared conditions.</td><td>Plan specifications, procedures, manuals, protocols, or reports with explicit section order, prerequisites, terminology, units, claims, and evidence before any model writes the final prose.</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>The approach is neuro-symbolic in a practical sense. Neural models interpret ambiguous language, propose typed observations, and realize CNL plans as fluent text. Persistent symbolic artifacts preserve source anchors, identity, time, state, rule priority, coverage, and executable control. Deterministic operators and trusted verifiers check the properties they can actually prove; model-assisted premises retain a lower guarantee ceiling and can require human review.</p>
+    <p>A useful result must therefore survive concrete questions: Which passage established the premise? Which release and rule were applied? Was the evidence complete enough to conclude that something was absent? Did a model merely propose an event, or did a checker verify the final property? nllAgent publishes through the declared verification path and stops with a precise gap when the specialized agent lacks the required language, evidence, or capability.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  INPUT[Existing document or high-level idea]
+  LTX[LongTextJS<br/>addressable source world]
+  REL[Qualified CircuitJS release]
+  EXEC[Validation or planning graph]
+  CNL[CNL/Audit-1 or CNL/Plan-1]
+  INPUT --> LTX
+  LTX --> EXEC --> CNL
+  REL --> EXEC
+  CNL -. optional plan realization returns as input .-> INPUT
+    </pre>
+    <p class="diagram-caption"><strong>The complete mental model.</strong> Both branches produce a typed CNL artifact. Audit describes an existing source; specification describes what a future source should become. The dotted realization branch is optional and returns through audit.</p>
+
+    <div class="concept-grid">
+      <section class="concept-card">
+        <h2>LongTextJS: the document side</h2>
+        <p>One production document becomes source blocks, exact anchors, structural and semantic observations, scopes, alternatives, coverage, capabilities, gaps, and a task. It says what this run knows about this source—not whether the source complies.</p>
+        <p><a href="longtextjs.html">Read the LongTextJS program</a> and then <a href="translation.html">follow its compilation</a>.</p>
+      </section>
+      <section class="concept-card">
+        <h2>CircuitJS: the theory side</h2>
+        <p>One rulebook lineage becomes typed ports, declarative nodes, registered operators, exceptions, budgets, verifiers, finding contracts, and links to authority. It is reused across documents and changes only through a new qualified release.</p>
+        <p><a href="circuitjs.html">Read the CircuitJS program</a> and then <a href="operators.html">follow its execution</a>.</p>
+      </section>
+    </div>
+
+    <h2 id="verification">What happens during one verification</h2>
+    <ol class="step-list">
+      <li>The CLI fixes a named agent, an immutable release, and an exact Markdown input snapshot.</li>
+      <li>The deterministic compiler creates LongTextJS structure and anchors. It materializes only the extra semantic types demanded by the release’s circuits.</li>
+      <li>The compatibility gate checks the concrete observations, statuses, cardinalities, resources, and coverage against the circuits’ observation contracts.</li>
+      <li>Ready circuits execute. Registered verifiers inspect their witnesses before findings can be emitted.</li>
+      <li>The run assembles verified findings into canonical <code>CNLAuditReport</code>, renders <code>report.md</code>, and persists both with the trace and any reusable issue.</li>
+    </ol>
+    <p>This sequence is implemented in <code>src/runtime/production-run.mjs</code> and <code>src/runtime/analyzer.mjs</code>. The page <a href="verification.html">Architecture of one verification</a> follows the code path and files in order.</p>
+
+    <h2 id="generation">What happens during CNL generation planning</h2>
+    <p>A high-level idea becomes a LongTextJS source. A qualified <code>purpose: planning</code> circuit applies the domain theory and emits an idea-specific CNL plan with document design, ordered content, dependencies, guidance, and provenance. Its verifier also requires a rule-to-plan witness, so every applied rule names the concrete plan locations it shaped. This plan is the primary result and can be produced without an LLM. If requested, a model realizes it and the draft returns to audit mode. <a href="generation.html">CNL generation planning</a> follows both paths.</p>
+
+    <h2 id="learning">What happens during learning</h2>
+    <p>Learning is a separate build system. Rules, calibration documents, reviewer feedback, and production issues are copied into a disposable staging workspace. A Coding Agent may propose schemas, extraction profiles, circuits, natural benchmark cases, and candidates. The host audits the resulting filesystem changes. An independent qualification step compiles circuits, derives observation contracts, links producers, runs the benchmark, snapshots unchanged bytes, and creates an immutable release. Activation is a later explicit command.</p>
+    <p>Production therefore never edits the theory that is judging its current input. Read <a href="learning-architecture.html">Architecture of learning</a> for the lifecycle and <a href="learning.html">Learning workflow</a> for the operational commands.</p>
+
+    <h2 id="first-run">Run the included agent</h2>
+    <p>The repository includes <code>editorial-demo</code>, with authority material, circuits, natural benchmark cases, qualified releases, and an active release pointer:</p>
+    <pre><code>node bin/nllagent.mjs benchmark --agent editorial-demo
+
+node bin/nllagent.mjs run \
+  --agent editorial-demo \
+  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
+  --output /tmp/editorial-report.md
+
+node bin/nllagent.mjs plan \
+  --agent editorial-demo --release 4.0.0 \
+  --input data/editorial-demo/examples/planning/idea.md \
+  --output /tmp/editorial-plan.cnl.md \
+  --translator none</code></pre>
+    <p><code>report.md</code> is the human view of <code>cnl-audit.json</code>; <code>plan.cnl.md</code> is the human view of <code>cnl-plan.json</code>. Their owning directories under <code>runs/</code> and <code>planning-runs/</code> contain the machine-readable evidence.</p>
+
+    <h2 id="reading">Choose the question you have</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Question</th><th>Read this page</th></tr></thead>
+      <tbody>
+        <tr><td>Can I see the entire mechanism on one tiny example?</td><td><a href="quick-tutorial.html">Quick Tutorial</a></td></tr>
+        <tr><td>What do the concepts and abbreviations mean, and where do they come from?</td><td><a href="concepts.html">Concepts and foundations</a></td></tr>
+        <tr><td>Why are there two DSLs?</td><td><a href="dsl.html">Two DSLs, one linter</a></td></tr>
+        <tr><td>How does a CircuitJS graph consume LongTextJS and execute node by node?</td><td><a href="circuit-tutorial.html">Interactive circuit execution tutorial</a></td></tr>
+        <tr><td>How do the DSLs connect without a universal ontology?</td><td><a href="connection.html">The observation contract</a></td></tr>
+        <tr><td>What exactly happens after <code>nllagent run</code>?</td><td><a href="verification.html">Architecture of one verification</a></td></tr>
+        <tr><td>How does an idea become a CNL plan before any prose is generated?</td><td><a href="generation.html">CNL generation planning</a></td></tr>
+        <tr><td>How do rules and feedback become a release?</td><td><a href="learning-architecture.html">Architecture of learning</a></td></tr>
+        <tr><td>What is normative rather than tutorial?</td><td><a href="specsLoader.html?spec=matrix.md">DS specifications</a></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="implemented">What exists today</h2>
+    <p>The current implementation provides the Node.js 22+ ESM library and CLI, Markdown ingestion with source maps and Unicode-aware anchors, canonical LongTextJS data, restricted validation and planning CircuitJS modules, canonical CNL audit and generation-plan artifacts, verified rule-to-plan coverage, optional bounded realize–validate–revise, registered operators and verifiers, compatibility and coverage checks, backend-neutral model roles, persistent runs and issues, isolated Coding Agent learning, natural benchmark qualification, immutable releases, and explicit activation.</p>
+    <p>It does not claim universal document understanding. Live model profiles are not exercised by the default offline checks; qualification does not yet execute generated program mutations, differential implementations, shadow/canary traffic, or an agent-owned idea-to-plan and plan-to-document quality benchmark. Planning is structurally qualified and covered by controlled integration tests, not by a statistical claim about prose quality. These concrete limits remain in <a href="../serious_issues.md">serious_issues.md</a>.</p>
+
+    <footer>The tutorial pages explain the implementation. The contiguous <a href="specsLoader.html?spec=matrix.md">DS specification set</a> defines the contracts.</footer>
+  </main>
+</div>
+</body>
+</html>

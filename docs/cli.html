@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CLI and Workspaces — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / CLI and workspaces</div>
+    <p class="kicker">Operate named linters without hiding their state</p>
+    <h1>CLI and agent workspaces</h1>
+    <p class="lead">The CLI looks file-oriented—select an agent, supply Markdown, receive a report—but every command acts on a persistent, versioned workspace. Understanding that workspace is the key to running, debugging, teaching, and upgrading a linter safely.</p>
+
+    <h2 id="first-run">Start with the executable example</h2>
+    <p>The repository’s <code>editorial-demo</code> agent is already qualified and active. Run its benchmark before analyzing a document so you see both halves of the operational contract:</p>
+    <pre><code>node bin/nllagent.mjs benchmark --agent editorial-demo
+
+node bin/nllagent.mjs run \
+  --agent editorial-demo \
+  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
+  --output /tmp/editorial-report.md</code></pre>
+    <p>The benchmark command tests the selected release against its natural cases. The run command copies the input into a new run directory, resolves the release, compiles LongTextJS, executes compatible circuits, verifies candidates, and writes <code>/tmp/editorial-report.md</code>. The command result also contains the run identifier. Use that identifier to inspect persisted evidence or attach reviewer feedback.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  CMD[run command] --> SNAP[Source + release snapshot]
+  SNAP --> ANALYZE[Compile + gate + execute]
+  ANALYZE --> AUDIT[CNLAuditReport]
+  AUDIT --> DELIVERY[Run artifacts + Markdown view + exit code]
+    </pre>
+    <p class="diagram-caption"><strong>The CLI starts a transaction, not a chat.</strong> The report is one rendering of a complete run record. Even a stopped run preserves enough evidence to explain why no verdict was published.</p>
+
+    <h2 id="named-agents">A named agent is the isolation boundary</h2>
+    <p>Every command that changes or executes domain behavior names an agent. An agent is not an LLM session. It is a persistent linter project with its own authority, extraction profiles, circuits, benchmark suites, candidates, release lineage, runs, issues, and feedback.</p>
+    <pre><code>node bin/nllagent.mjs agent init \
+  --agent editorial \
+  --description "Editorial review for Romanian prose" \
+  --language ro
+
+node bin/nllagent.mjs agent list
+node bin/nllagent.mjs agent inspect --agent editorial --json</code></pre>
+    <p>Names are path-safe workspace identifiers. The default persistent root is <code>./data</code>; <code>--data-root /controlled/location</code> moves the entire agent collection for one command. Avoid pointing different operational environments at the same writable root unless their locking and release policy are coordinated.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  ROOT[data/] --> A1[editorial agent]
+  ROOT --> A2[compliance agent]
+  A1 --> W1[Own circuits + benchmarks]
+  A2 --> W2[Own circuits + benchmarks]
+    </pre>
+    <p class="diagram-caption"><strong>Shared engine, separate theories.</strong> Several agents use the same CLI and trusted registries, while every agent owns an independent authoring, release, benchmark, and run history.</p>
+
+    <h3>Workspace areas</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Area under <code>data/&lt;agent&gt;/</code></th><th>Purpose</th><th>Who may change it</th></tr></thead>
+      <tbody>
+        <tr><td>Manifest and authority</td><td>Intended use, language, project metadata, rulebook material, and rule cards.</td><td>Operators and audited learning promotion.</td></tr>
+        <tr><td><code>schemas/</code>, <code>extraction/</code>, <code>circuits/</code>, <code>benchmark/</code></td><td>Agent authoring surface used to assemble a candidate.</td><td>Humans or the Coding Agent inside the learning workflow.</td></tr>
+        <tr><td><code>candidates/</code></td><td>Versioned packages proposed for qualification.</td><td>Learning may build; production never reads.</td></tr>
+        <tr><td><code>releases/</code> and active pointer</td><td>Immutable qualified snapshots and the version selected by default.</td><td>Trusted qualification writes releases; only explicit activation changes the pointer.</td></tr>
+        <tr><td><code>runs/</code>, <code>issues/</code>, feedback records</td><td>Production evidence, failures, and reviewer corrections.</td><td>Runtime and explicit feedback commands; historical records are not silently rewritten.</td></tr>
+        <tr><td><code>planning-runs/</code></td><td>Ideas, CNL plans, planning traces, and optional realization attempts with nested validation evidence.</td><td>Planning runtime; the plan and every optional candidate remain tied to one immutable release.</td></tr>
+        <tr><td><code>learning-runs/</code></td><td>Disposable Coding Agent staging snapshots, event streams, diagnostics, and audit results.</td><td>Learning runner under its whitelist policy.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="run-command">Run a document</h2>
+    <pre><code>nllagent run \
+  --agent &lt;name&gt; \
+  --input &lt;document.md&gt; \
+  --output &lt;report.md&gt; \
+  [--release &lt;version&gt;] \
+  [--translator auto|achilles|codex|none]</code></pre>
+    <p>Without <code>--release</code>, the command uses the agent’s active release. Selecting a version explicitly is useful for comparison and replay, but it still must be a qualified release. Input is currently Markdown; the copied source and its digest become the lexical authority of the run. The output file is written for both successful and controlled stopped outcomes.</p>
+    <p>The command rejects unknown flags, conflicting translation switches, surplus positional arguments, unsafe agent names, missing input, and missing or unqualified releases before treating the invocation as a valid production run. Once a run exists, runtime diagnostics are persisted alongside its partial artifacts.</p>
+
+    <h2 id="plan-command">Compile an idea into a CNL generation specification</h2>
+    <pre><code>nllagent plan \
+  --agent &lt;name&gt; \
+  --input &lt;idea.md&gt; \
+  --output &lt;plan.cnl.md&gt; \
+  [--release &lt;version&gt;] \
+  [--translator auto|achilles|codex|none]</code></pre>
+    <p>The command compiles the idea through LongTextJS and the release’s primary planning circuit. Its primary output is the CNL specification; deterministic planning works with <code>--translator none</code>. CNL contains the concrete document design, content sequence, and verified rule-to-plan locations, not a list of rule constraints.</p>
+    <p>To ask nllAgent to realize and validate the plan, add:</p>
+    <pre><code>  --realize-output &lt;draft.md&gt; \
+  [--max-revisions &lt;0..10&gt;] \
+  --translator auto</code></pre>
+    <p><code>--max-revisions</code> is rejected without <code>--realize-output</code>. Realization uses a schema-bound backend, then sends every candidate through CNL audit mode. Read <a href="generation.html">CNL specification mode</a> for circuit reuse and artifact details.</p>
+
+    <h3 id="translation-selection">Choose semantic translation deliberately</h3>
+    <pre><code>nllagent model inspect --json
+nllagent run ... --translator auto
+nllagent run ... --translator achilles
+nllagent run ... --translator codex
+nllagent run ... --translator none
+# --no-llm is an alias for --translator none</code></pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Selection</th><th>Behavior</th><th>When to use it</th></tr></thead>
+      <tbody>
+        <tr><td><code>auto</code></td><td>Prefers configured AchillesAgentLib; otherwise uses the shipped reference Coding Agent translation adapter.</td><td>Normal operation when semantic observations may be required.</td></tr>
+        <tr><td><code>achilles</code></td><td>Requires a resolvable and configured AchillesAgentLib <code>LLMAgent</code>; translation-class work prefers Spark when exposed.</td><td>Environments that qualify and operate an Achilles model profile.</td></tr>
+        <tr><td><code>codex</code></td><td>Selects the current OpenAI Codex reference implementation of the generic Coding Agent backend.</td><td>Explicit fallback testing or installations intentionally using that adapter.</td></tr>
+        <tr><td><code>none</code></td><td>Disables semantic calls. Deterministic structural and lexical rules still run; missing semantic requirements become compatibility gaps.</td><td>Offline deterministic agents, diagnostics, or fail-closed operation without a model.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The option name <code>codex</code>, <code>--codex-bin</code>, and <code>NLL_CODEX_BIN</code> are current compatibility surfaces, not a claim that the architecture requires Codex. A future Coding Agent adapter can preserve the same schema, workspace, capture, and capability contract with a different process protocol. See <a href="translation.html#backend-contract">Semantic translation</a> for that boundary.</p>
+
+    <h2 id="inspect-results">Read the result at two levels</h2>
+    <p>The requested Markdown file is the reviewer view of canonical <code>cnl-audit.json</code>: status, release, coverage limits, findings, evidence, and remediation. The run directory contains the source package, canonical LongTextJS, compatibility and coverage reports, circuit plan, execution trace, findings, conflicts, verifier results, model captures, CNL audit, and rendered report. A Coding Agent translation fallback additionally creates small <code>translation/call-NNNN/</code> folders with request, schema, result, events, and diagnostics.</p>
+    <p>Start with the report. If a finding is disputed, inspect its anchor and verifier record. If no finding was produced, inspect compatibility and coverage before looking at circuit execution. If semantic extraction failed, inspect model captures and the individual translation call. <a href="artifacts.html#debugging">Artifacts and statuses</a> provides this debugging path in detail.</p>
+
+    <h2 id="benchmark-release">Benchmark, qualify, and activate</h2>
+    <pre><code>nllagent benchmark --agent editorial
+nllagent benchmark --agent editorial --release 1.0.0 --json
+
+nllagent release qualify --agent editorial --candidate 1.1.0
+nllagent release activate --agent editorial --release 1.1.0</code></pre>
+    <p><code>benchmark</code> runs the active or selected release against the agent’s declared natural suites. <code>release qualify</code> does more: it validates the candidate manifest, circuit grammar, registry links, observation contracts, producer alignment, benchmark snapshot, and candidate immutability before creating a release. <code>release activate</code> checks the qualified snapshot again and atomically changes the active pointer. Qualification and activation are separate so an operator can inspect the benchmark results and semantic diff first.</p>
+
+    <h2 id="learning-command">Open a controlled learning job</h2>
+    <pre><code>nllagent learn \
+  --agent editorial \
+  --rules ./rulebook
+
+nllagent learn \
+  --agent editorial \
+  --rules ./rulebook \
+  --qualify</code></pre>
+    <p>The first form asks the configured Coding Agent adapter to build or repair agent-local authoring artifacts in staging. The second also permits the trusted parent process to attempt qualification after the Coding Agent exits and the filesystem audit succeeds. Neither form activates a release. The current executable override is <code>--codex-bin &lt;path&gt;</code> because OpenAI Codex is the shipped reference adapter; this vendor detail is confined to that adapter.</p>
+    <p>Learning is appropriate when rules, examples, or issues should change the reusable theory. It is not a recovery flag for a production run. A blocked document remains blocked under its original release; after a new release is independently qualified and activated, the operator may run the document again as a new run. See <a href="learning.html#learning-command">Learning workflow</a>.</p>
+
+    <h2 id="feedback">Record evidence, not hidden exceptions</h2>
+    <pre><code>nllagent issue list --agent editorial
+nllagent issue list --agent editorial --status open --json
+
+nllagent feedback add \
+  --agent editorial \
+  --run &lt;run-id&gt; \
+  --type observation-correction \
+  --message "The speaker in paragraph 12 is Mara."</code></pre>
+    <p>Issues are runtime-generated statements about compatibility, materialization, verification, benchmark, or execution failure. Feedback is reviewer evidence attached to a run. Neither automatically changes a rule. A later learning job snapshots authorized records and converts useful examples into candidate changes and regression cases.</p>
+
+    <h2 id="terminal-statuses">Exit codes are part of automation</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Code</th><th>Meaning</th><th>Automation guidance</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Reported successfully, possibly with explicitly non-blocking limits.</td><td>Read the report status; do not assume “no findings” means full coverage.</td></tr>
+        <tr><td>2</td><td>A validation run has blocking findings, or optional realization exhausted its revision budget with findings.</td><td>Fail the gate or route the final candidate and evidence for review.</td></tr>
+        <tr><td>3</td><td>Stopped because critical compatibility was missing.</td><td>Supply missing context or open a learning task; never treat as compliant.</td></tr>
+        <tr><td>4</td><td>Stopped because required materialization or coverage remained incomplete.</td><td>Inspect gaps, source completeness, and translation captures.</td></tr>
+        <tr><td>5</td><td>Stopped because a declared budget was exhausted.</td><td>Rerun with an approved policy change or optimize the release.</td></tr>
+        <tr><td>6</td><td>Certified alternatives conflict and require review.</td><td>Resolve the identity, scope, authority, or policy conflict.</td></tr>
+        <tr><td>64</td><td>Command usage error.</td><td>Correct arguments; no semantic conclusion exists.</td></tr>
+        <tr><td>70</td><td>Unexpected runtime failure.</td><td>Inspect diagnostics and any created run; treat as no verdict.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="troubleshooting">A practical troubleshooting order</h2>
+    <ol>
+      <li>Run <code>agent inspect</code> and confirm the intended agent and active release.</li>
+      <li>Run <code>model inspect --json</code> if semantic observations are expected.</li>
+      <li>Read the report’s terminal status, active circuits, and declared limits.</li>
+      <li>For stopped runs, inspect compatibility and coverage before circuit traces.</li>
+      <li>For rejected candidates, inspect verifier results and witness data.</li>
+      <li>For changed behavior after an upgrade, compare explicit release versions and the qualification semantic diff.</li>
+      <li>Record a scoped issue or feedback item when the discrepancy should inform learning.</li>
+    </ol>
+
+    <footer>Normative command, workspace, and exit contracts: <a href="specsLoader.html?spec=DS003-cli-agent-workspace.md">DS003</a>. Translation selection: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

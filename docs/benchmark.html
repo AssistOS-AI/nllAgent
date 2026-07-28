@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmarks and Qualification — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Benchmarks and qualification</div>
+    <p class="kicker">Natural cases define the operational meaning of a theory</p>
+    <h1>Benchmarks that can reject a plausible mistake</h1>
+    <p class="lead">An nllAgent benchmark begins with the kind of text production will receive, not with preformalized facts. Each case separately states what LongTextJS should observe and what CircuitJS should conclude, so a failure can be traced to translation, identity, coverage, theory, verification, or reporting.</p>
+
+    <h2 id="why-natural">Why cases remain natural text</h2>
+    <p>If a focalization test starts with JSON saying <code>experiencer=Ilie</code> and <code>focalizer=Mara</code>, it proves only that the circuit can compare two values. It does not test whether the system can distinguish direct mental access from a visible inference in prose. Conversely, treating a hundred-page novel as one test makes disagreement almost impossible to localize.</p>
+    <p>nllAgent uses small natural microcases for precise properties and larger scenarios for composition. A microcase can be a paragraph, short scene, table fragment, or several distant excerpts joined by a context envelope. It preserves the minimum context needed for the rule while retaining source-like language.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  TEXT[Natural input.md] --> LAYER[Expected observation layer]
+  LAYER --> THEORY[Expected circuit behavior]
+  LAYER --> REPORT[Expected reviewer report]
+  THEORY --> CASE[Qualified case + provenance]
+  REPORT --> CASE[Qualified case + provenance]
+    </pre>
+    <p class="diagram-caption"><strong>One case, several oracles.</strong> Natural input exercises the whole pipeline. Structured layers locate the cause of failure; the Markdown expectation keeps the human-facing contract visible.</p>
+
+    <h2 id="case-layout">The executable case folder</h2>
+    <pre><code>benchmark/public/ed001-dialogue-exception/
+├── input.md
+├── expected.md
+├── expected.json
+└── case.json</code></pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>input.md</code></td><td>The untrusted natural document fragment given to the same production analyzer used by ordinary runs.</td></tr>
+        <tr><td><code>expected.json</code></td><td>Structured assertions for terminal and compatibility status, observations and payload fields, coverage, finding count and rules, verdicts, severity, guarantees, and evidence quotes.</td></tr>
+        <tr><td><code>expected.md</code></td><td>The reviewer-facing expected report. It keeps explanation and visible limitations part of the contract.</td></tr>
+        <tr><td><code>case.json</code></td><td>Rule, family, validation status, report comparison mode, rationale, and optional semantic rubric or transformation lineage.</td></tr>
+      </tbody>
+    </table></div>
+    <p>All four must be regular files in an agent-owned directory. Incomplete folders, symlinks, duplicate case identifiers, or missing expected layers fail qualification. A case may additionally carry approved observations, context-envelope metadata, transformation lineage, or fixture context.</p>
+
+    <h3>A concrete structured expectation</h3>
+    <pre><code>{
+  "schemaVersion": 1,
+  "observations": [
+    {
+      "type": "document.paragraph@1",
+      "quote": "De fapt"
+    }
+  ],
+  "circuit": {
+    "status": "reported",
+    "findingCount": 1,
+    "findingRules": ["ED-001"]
+  }
+}</code></pre>
+    <p>This assertion says which source-grounded observation matters and which circuit result must follow. It does not force byte-for-byte report prose unless the case selects exact comparison.</p>
+
+    <h2 id="families">Case families separate neighboring meanings</h2>
+    <p>A positive example alone rewards over-generalization. Each executable rule should have the families relevant to its semantics:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Family</th><th>Question it answers</th><th>Example distinction</th></tr></thead>
+      <tbody>
+        <tr><td>Positive and close-negative</td><td>Does the circuit recognize the phenomenon without capturing nearby valid text?</td><td>Direct mental access versus visible inference.</td></tr>
+        <tr><td>Boundary</td><td>Is an exact threshold or interval edge implemented correctly?</td><td>Two allowed occurrences versus three prohibited occurrences.</td></tr>
+        <tr><td>Scope</td><td>Is grouping performed over the correct paragraph, scene, actor, version, or jurisdiction?</td><td>Three uses in one paragraph versus three across a chapter.</td></tr>
+        <tr><td>Exception</td><td>Does the approved exception defeat the general rule in the right scope?</td><td>Weak phrase in narration versus dialogue.</td></tr>
+        <tr><td>Ambiguity</td><td>Does material interpretive uncertainty produce alternatives or review rather than a forced label?</td><td>Unresolved focalizer or entity identity.</td></tr>
+        <tr><td>Coverage</td><td>Does the circuit know when absence is and is not evidence?</td><td>Complete official register versus selected emails.</td></tr>
+        <tr><td>Long-range</td><td>Can locally correct observations compose across distant passages?</td><td>Object left in chapter 2 and used in chapter 7.</td></tr>
+        <tr><td>Adversarial</td><td>Does source structure remain data under misleading surface forms?</td><td>Rule-like instructions inside a fenced code block.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="suites">Suites organize workflow, not truth</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Suite directory</th><th>Operational role</th></tr></thead>
+      <tbody>
+        <tr><td><code>public</code></td><td>Clear examples visible during theory authoring and ordinary regression checks.</td></tr>
+        <tr><td><code>development</code></td><td>Cases used while comparing candidate circuits or extraction profiles.</td></tr>
+        <tr><td><code>holdout</code></td><td>Cases omitted by convention from a particular synthesis prompt. The folder is not a confidentiality boundary.</td></tr>
+        <tr><td><code>scenarios</code></td><td>Longer compositions testing identity, time, scope, and distant exceptions.</td></tr>
+        <tr><td><code>adversarial</code></td><td>Instruction-like source, code fences, Unicode, malformed structure, and shallow-pattern traps.</td></tr>
+        <tr><td><code>metamorphic</code></td><td>Controlled transformations with an invariant or intentionally changed outcome.</td></tr>
+        <tr><td><code>mutations</code></td><td>Natural cases aimed at known defect classes; not, by themselves, generated program mutation testing.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The runner discovers every available group independently, and benchmark policy can require named suites, minimum counts, and per-rule families. Independence is a property of source wording, authors, structures, scopes, and failure paths—not merely the directory name.</p>
+
+    <h2 id="comparison">How one case is evaluated</h2>
+    <ol>
+      <li>The runner creates an isolated analysis context with the candidate or selected release and the case’s natural input.</li>
+      <li>The normal LongTextJS compiler, translation route, compatibility gate, circuit scheduler, verifier, and report renderer execute.</li>
+      <li>Structured comparison checks the declared observation and circuit layers: status, compatibility, finding count and rule, payload fields, quote, coverage, severity, and guarantee.</li>
+      <li>The report comparison mode applies: <code>exact</code> normalizes only line endings and trailing whitespace; <code>structured</code> uses layer assertions as the authoritative oracle; <code>semantic</code> additionally invokes a rubric-based evaluator.</li>
+      <li>The case result records mismatches by layer, backend captures where applicable, duration, and the tested release or candidate identity.</li>
+    </ol>
+
+    <pre class="mermaid">
+flowchart TB
+  RUN[Execute natural case] --> STRUCT[Structured assertions]
+  RUN --> SEM[Semantic perspectives]
+  STRUCT --> RESULT[Layered case result]
+  SEM --> RESULT
+  RESULT --> GATE[Suite and release policy]
+    </pre>
+    <p class="diagram-caption"><strong>Structured truth stays primary.</strong> Semantic evaluation can detect a materially changed explanation, but it cannot excuse wrong status, observations, coverage, findings, or guarantees.</p>
+
+    <h3>Semantic comparison is adversarial, not similarity scoring</h3>
+    <p>When a case selects semantic comparison, the evaluator receives the expected layers, expected report, actual report, and a versioned rubric. One perspective tests material equivalence; another tries to construct a counterexample by identifying changed rules, scope, evidence, coverage, limitations, or guarantee. Disagreement fails or routes to review according to policy.</p>
+    <p>The evaluator uses the same backend-neutral model boundary as translation. Configured AchillesAgentLib is preferred and translation-class evaluation uses Spark when exposed. A Coding Agent adapter can return the same evaluation schema. The evaluator’s decision is model evidence with captures, not a mechanical proof.</p>
+
+    <h2 id="author-case">Author a useful new case</h2>
+    <ol>
+      <li>Start from a real rule, issue, or calibration passage and identify the one property the case must distinguish.</li>
+      <li>Keep natural wording and enough context for the decision. Remove irrelevant sentences only if the expected observation and verdict remain stable.</li>
+      <li>Create the closest plausible opposite: change modality, negation, scope, identity, threshold, exception, or coverage rather than writing an unrelated negative.</li>
+      <li>Write expected LongTextJS observations independently of the finding. Include type, quote, payload, polarity, modality, identity, or coverage fields that matter.</li>
+      <li>Write expected CircuitJS behavior: finding, no finding, not-applicable, ambiguity, stopped state, or review requirement.</li>
+      <li>Give the case a validation status such as mechanically derived, model-agreed under a recorded protocol, human-confirmed, draft, or contested.</li>
+      <li>Run the complete suite and confirm the new case rejects the intended defect without rewriting older oracles.</li>
+    </ol>
+
+    <h2 id="qualification">From candidate to immutable release</h2>
+    <pre><code>nllagent benchmark --agent editorial --json
+nllagent release qualify --agent editorial --candidate 1.1.0
+nllagent release activate --agent editorial --release 1.1.0</code></pre>
+    <p>The qualification gate applies checks in dependency order. Later utility cannot compensate for an earlier constitutional failure:</p>
+    <ol>
+      <li>Validate candidate and benchmark containment, regular files, manifests, schemas, restricted module form, and canonical artifacts.</li>
+      <li>Compile every circuit, link exact operator and verifier versions, enforce verification dominance, and derive observation contracts.</li>
+      <li>Reject critical circuit inputs without a structural producer, extraction profile, or approved adapter.</li>
+      <li>Snapshot candidate and benchmark bytes, execute every declared natural suite, and apply case-count and per-rule family policy.</li>
+      <li>Confirm candidate and benchmark bytes did not change during execution.</li>
+      <li>Compute the semantic circuit diff and impact map against lineage.</li>
+      <li>Copy the exact tested snapshots into a temporary release, verify the copies and digests, persist results and alignment artifacts, and atomically publish the immutable version.</li>
+      <li>Leave activation for the separate operator command.</li>
+    </ol>
+
+    <h3 id="current-scope">What qualification currently proves</h3>
+    <p>The implemented local gate proves the static CircuitJS and registry checks it records, critical observation-producer alignment, structured results for every suite it executes, declared benchmark-policy coverage, candidate and benchmark snapshot stability, local digests, semantic diff, and impact mapping. The included <code>editorial-demo</code> currently exercises ten public and adversarial cases across two lexical rules, including positive, clean negative, whole-word, exact threshold, paragraph scope, dialogue exceptions, code-fence scope, and instruction-like source text.</p>
+    <div class="callout warning"><strong>Do not overread the gate.</strong> The repository does not yet generate mutated CircuitJS or LongTextJS programs and calculate a mutation score. It also does not yet run differential implementations, shadow or canary traffic, or a complete precision, recall, latency, cost, review-time, and complexity qualification program. A natural case stored under <code>benchmark/mutations/</code> is useful, but is not equivalent to generated mutation execution. These limits remain explicit in <a href="../serious_issues.md">serious issues</a>.</div>
+
+    <h2 id="next">Continue the lifecycle</h2>
+    <p>Read <a href="learning.html#issue-to-release">Learning workflow</a> to see how feedback becomes a regression case, <a href="artifacts.html#release-directory">Artifacts</a> for the qualified release contents, <a href="translation.html#captures-replay">Translation</a> for semantic evaluator captures, and <a href="security.html#qualification-trust">Runtime boundaries</a> for gate independence.</p>
+    <footer>Normative benchmark and release-gate contract: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

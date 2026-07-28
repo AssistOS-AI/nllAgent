@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quick Tutorial — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Quick Tutorial</div>
+    <p class="kicker">Five minutes · one real rule · one complete run</p>
+    <h1>See one circuit from text to audit</h1>
+    <p class="lead">We will check one sentence with one rule from the included <code>editorial-demo</code> release.
+      Ignore the rest of the platform for now. Follow the value that moves through the five boxes.</p>
+
+    <section class="quick-problem" aria-labelledby="quick-problem-title">
+      <div>
+        <p class="quick-label">The source</p>
+        <h2 id="quick-problem-title">A tiny literary fragment</h2>
+        <blockquote>Mara a intrat în cameră. <mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+      </div>
+      <div>
+        <p class="quick-label">Rule ED-001</p>
+        <p><strong>Flag “de fapt” in a narrative paragraph.</strong><br>Do not flag it in a dialogue paragraph that
+          begins with an em dash or en dash.</p>
+      </div>
+    </section>
+
+    <div class="quick-map" aria-label="The five stages of the example">
+      <a href="#step-1"><span>1</span>Source</a>
+      <i aria-hidden="true">→</i>
+      <a href="#step-2"><span>2</span>LongTextJS</a>
+      <i aria-hidden="true">→</i>
+      <a href="#step-3"><span>3</span>CircuitJS</a>
+      <i aria-hidden="true">→</i>
+      <a href="#step-4"><span>4</span>Verifier</a>
+      <i aria-hidden="true">→</i>
+      <a href="#step-5"><span>5</span>CNL audit</a>
+    </div>
+
+    <section class="quick-step" id="step-1">
+      <div class="quick-step__number">1</div>
+      <div>
+        <p class="quick-label">Input</p>
+        <h2>Freeze the exact source</h2>
+        <p>nllAgent stores the Markdown snapshot and its digest. From this point on, an observation can point back to
+          exact characters. The text is data; instructions inside it cannot change the rule.</p>
+        <pre><code># Fragment
+
+Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
+      </div>
+      <aside class="quick-answer"><strong>Question answered</strong><br>What exact source are we judging?</aside>
+    </section>
+
+    <section class="quick-step" id="step-2">
+      <div class="quick-step__number">2</div>
+      <div>
+        <p class="quick-label">Document side</p>
+        <h2>LongTextJS gives the paragraph an address</h2>
+        <p>The Markdown compiler does not decide that the rule was broken. It records a typed paragraph, its exact
+          source range, its channel, and the fact that all paragraphs were structurally scanned.</p>
+        <pre><code>{
+  "id": "observation:block:paragraph-2",
+  "type": "document.paragraph@1",
+  "status": "extracted",
+  "payload": { "text": "Mara ... De fapt, fereastra ..." },
+  "anchor": "anchor:paragraph-2"
+}</code></pre>
+      </div>
+      <aside class="quick-answer"><strong>Question answered</strong><br>What did we observe, and where?</aside>
+    </section>
+
+    <section class="quick-step" id="step-3">
+      <div class="quick-step__number">3</div>
+      <div>
+        <p class="quick-label">Theory side</p>
+        <h2>CircuitJS receives only paragraphs</h2>
+        <p>The circuit's input port accepts extracted <code>document.paragraph@1</code> observations. Its graph then has
+          only three runtime nodes. The rule configuration is frozen in the qualified release.</p>
+        <div class="mini-circuit" aria-label="Three CircuitJS nodes">
+          <div><small>call</small><strong>matches</strong><span>Find whole phrase<br>except dialogue</span></div>
+          <b aria-hidden="true">→</b>
+          <div><small>verify</small><strong>verified</strong><span>Re-read exact<br>source witness</span></div>
+          <b aria-hidden="true">→</b>
+          <div><small>emit</small><strong>findings</strong><span>Publish accepted<br>records only</span></div>
+        </div>
+      </div>
+      <aside class="quick-answer"><strong>Question answered</strong><br>Which reusable method judges the paragraph?</aside>
+    </section>
+
+    <section class="quick-step" id="step-4">
+      <div class="quick-step__number">4</div>
+      <div>
+        <p class="quick-label">Runtime boundary</p>
+        <h2>A match is only a candidate</h2>
+        <div class="quick-before-after">
+          <div><p class="quick-label">Operator output</p><code>FindingCandidate</code><p>Term <strong>“De fapt”</strong>,
+            anchor, rule ED-001, and an exact-text witness.</p></div>
+          <div><p class="quick-label">Verifier output</p><code>accepted: true</code><p>The verifier uses the anchor to
+            slice the frozen source and confirms the exact term at that location.</p></div>
+        </div>
+        <p>If the range were forged or the source no longer matched, verification would reject the candidate.
+          <code>emit</code> never receives an unverified candidate.</p>
+      </div>
+      <aside class="quick-answer"><strong>Question answered</strong><br>Why may this result be published?</aside>
+    </section>
+
+    <section class="quick-step" id="step-5">
+      <div class="quick-step__number">5</div>
+      <div>
+        <p class="quick-label">Controlled output</p>
+        <h2>The finding becomes one CNL audit observation</h2>
+        <p>The runtime assembles the emitted finding, release identity, compatibility, coverage, limitation, and source
+          evidence into canonical <code>CNLAuditReport</code>. Markdown is only its human-readable view.</p>
+        <div class="quick-result">
+          <span>editorial-warning</span>
+          <strong>ED-001 · weak phrase in narration</strong>
+          <blockquote>De fapt</blockquote>
+          <p>Check whether the contrast is necessary; remove or replace the phrase when it adds no meaning.</p>
+          <small>Guarantee: mechanically-certified exact-text witness · Limitation: dialogue uses the released prefix convention.</small>
+        </div>
+      </div>
+      <aside class="quick-answer"><strong>Question answered</strong><br>What can the user inspect and contest?</aside>
+    </section>
+
+    <h2 id="counterexample">Now change only the context</h2>
+    <div class="quick-contrast">
+      <div>
+        <p class="quick-label">Narration</p>
+        <blockquote><mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+        <span class="quick-status quick-status--finding">1 candidate → 1 verified finding</span>
+      </div>
+      <div>
+        <p class="quick-label">Dialogue</p>
+        <blockquote>— <mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+        <span class="quick-status quick-status--clean">0 candidates → no finding for ED-001</span>
+      </div>
+    </div>
+    <p>The words did not change. LongTextJS recorded the paragraph prefix, and the released operator applied the
+      dialogue exception before producing candidates. “No finding” here means only that ED-001 found no eligible
+      occurrence; it is not a universal claim that the whole document is good.</p>
+
+    <h2 id="remember">The whole idea in three sentences</h2>
+    <ol class="step-list">
+      <li><strong>LongTextJS describes one source instance:</strong> exact text, typed observations, addresses, coverage,
+        and gaps.</li>
+      <li><strong>CircuitJS describes one reusable theory:</strong> accepted inputs, transformations, exceptions,
+        verifier, and publication path.</li>
+      <li><strong>CNL is the controlled result:</strong> an audit of an existing source, or—through a separate planning
+        circuit—a verified specification for a future source.</li>
+    </ol>
+
+    <h2 id="run-it">Run this exact example</h2>
+    <pre><code>node bin/nllagent.mjs run \
+  --agent editorial-demo \
+  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
+  --output /tmp/editorial-report.md
+
+cat /tmp/editorial-report.md</code></pre>
+
+    <nav class="page-nav" aria-label="Quick Tutorial next steps">
+      <strong>Choose the next level</strong>
+      <a href="circuit-tutorial.html">Open the detailed interactive tutorial</a>
+      <a href="longtextjs.html">Learn the document side</a>
+      <a href="circuitjs.html">Learn the theory side</a>
+      <a href="generation.html">See idea → CNL specification</a>
+      <a href="concepts.html">Learn the foundations</a>
+    </nav>
+
+    <footer>This example mirrors the qualified <code>editorial-demo</code> circuit and benchmark. The production
+      compiler, release, verifier record, and run artifacts—not this page—remain the execution authority.</footer>
+  </main>
+</div>
+</body>
+</html>

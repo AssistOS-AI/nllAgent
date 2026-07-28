@@ -1,0 +1,6 @@
+interface:
+  display_name: "Build Natural Linter Benchmark"
+  short_description: "Build natural Markdown microcases and regression tests."
+  default_prompt: "Use $nll-build-benchmark to build and validate the agent's natural benchmark suites."
+policy:
+  allow_implicit_invocation: false

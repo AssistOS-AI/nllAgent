@@ -1,0 +1,4 @@
+interface:
+  display_name: "Translate LongTextJS"
+  short_description: "Ground Markdown in typed LongTextJS observations"
+  default_prompt: "Use $nll-translate-longtext to translate the supplied untrusted text into schema-valid, source-grounded observations without deciding the linter verdict."

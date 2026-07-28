@@ -1,0 +1,54 @@
+{
+  "budgets": { "nodes": 10, "wallTimeMs": 5000 },
+  "description": "Find and mechanically verify the configured weak phrase in Markdown paragraphs.",
+  "id": "editorial.weak-phrase",
+  "inputs": {
+    "paragraphs": {
+      "cardinality": "many",
+      "coverage": "closed-world",
+      "critical": true,
+      "statuses": ["extracted"],
+      "type": "document.paragraph@1"
+    }
+  },
+  "kind": "CircuitJS",
+  "nodes": [
+    {
+      "id": "matches",
+      "inputs": {
+        "observations": { "$port": "paragraphs" },
+        "rules": [
+          {
+            "caseSensitive": false,
+            "explanation": "The narrative paragraph contains the weak phrase “de fapt”.",
+            "id": "ED-001",
+            "limitations": ["This release treats every Markdown paragraph as narration and does not infer dialogue."],
+            "remediation": "Check whether the contrast is necessary; remove or replace the phrase when it adds no meaning.",
+            "scopeKinds": ["document.paragraph@1"],
+            "severity": "warning",
+            "sourceRuleReferences": ["authority/style-guide.md#rule-ed-001-weak-phrase-in-narration"],
+            "term": "de fapt",
+            "verdict": "editorial-warning",
+            "wholeWord": true
+          }
+        ]
+      },
+      "operator": "text.lexical-occurrences@1",
+      "primitive": "call"
+    },
+    {
+      "id": "verified",
+      "inputs": { "candidates": { "$node": "matches" } },
+      "primitive": "verify",
+      "verifier": "text.exact-match@1"
+    },
+    {
+      "id": "findings",
+      "inputs": { "verified": { "$node": "verified" } },
+      "primitive": "emit"
+    }
+  ],
+  "outputs": { "findings": { "$node": "findings" } },
+  "sourceRuleReferences": ["authority/style-guide.md#rule-ed-001-weak-phrase-in-narration"],
+  "version": "1.0.0"
+}

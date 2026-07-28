@@ -1,0 +1,13 @@
+{
+  "affectedCircuits": [
+    "editorial.scene-cnl-plan"
+  ],
+  "affectedRules": [
+    "authority/style-guide.md#rule-ed-001-weak-phrase-in-narration",
+    "authority/style-guide.md#rule-ed-002-repeated-parcă-in-one-narrative-paragraph"
+  ],
+  "kind": "ImpactMap",
+  "reanalysisRequired": true,
+  "release": "3.1.0",
+  "schemaVersion": 1
+}

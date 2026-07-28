@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concepts and Foundations — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Concepts and foundations</div>
+    <p class="kicker">A field guide to the ideas behind nllAgent</p>
+    <h1>Concepts, scientific foundations, and ethical commitments</h1>
+    <p class="lead">This page explains the vocabulary behind nllAgent, the research traditions from which its
+      architecture borrows, why the boundaries are useful, and what those mechanisms do not guarantee. It is an
+      initiation map for readers coming from literature, law, science, AI, or software engineering.</p>
+
+    <div class="callout"><strong>Start with the unusual meaning of CNL.</strong> In this project, CNL historically
+      expands to <em>Constraint Natural Language</em>. It is a controlled output family, not a language in which a
+      person must encode the rulebook. <code>CNL/Audit-1</code> describes what a released theory established about an
+      existing source. <code>CNL/Plan-1</code> is the idea-specific specification produced after planning circuits
+      applied that theory. Rules and their executable meaning remain in CircuitJS.</div>
+
+    <h2 id="map">The conceptual map</h2>
+    <pre class="mermaid">
+flowchart TB
+  REL[Authority + examples → qualified release]
+  INPUT[Existing document or idea] --> LTX[LongTextJS source world]
+  REL --> EXEC[Validation or planning CircuitJS]
+  LTX --> EXEC --> CNL[CNL/Audit-1 or CNL/Plan-1]
+  CNL -. optional plan realization returns as input .-> INPUT
+    </pre>
+    <p class="diagram-caption"><strong>One theory, two directions.</strong> Retrospective circuits audit a fixed
+      source. Prospective circuits specify a future source. Optional realization closes the loop only by returning
+      the candidate to the ordinary audit path.</p>
+
+    <h2 id="why">Why this architecture can work</h2>
+    <p>“Works” has a bounded meaning here. The architecture does not prove that all natural-language interpretation
+      is correct. It makes particular claims easier to inspect, test, reproduce, reject, and improve.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Mechanism</th><th>Why it helps</th><th>What it does not prove</th></tr></thead>
+      <tbody>
+        <tr><td>Source / judgment separation</td><td>LongTextJS preserves what was observed and where; CircuitJS
+          separately states how released rules transform observations into an audit or plan.</td><td>That the semantic
+          observation proposed by a model is automatically correct.</td></tr>
+        <tr><td>Typed observation contracts</td><td>A circuit declares the shape, status, scope, cardinality, and
+          coverage it needs. Qualification links those demands to approved producers.</td><td>That similarly named
+          concepts in two domains have the same meaning.</td></tr>
+        <tr><td>Candidate / verifier separation</td><td>A complex or model-assisted operator can propose a witness;
+          a smaller checker controls publication of the property it knows how to verify.</td><td>Any semantic property
+          outside the verifier contract.</td></tr>
+        <tr><td>Explicit coverage and abstention</td><td>The runtime distinguishes “not found in a complete declared
+          scope” from “not observed in incomplete evidence” and can stop rather than invent a verdict.</td><td>That a
+          source declared complete accurately represents the external world.</td></tr>
+        <tr><td>Frozen releases and replayable artifacts</td><td>The rule, model capture, source revision, trace, and
+          verifier result cannot silently drift during a run.</td><td>That the approved policy itself is fair, lawful,
+          or complete.</td></tr>
+        <tr><td>Natural microcases and non-regression</td><td>Small positive, negative, ambiguous, exception, and
+          coverage cases localize whether extraction or theory failed.</td><td>Universal generalization beyond the
+          intended use and represented document distribution.</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>Research on long-context models reports that retrieval and use of relevant information can degrade when that
+      information lies in the middle of a long input. This supports the decision to build addressable memory and
+      executable dependencies rather than rely only on a larger prompt; it does not establish that nllAgent's own
+      extraction is correct. See <a href="https://aclanthology.org/2024.tacl-1.9/">Lost in the Middle</a> and the
+      document-level contradiction benchmark <a href="https://aclanthology.org/2024.naacl-long.362/">ContraDoc</a>.</p>
+
+    <h2 id="ethics">The epistemic and ethical constitution</h2>
+    <p>These commitments are architectural requirements, not decorative AI principles.</p>
+    <ol class="step-list">
+      <li><strong>Source integrity.</strong> An interpretation must not replace its source. Published observations and
+        findings retain exact anchors or declared external provenance.</li>
+      <li><strong>Bounded claims.</strong> A certificate names the property actually checked. Deterministic code after
+        an uncertain premise does not upgrade that premise to certainty.</li>
+      <li><strong>Contestability.</strong> A reviewer must be able to contest the passage, identity, scope, coverage,
+        rule, exception, witness, or rendering separately and see what depends on it.</li>
+      <li><strong>Honest abstention.</strong> <code>undetermined</code>, <code>review-required</code>, and stopped states
+        are useful results. Missing evidence must not be translated into compliance or non-compliance.</li>
+      <li><strong>Authority separation.</strong> A production document, model output, or isolated review comment cannot
+        become a rule merely by appearing in the input. Authority changes pass through learning and qualification.</li>
+      <li><strong>Non-retroactivity.</strong> A new release does not rewrite what an older release concluded. Reanalysis
+        is a new run whose differences remain inspectable.</li>
+      <li><strong>Human responsibility.</strong> Legal, editorial, scientific, and organizational policy owners remain
+        responsible for the intended use and authority. A structured explanation can still induce automation bias;
+        the UI must expose limits rather than use fluency as evidence.</li>
+      <li><strong>Privacy and least privilege.</strong> Source text, model access, agent workspaces, and benchmark data
+        receive only the capabilities and retention required by their role. Learning and production stay separate.</li>
+      <li><strong>Plurality where disagreement is real.</strong> Contested rules or interpretations may remain separate
+        candidate worlds or release lineages. Majority or model consensus is not silently converted into truth.</li>
+    </ol>
+    <p>The W3C <a href="https://www.w3.org/TR/prov-o/">PROV-O recommendation</a> provides a general vocabulary for
+      provenance. Research on LLM judges demonstrates susceptibility to several evaluation biases, so nllAgent treats
+      model judgments as evidence with a declared ceiling rather than as an anonymous oracle. See
+      <a href="https://aclanthology.org/2024.emnlp-main.474/">Humans or LLMs as the Judge?</a>.</p>
+
+    <h2 id="guarantees">How to read a guarantee</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Kind</th><th>Responsible interpretation</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Mechanically certified</td><td>A checker replayed a precisely stated property from source data and a
+          witness.</td><td>A quoted phrase occurs at the stated Unicode anchor.</td></tr>
+        <tr><td>Evidence certified</td><td>Evidence, scope, rubric use, and control flow were checked, but at least one
+          semantic premise remains model-assisted.</td><td>A candidate passage is grounded in the declared scene and
+          focalizer evidence.</td></tr>
+        <tr><td>Model judgment</td><td>A qualified model applied a bounded rubric. The result remains an interpretation,
+          not a theorem.</td><td>A passage explains an emotion too directly for one editorial policy.</td></tr>
+        <tr><td>Human confirmed</td><td>An authorized reviewer accepted a claim for the specified policy and release.</td>
+          <td>An editor confirms the intended focalization exception.</td></tr>
+        <tr><td>Stopped or undetermined</td><td>The system lacked a required concept, resource, complete source, budget, or
+          unambiguous interpretation.</td><td>A missing official register prevents a negative compliance conclusion.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="project-vocabulary">The nllAgent vocabulary</h2>
+    <h3 id="source-world">Source world and evidence</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Concept</th><th>Meaning in this project</th><th>Where to continue</th></tr></thead>
+      <tbody>
+        <tr><td>Canonical source</td><td>The immutable bytes or normalized representation whose digest identifies the
+          input to one run.</td><td><a href="longtextjs.html">LongTextJS</a></td></tr>
+        <tr><td>Anchor</td><td>A verifiable address to a source fragment: range, block, quote, table cell, or
+          another selector bound to a revision.</td><td><a href="https://www.w3.org/TR/annotation-model/">W3C Web
+          Annotation</a></td></tr>
+        <tr><td>Observation</td><td>A typed, scoped statement grounded in source evidence. It is input to judgment,
+          not the verdict itself.</td><td><a href="artifacts.html">Artifacts and statuses</a></td></tr>
+        <tr><td>Epistemic status</td><td>How an observation is known: given, extracted, proposed, derived, certified,
+          refuted, unknown, or human-confirmed.</td><td><a href="artifacts.html">Artifacts and statuses</a></td></tr>
+        <tr><td>Provenance</td><td>The lineage from an artifact to its source, producer, release, inputs, and
+          transformation.</td><td><a href="https://www.w3.org/TR/prov-overview/">W3C PROV overview</a></td></tr>
+        <tr><td>View</td><td>An addressable, reconstructable selection of source blocks and observations for a
+          declared task. It is not an authoritative summary.</td><td><a href="longtextjs.html">LongTextJS</a></td></tr>
+        <tr><td>Scope</td><td>The scene, interval, jurisdiction, version, experimental condition, world, or other
+          domain within which a statement is valid.</td><td><a href="connection.html">Observation contract</a></td></tr>
+        <tr><td>Identity and coreference</td><td>The contestable claim that multiple mentions denote the same person,
+          object, legal entity, definition, or case.</td><td><a href="translation.html">Compilation and translation</a></td></tr>
+        <tr><td>Candidate set / world</td><td>Explicit alternative interpretations kept separate until evidence or the task
+          makes the difference material.</td><td><a href="longtextjs.html">LongTextJS</a></td></tr>
+        <tr><td>Coverage</td><td>A claim about which source, scope, observation types, and search policy were
+          inspected. It is required for conclusions based on absence.</td><td><a href="connection.html">Observation
+          contract</a></td></tr>
+        <tr><td>Open-world assumption</td><td>Missing information is unknown. This is the safe default for ordinary
+          documents and partial evidence.</td><td><a href="https://en.wikipedia.org/wiki/Open-world_assumption">Wikipedia
+          orientation</a></td></tr>
+        <tr><td>Closed-world assumption</td><td>Within a certified scope, missing records may be treated as absent. The
+          declaration is local, not a statement about all reality.</td><td><a href="https://en.wikipedia.org/wiki/Closed-world_assumption">Wikipedia orientation</a></td></tr>
+        <tr><td>Gap</td><td>A typed account of what could not be materialized or linked and which circuits it
+          blocks.</td><td><a href="connection.html">Compatibility and coverage</a></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="programs">Programs and outputs</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Concept</th><th>Meaning in this project</th><th>Important distinction</th></tr></thead>
+      <tbody>
+        <tr><td>DSL</td><td>A domain-specific language whose vocabulary and rules are narrower than a general
+          programming language.</td><td>JS-like syntax does not grant JavaScript capabilities.</td></tr>
+        <tr><td>LongTextJS</td><td>The declarative instance program for one source: structure, anchors,
+          observations, alternatives, coverage, gaps, and task.</td><td>It represents the source world; it does not own
+          compliance policy.</td></tr>
+        <tr><td>CircuitJS</td><td>The typed declarative graph for reusable theory: ports, transformations, state,
+          exceptions, operators, verification, and emission.</td><td>It is versioned theory; it is not arbitrary
+          JavaScript or an opaque prompt.</td></tr>
+        <tr><td>CNL/Audit-1</td><td>The controlled natural-language audit profile assembled from verified findings
+          about an existing document.</td><td>It may contain compliance, non-compliance, quality, ambiguity, or
+          insufficient-evidence observations.</td></tr>
+        <tr><td>CNL/Plan-1</td><td>The controlled natural-language document specification produced after planning
+          circuits apply released rules to one idea.</td><td>It is not a natural-language copy of those rules and does
+          not itself prove a later realization compliant.</td></tr>
+        <tr><td>AST</td><td>An abstract syntax tree: the plain-data structural representation compiled from a
+          restricted author form.</td><td>The runtime executes the canonical graph, not unrestricted source code.</td></tr>
+        <tr><td>IR</td><td>An intermediate representation used between human-facing source and execution or
+          storage.</td><td>LongTextJS is deliberately not one universal ontology for all reasoning.</td></tr>
+        <tr><td>Observation contract</td><td>The typed interface declaring exactly what LongTextJS material a circuit
+          consumes and under what coverage and status conditions.</td><td>Matching names are insufficient; operational
+          meaning and producer alignment are checked.</td></tr>
+        <tr><td>Operator</td><td>A registered transformation or solver with a signature, effects, budget, output
+          contract, and often a checker.</td><td>A model call is one operator class, not the runtime's universal judge.</td></tr>
+        <tr><td>Witness</td><td>Concrete evidence supplied so a verifier can replay one declared property.</td>
+          <td>A witness is data, not a fluent chain-of-thought narrative.</td></tr>
+        <tr><td>Verifier / certificate</td><td>The checker and its accepted result for a bounded property.</td><td>A
+          certificate inherits the weakest unverified premise on which its claim depends.</td></tr>
+        <tr><td>Guarantee ceiling</td><td>The strongest guarantee an output may retain after considering all
+          material premises.</td><td>A deterministic node cannot turn a proposed semantic observation into a mechanical
+          fact.</td></tr>
+        <tr><td>Verification dominance</td><td>The static property that every dependency path into publication passes
+          exclusively through accepted verification.</td><td>A candidate-to-<code>emit</code> shortcut is rejected at
+          compilation.</td></tr>
+        <tr><td>Topological order</td><td>A deterministic node order in which every ordinary dependency runs before
+          its consumer.</td><td>Cycles require an explicit reasoning construct rather than an accidental graph loop.</td></tr>
+        <tr><td>Finding</td><td>A structured conclusion with rule, source anchors, verdict, witness, guarantee,
+          remediation, and limits.</td><td>The Markdown sentence is a rendering of this object, not the authority.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="lifecycle">Learning and operational lifecycle</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Concept</th><th>Meaning</th><th>Why it exists</th></tr></thead>
+      <tbody>
+        <tr><td>NaturalLanguageLinterProject</td><td>The durable intended use, authority, calibration corpus, review evidence,
+          operational context, and release history for one specialized agent.</td><td>Prevents “the agent” from being
+          confused with one prompt or run.</td></tr>
+        <tr><td>Release</td><td>An immutable, content-addressed package of schemas, producers, circuits,
+          verifiers, compatibility declarations, and benchmark evidence.</td><td>Freezes the theory used by a result.</td></tr>
+        <tr><td>Content addressing</td><td>Identifying an immutable artifact by a digest of its canonical content.</td>
+          <td>A matching digest proves byte identity, not semantic correctness.</td></tr>
+        <tr><td>Semantic version / diff</td><td>A version and comparison that describe changes in meaning and likely
+          impact, not only changed file lines.</td><td>A major meaning change creates new release identity rather than
+          rewriting prior runs.</td></tr>
+        <tr><td>Run</td><td>One transactional application of a precise release to one precise input and task.</td>
+          <td>Provides reproducible identity and failure status.</td></tr>
+        <tr><td>Microcase</td><td>A small natural-language example with separately expected observations and
+          circuit behavior.</td><td>Localizes extraction, theory, exception, and coverage failures.</td></tr>
+        <tr><td>Benchmark</td><td>Versioned public, development, hidden, long-scenario, metamorphic, and mutation
+          evidence for an intended use.</td><td>Tests a release without claiming universal correctness.</td></tr>
+        <tr><td>Qualification / release gate</td><td>The independent checks that compile, link, benchmark, digest, and
+          freeze a candidate.</td><td>Separates the agent proposing a theory from production activation.</td></tr>
+        <tr><td>Compatibility gate</td><td>The run-time proof that this input can satisfy the selected release's
+          contracts.</td><td>A release can be valid yet inapplicable to an unfamiliar document.</td></tr>
+        <tr><td>LearningNeed / issue</td><td>A persistent, typed object explaining a blocked run, disagreement, or
+          missing capability.</td><td>Turns failure into a reviewable input to a later learning iteration.</td></tr>
+        <tr><td>Realization</td><td>The optional human or LLM transformation of <code>CNL/Plan-1</code> into a
+          candidate document.</td><td>Separates document planning from fluent surface generation.</td></tr>
+        <tr><td>Revision</td><td>A bounded attempt to repair a candidate using the plan and structured audit
+          findings.</td><td>Does not change the release or allow the generator to certify itself.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="foundations">Related theories and what nllAgent borrows</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tradition or standard</th><th>Idea used here</th><th>Relationship and limit</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://www.w3.org/TR/annotation-model/">W3C Web Annotation</a>,
+          <a href="https://www.w3.org/TR/prov-o/">PROV-O</a>, and
+          <a href="https://docs.oasis-open.org/uima/v1.0/uima-spec-v1.0.html">UIMA</a></td><td>Separate an
+          annotation from its target and preserve machine-readable provenance across analysis stages.</td><td>nllAgent
+          uses its own plain-data source and trace models; it does not claim wire-format compatibility with all three.</td></tr>
+        <tr><td><a href="https://json-schema.org/draft/2020-12">JSON Schema</a> and
+          <a href="https://www.w3.org/TR/shacl/">SHACL</a></td><td>Validate data shape separately from the data being
+          validated.</td><td>Shape validity can reject malformed artifacts but cannot prove the intended semantic
+          interpretation.</td></tr>
+        <tr><td><a href="https://docs.oasis-open.org/legalruleml/legalruleml-core-spec/v1.0/os/legalruleml-core-spec-v1.0-os.html">LegalRuleML</a></td><td>Legal rules require explicit authority,
+          temporal scope, defeasibility, obligations, permissions, prohibitions, and links to source provisions.</td>
+          <td>CircuitJS is not LegalRuleML and legal validity remains tied to an agent's approved authority and intended use.</td></tr>
+        <tr><td><a href="https://doi.org/10.1007/BF03037383">Event Calculus</a> and
+          <a href="https://doi.org/10.1016/0004-3702(79)90008-0">Truth Maintenance Systems</a></td><td>Events can
+          initiate or terminate persistent state; conclusions retain justifications and can be retracted when premises
+          change.</td><td>These are operator patterns, not a claim that every document uses one temporal logic.</td></tr>
+        <tr><td><a href="https://doi.org/10.1016/0004-3702(94)00041-X">Abstract argumentation frameworks</a></td>
+          <td>Conflicting arguments and exceptions can remain explicit instead of being flattened into one score.</td>
+          <td>Domain packages must still define how text becomes arguments and what authority governs priority.</td></tr>
+        <tr><td><a href="https://doi.org/10.1007/978-3-319-41540-6_23">Datalog and Soufflé</a></td><td>Typed
+          relations, fixpoint derivation, indexing, and incremental analysis can make declarative rules executable.</td>
+          <td>CircuitJS also supports non-monotonic state, model calls, search, and external solvers; it is not Datalog.</td></tr>
+        <tr><td><a href="https://doi.org/10.1007/978-3-540-27813-9_14">DPLL(T)</a> and SMT solving</td><td>A common
+          control protocol can coordinate specialized theories without pretending that they share one solving algorithm.</td>
+          <td>nllAgent only obtains solver guarantees when a concrete operator and witness checker are installed.</td></tr>
+        <tr><td><a href="https://people.eecs.berkeley.edu/~sseshia/pubs/b2hd-alur-fmcad13.html">Syntax-Guided
+          Synthesis</a> and <a href="https://doi.org/10.1007/s00236-017-0294-5">CEGIS</a></td><td>Restrict the
+          program space by a grammar and refine candidates using counterexamples.</td><td>Learning agents may propose
+          circuits, but qualification—not agent confidence—controls release.</td></tr>
+        <tr><td><a href="https://doi.org/10.1145/263699.263712">Proof-Carrying Code</a></td><td>A complex producer
+          can supply a simpler object that a smaller trusted checker validates against a policy.</td><td>A document
+          witness is not a formal proof unless its verifier contract actually establishes a formal property.</td></tr>
+        <tr><td><a href="https://aclanthology.org/2021.emnlp-main.779/">PICARD</a> and
+          <a href="https://aclanthology.org/2023.emnlp-main.674/">grammar-constrained decoding</a></td><td>Reject model
+          outputs that cannot satisfy a target grammar or schema.</td><td>Constrained syntax prevents impossible forms,
+          not plausible but semantically wrong observations.</td></tr>
+        <tr><td><a href="https://doi.org/10.1145/3143561">Metamorphic testing</a> and mutation testing</td><td>Test
+          invariants under controlled input transformations and test whether the suite detects deliberate defects.</td>
+          <td>These techniques measure test sensitivity; they do not replace representative human-confirmed cases.</td></tr>
+        <tr><td>Neuro-symbolic AI</td><td>Use language models for ambiguous translation and realization while explicit
+          structures carry persistent state, rules, provenance, and replay.</td><td>“Neuro-symbolic” names a division of
+          labor, not a blanket guarantee against hallucination.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="comparisons">Similar approaches and the boundary</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Approach</th><th>Overlap</th><th>Difference in nllAgent</th></tr></thead>
+      <tbody>
+        <tr><td>Classic compiler or linter</td><td>Source locations, typed intermediate artifacts, reusable rules,
+          diagnostics, and deterministic replay.</td><td>Natural-language observations can be ambiguous and model-assisted,
+          so status, alternatives, coverage, and review are first-class.</td></tr>
+        <tr><td>RAG</td><td>Retrieval can propose source passages relevant to a task.</td><td>Retrieval rank does not prove
+          complete coverage, stable identity, rule applicability, or a verified conclusion.</td></tr>
+        <tr><td>One long LLM prompt</td><td>A model can interpret the document and produce useful candidates or prose.</td>
+          <td>The rule release, source world, observation contract, witnesses, and verification exist outside the model
+          call and remain replayable.</td></tr>
+        <tr><td>Traditional controlled natural language</td><td>Both seek language with more explicit, stable
+          interpretation than unrestricted prose.</td><td>Users do not author the rulebook in CNL here. nllAgent emits
+          CNL audits and plans after executing CircuitJS.</td></tr>
+        <tr><td>Policy or rule languages</td><td>Rules are explicit, versioned, and executable.</td><td>CircuitJS also
+          orchestrates document observations, model-assisted operators, state, search, verification, and explanations.</td></tr>
+        <tr><td>Proof assistant or theorem prover</td><td>Small trusted checking and proof-producing workflows are
+          architectural inspirations.</td><td>Most literary or legal interpretations are not formal theorems. Their
+          guarantee must remain evidence-certified, model-judged, or human-confirmed.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="abbreviations">Abbreviations</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Abbreviation</th><th>Expansion</th><th>Meaning here</th></tr></thead>
+      <tbody>
+        <tr><td>AI</td><td>Artificial Intelligence</td><td>The broad field; not a guarantee level.</td></tr>
+        <tr><td>API</td><td>Application Programming Interface</td><td>A typed integration boundary between components.</td></tr>
+        <tr><td>AST</td><td>Abstract Syntax Tree</td><td>Canonical structural form compiled from a DSL author form.</td></tr>
+        <tr><td>CEGIS</td><td>Counterexample-Guided Inductive Synthesis</td><td>Candidate refinement using failing examples.</td></tr>
+        <tr><td>CI</td><td>Continuous Integration</td><td>Automated tests and gates run on repository changes.</td></tr>
+        <tr><td>CLI</td><td>Command-Line Interface</td><td>The <code>nllagent</code> user entry point.</td></tr>
+        <tr><td>CNL</td><td>Constraint Natural Language</td><td>The project's controlled audit and document-plan output family.</td></tr>
+        <tr><td>CSP</td><td>Constraint Satisfaction Problem</td><td>A possible specialized solver representation.</td></tr>
+        <tr><td>DSL</td><td>Domain-Specific Language</td><td>LongTextJS or CircuitJS, each with a restricted purpose.</td></tr>
+        <tr><td>DS</td><td>Design Specification</td><td>One numbered normative contract under <code>docs/specs/</code>.</td></tr>
+        <tr><td>DOCX</td><td>Office Open XML word-processing document</td><td>A possible source format requiring a structure-preserving adapter.</td></tr>
+        <tr><td>ESM</td><td>ECMAScript Modules</td><td>The Node.js module format used by the implementation.</td></tr>
+        <tr><td>HTML</td><td>HyperText Markup Language</td><td>A documentation and possible document-source format.</td></tr>
+        <tr><td>HTTP</td><td>Hypertext Transfer Protocol</td><td>A possible adapter surface; the primary product remains file and CLI oriented.</td></tr>
+        <tr><td>IR</td><td>Intermediate Representation</td><td>A machine-checkable form between source and execution.</td></tr>
+        <tr><td>JSON</td><td>JavaScript Object Notation</td><td>The plain-data serialization boundary for canonical artifacts.</td></tr>
+        <tr><td>LLM</td><td>Large Language Model</td><td>A bounded translator, judge, explainer, or optional realizer.</td></tr>
+        <tr><td>LSP</td><td>Language Server Protocol</td><td>A related protocol model for diagnostics and navigation.</td></tr>
+        <tr><td>MJS</td><td>ECMAScript module file suffix</td><td>The <code>.mjs</code> author and implementation file form.</td></tr>
+        <tr><td>MILP</td><td>Mixed-Integer Linear Programming</td><td>A possible optimization backend for a domain operator.</td></tr>
+        <tr><td>NLP</td><td>Natural Language Processing</td><td>Methods for extracting or generating language structure.</td></tr>
+        <tr><td>NUL</td><td>Null control character</td><td>An unsafe source byte rejected by canonical Markdown ingestion.</td></tr>
+        <tr><td>OCR</td><td>Optical Character Recognition</td><td>A possible producer of text from scans whose uncertainty must retain provenance.</td></tr>
+        <tr><td>PDF</td><td>Portable Document Format</td><td>A source format whose visual and logical reading order may differ.</td></tr>
+        <tr><td>PCC</td><td>Proof-Carrying Code</td><td>Inspiration for producer / witness / checker separation.</td></tr>
+        <tr><td>PROV / PROV-O</td><td>W3C provenance model and ontology</td><td>Standards vocabulary related to artifact lineage.</td></tr>
+        <tr><td>RAG</td><td>Retrieval-Augmented Generation</td><td>Useful candidate retrieval, not a coverage certificate.</td></tr>
+        <tr><td>RDF</td><td>Resource Description Framework</td><td>The graph data model underlying several W3C standards.</td></tr>
+        <tr><td>SHACL</td><td>Shapes Constraint Language</td><td>A W3C language for validating RDF graph shapes.</td></tr>
+        <tr><td>SHA-256</td><td>Secure Hash Algorithm, 256-bit</td><td>The digest family used for immutable content identity.</td></tr>
+        <tr><td>SMT</td><td>Satisfiability Modulo Theories</td><td>Constraint solving across specialized logical theories.</td></tr>
+        <tr><td>SyGuS</td><td>Syntax-Guided Synthesis</td><td>Program synthesis restricted by a grammar.</td></tr>
+        <tr><td>TCB</td><td>Trusted Computing Base</td><td>The minimal code and policy whose correctness must be trusted.</td></tr>
+        <tr><td>TMS</td><td>Truth Maintenance System</td><td>Reasoning that retains justifications and supports retraction.</td></tr>
+        <tr><td>UIMA</td><td>Unstructured Information Management Architecture</td><td>A standard for composable analysis over artifacts.</td></tr>
+        <tr><td>UI</td><td>User Interface</td><td>The human-facing review or documentation surface.</td></tr>
+        <tr><td>UTF-8 / UTF-16</td><td>Unicode Transformation Formats</td><td>Text encodings distinct from the runtime's Unicode code-point anchor unit.</td></tr>
+        <tr><td>VM</td><td>Virtual Machine</td><td>The restricted short-lived environment used to normalize CircuitJS author expressions.</td></tr>
+        <tr><td>W3C</td><td>World Wide Web Consortium</td><td>The standards body behind Web Annotation, PROV, and SHACL.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="orientation">Wikipedia orientation pages</h2>
+    <p>These links are intentionally separated from the primary reading above. They are useful introductions and
+      vocabulary maps, not normative sources for nllAgent:</p>
+    <ul>
+      <li><a href="https://en.wikipedia.org/wiki/Domain-specific_language">Domain-specific language</a>,
+        <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract syntax tree</a>,
+        <a href="https://en.wikipedia.org/wiki/Intermediate_representation">intermediate representation</a>, and
+        <a href="https://en.wikipedia.org/wiki/Declarative_programming">declarative programming</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Data_provenance">Data provenance</a>,
+        <a href="https://en.wikipedia.org/wiki/Open-world_assumption">open-world assumption</a>, and
+        <a href="https://en.wikipedia.org/wiki/Closed-world_assumption">closed-world assumption</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Non-monotonic_logic">Non-monotonic logic</a>,
+        <a href="https://en.wikipedia.org/wiki/Reason_maintenance">reason maintenance</a>,
+        <a href="https://en.wikipedia.org/wiki/Event_calculus">Event Calculus</a>, and
+        <a href="https://en.wikipedia.org/wiki/Argumentation_framework">argumentation frameworks</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Satisfiability_modulo_theories">Satisfiability modulo theories</a>,
+        <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem">constraint satisfaction</a>,
+        <a href="https://en.wikipedia.org/wiki/Model_checking">model checking</a>, and
+        <a href="https://en.wikipedia.org/wiki/Mutation_testing">mutation testing</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Neuro-symbolic_AI">Neuro-symbolic AI</a>,
+        <a href="https://en.wikipedia.org/wiki/Large_language_model">large language models</a>,
+        <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation">retrieval-augmented generation</a>,
+        <a href="https://en.wikipedia.org/wiki/Explainable_artificial_intelligence">explainable AI</a>, and
+        <a href="https://en.wikipedia.org/wiki/Automation_bias">automation bias</a>.</li>
+      <li><a href="https://en.wikipedia.org/wiki/Trusted_computing_base">Trusted computing base</a>,
+        <a href="https://en.wikipedia.org/wiki/Sandbox_(computer_security)">sandboxing</a>, and
+        <a href="https://en.wikipedia.org/wiki/Reproducible_builds">reproducible builds</a>.</li>
+    </ul>
+
+    <h2 id="status">Implemented mechanism versus research lineage</h2>
+    <p>The page deliberately includes concepts broader than the current demonstration agent. The repository currently
+      implements canonical LongTextJS, restricted CircuitJS validation and planning graphs, observation contracts,
+      registered operators and replay verifiers, CNL audit and plan artifacts, compatibility and coverage gates,
+      immutable releases, natural benchmark qualification, isolated learning, and optional bounded realization.
+      Event-calculus-style state, argumentation, solver, multimodal, and richer legal modules are extension patterns
+      unless a selected release actually includes and qualifies them. A scientific citation explains a design lineage;
+      only code, tests, release evidence, and an applicable run establish that a capability exists for a document.</p>
+
+    <nav class="page-nav" aria-label="Concept reading paths">
+      <strong>Continue from the foundation</strong>
+      <a href="architecture.html">See the concrete architecture</a>
+      <a href="longtextjs.html">Study the source program</a>
+      <a href="circuitjs.html">Study the theory program</a>
+      <a href="circuit-tutorial.html">Run the interactive circuit tutorial</a>
+      <a href="verification.html">Follow a CNL audit</a>
+      <a href="generation.html">Follow a CNL specification</a>
+      <a href="specsLoader.html?spec=matrix.md">Read the normative DS contracts</a>
+    </nav>
+
+    <footer>Primary sources explain the intellectual lineage. The repository's DS specifications, implementation,
+      tests, qualified release, and run artifacts define what nllAgent actually claims.</footer>
+  </main>
+</div>
+</body>
+</html>

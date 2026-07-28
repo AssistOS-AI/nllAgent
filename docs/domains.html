@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Domain Packages — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Domain packages</div>
+    <p class="kicker">General infrastructure without a universal ontology</p>
+    <h1>Editorial, normative, and technical theories</h1>
+    <p class="lead">nllAgent becomes useful in a domain by qualifying a package of observations, rules, operators, verifiers, examples, compatibility limits, and explanations. The core provides common execution discipline; it does not pretend that a scene, a legal obligation, and a scientific measurement share the same meaning.</p>
+
+    <h2 id="generalization">How the platform generalizes</h2>
+    <p>A universal set of fields such as <code>Entity</code>, <code>Fact</code>, and <code>Constraint</code> looks simple until all meaningful semantics move into opaque payloads and prompts. nllAgent keeps a smaller common kernel: sources, anchors, versioned types, scope, time, alternatives, epistemic status, provenance, coverage, ports, budgets, witnesses, and publication rules. Domains extend the nominal vocabularies and compose the reasoning regimes they actually need.</p>
+    <p>This design resembles a platform with specialized theories rather than one giant classifier. The same scheduler can coordinate lexical matching, state timelines, deadlines, constraints, graph search, or model judgments because every component declares typed inputs, effects, limits, and verification. It does not imply that any operator understands arbitrary natural language.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  AUTH[Domain authority + examples] --> OBS[Observation schemas + producers]
+  AUTH --> THEORY[Circuits + witnesses]
+  OBS --> TEST[Natural benchmark + compatibility]
+  THEORY --> TEST
+  TEST --> REL[Qualified domain release]
+    </pre>
+    <p class="diagram-caption"><strong>A domain is a linked package.</strong> Authority determines both what the document compiler must observe and how the theory may judge. Natural cases and compatibility probes prove that both sides use the same operational meaning.</p>
+
+    <h2 id="package">What a complete domain package contains</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Component</th><th>Responsibility</th><th>Typical failure if omitted</th></tr></thead>
+      <tbody>
+        <tr><td>Authority map and rule cards</td><td>Fix source version, priority, scope, trigger, exceptions, outcomes, and maximum guarantee.</td><td>The Coding Agent invents policy or file order resolves a conflict.</td></tr>
+        <tr><td>LongTextJS schemas</td><td>Name the minimum observable concepts, fields, status, anchors, identity, time, and coverage.</td><td>Circuits depend on free-form prompts or semantically overloaded types.</td></tr>
+        <tr><td>Producers and adapters</td><td>Materialize observations neutrally from supported source profiles and declare losses.</td><td>Ports compile nominally but cannot be satisfied on real documents.</td></tr>
+        <tr><td>CircuitJS theory</td><td>Encode reusable selection, state, exception, priority, search, verification, and finding behavior.</td><td>The rule changes between runs or extraction is contaminated by the desired verdict.</td></tr>
+        <tr><td>Operators and verifiers</td><td>Provide approved algorithms and replay checks for domain computations.</td><td>A complex claim has no inspectable witness or guarantee boundary.</td></tr>
+        <tr><td>Natural benchmark</td><td>Define positives, close negatives, exceptions, ambiguity, coverage, adversarial inputs, and long composition.</td><td>A plausible but wrong theory passes convenient examples.</td></tr>
+        <tr><td>Compatibility profile</td><td>Declare languages, formats, structures, auxiliary context, qualified producers, and limits.</td><td>An unfamiliar document receives a misleading approximate verdict.</td></tr>
+        <tr><td>Explanation and migration policy</td><td>Constrain user claims and define how versions change.</td><td>Reports overstate evidence or releases silently reinterpret old observations.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="editorial">Editorial domain: from exact phrases to continuity</h2>
+    <p>An editorial linter combines rules with very different guarantee levels. The included <code>editorial-demo</code> is the implemented starting point. Its deterministic Markdown observations support two exact lexical rules: a weak phrase in narrative paragraphs and a per-paragraph frequency limit. Circuits exclude dash-prefixed dialogue and fenced code, respect whole-word boundaries and exact thresholds, preserve Unicode source spans, and use replay verifiers.</p>
+    <p>A richer editorial package can add semantic observation types such as <code>Scene</code>, <code>Focalizer</code>, <code>DiscourseMode</code>, <code>MentalStateAttribution</code>, <code>ObjectEvent</code>, <code>NarrativeTime</code>, and <code>KnowledgeState</code>. These remain LongTextJS interpretations. CircuitJS derives concepts such as unauthorized mind access, use without possession, temporal regression, or premature revelation.</p>
+
+    <h3>Example: focalization</h3>
+    <ol>
+      <li>The rulebook defines third-person limited narration, direct mental access, licensed inference, dialogue, free-indirect discourse, and declared scene transitions through examples and counterexamples.</li>
+      <li>The extraction contract asks for scene boundaries, focalizer candidates, experiencer, attribution mode, discourse mode, and exact passages—without asking whether the rule is broken.</li>
+      <li>The circuit groups observations by scene, resolves or preserves focalizer alternatives, selects direct mental attribution to another character, and applies licensed exceptions.</li>
+      <li>A semantic rubric may still be needed to distinguish direct access from inference. The finding can have exact evidence and a verified rule path while remaining model-judgment or review-required.</li>
+    </ol>
+
+    <h3>Example: object continuity</h3>
+    <p>The implemented <code>narrative.object-continuity@1</code> operator tracks leave, retrieve, transfer, replace, and use events by stable identity. If a phone is left in a car and later used elsewhere, the verifier replays all materialized intervening events. A finding is possible only when the object identity, event order, transition policy, and coverage satisfy the release contract. Model-produced event semantics keep an evidence-assisted ceiling.</p>
+
+    <h2 id="normative">Normative domain: obligation, exception, and incomplete evidence</h2>
+    <p>A policy linter must keep rule authority separate from case evidence. Its observation vocabulary may include incident, confirmation event, responsible actor, notification event, official channel, outage, timestamp, jurisdiction, rule version, and record completeness. Its theory derives obligation activation, deadline, exception application, satisfaction, non-compliance, not-applicable, undetermined, or policy conflict.</p>
+
+    <h3>Example: an incident notification deadline</h3>
+    <ol>
+      <li>The authority package defines what counts as a critical incident and confirmation, who must notify, the elapsed duration, the official channel, the outage policy, and source precedence.</li>
+      <li>LongTextJS materializes incident and evidence observations from the concrete case, retaining exact timestamps, timezone, source authority, and open- or closed-world coverage.</li>
+      <li>CircuitJS instantiates the obligation, invokes <code>temporal.deadline@1</code>, applies the named outage rule, searches qualifying notification events, and carries the coverage contract into its witness.</li>
+      <li>The verifier recomputes the deadline and action relation. Missing action can support non-compliance only when the relevant official record is complete. Selected emails produce <code>undetermined</code> or a limited “not identified in supplied material” statement.</li>
+    </ol>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Concrete evidence</th><th>Permitted outcome for no matching action</th></tr></thead>
+      <tbody>
+        <tr><td>Complete official record for the relevant actor, action, channel, and interval</td><td>A verified non-compliance candidate may be possible.</td></tr>
+        <tr><td>Open collection of emails, excerpts, or interviews</td><td><code>undetermined</code> or an explicitly material-limited statement.</td></tr>
+        <tr><td>Missing calendar, authority order, applicable version, or trigger definition</td><td>The dependent circuit stops and records the required operational context.</td></tr>
+        <tr><td>Competing applicable norms without approved priority</td><td><code>policy-conflict</code> and human review, not first-file-wins.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="technical">Technical and scientific domain: typed claims and solver-backed checks</h2>
+    <p>Technical packages may define <code>Definition</code>, <code>Quantity</code>, <code>Unit</code>, <code>Component</code>, <code>Requirement</code>, <code>ProcedureStep</code>, <code>Measurement</code>, <code>Claim</code>, <code>Evidence</code>, <code>Dataset</code>, <code>Version</code>, and <code>ApplicabilityCondition</code>. The source wording remains anchored; normalized values and derived conflicts retain their conversion or dependency witnesses.</p>
+
+    <h3>Examples of executable checks</h3>
+    <ul>
+      <li><strong>Numerical consistency:</strong> <code>units.convert@1</code> normalizes supported length, pressure, mass, and temperature quantities; <code>constraints.interval-conflicts@1</code> compares requirements only after component identity, qualifier, conditions, scope, and version align.</li>
+      <li><strong>Procedure conformance:</strong> <code>state.timeline@1</code> applies ordered preconditions, effects, inertia, and explicit retraction to detect missing or impossible steps.</li>
+      <li><strong>Rule closure:</strong> <code>logic.fixpoint@1</code> computes finite positive consequences with proof provenance.</li>
+      <li><strong>Competing evidence:</strong> <code>argumentation.grounded@1</code> preserves explicit attacks and computes a named acceptance semantics rather than hiding conflict.</li>
+      <li><strong>Graph tasks:</strong> <code>graph.shortest-path@1</code> produces a path witness and separate optimality check, demonstrating how a textual problem can route to a specialized solver.</li>
+    </ul>
+    <p>Scientific claim/evidence review can identify a mismatch between population, method, result, and conclusion or flag causal language unsupported by the declared design. The runtime may certify unit conversions, formula replay, or an explicit graph property. It does not claim to certify arbitrary scientific truth or to turn a model-extracted causal interpretation into a theorem.</p>
+
+    <h2 id="transfer">Compatibility must be proven before reuse</h2>
+    <p>Similar names are not sufficient. A narrative scene is not automatically a dramatic scene; an informal message is not automatically an official notification; an experiment is not automatically a simulation run. An adapter must state its preconditions, field mapping, lost information, coverage effect, and maximum guarantee. Qualification needs natural positive, negative, ambiguous, and coverage cases demonstrating the shared operational meaning.</p>
+    <p>When a new document cannot satisfy the package, preflight should stop the dependent circuits and create a learning need. Expanding the compatibility profile is a release change with new benchmarks, not a prompt tweak during the run.</p>
+
+    <h2 id="build-domain">Build a new specialized agent</h2>
+    <ol>
+      <li>Create a named agent and fix its intended use, users, authority order, document population, output classes, and automation limit.</li>
+      <li>Collect representative rulebooks, calibration documents, reviewer decisions, formats, languages, and operational context. Record missing regions before claiming compatibility.</li>
+      <li>Mine natural positive, close-negative, exception, boundary, ambiguity, coverage, adversarial, and long-range cases.</li>
+      <li>Design the smallest LongTextJS observation vocabulary that makes the rules executable. Separate mention from identity and source observation from rule-derived concepts.</li>
+      <li>Choose CircuitJS patterns—relational, state, temporal, fixpoint, argumentation, search, solver, or rubric—and design each witness before implementation.</li>
+      <li>Use existing trusted operators where their semantics fit. Propose a reviewed operator and verifier when they do not; never hide new execution in unrestricted circuit code.</li>
+      <li>Declare supported language, format, structure, auxiliary registries, coverage policy, cost, and known limits in the compatibility profile.</li>
+      <li>Build a candidate with the <a href="learning.html">learning workflow</a>, qualify it against <a href="benchmark.html">natural benchmarks</a>, inspect semantic diff and limitations, then activate explicitly.</li>
+    </ol>
+
+    <div class="callout warning"><strong>Implemented core versus extension contract.</strong> The repository currently ships Markdown ingestion, lexical editorial examples, semantic observation translation, a continuity operator, and several deterministic reasoning operators. Rich legal, scientific, multilingual, multimodal, external-solver, causal, and formal-proof packages are supported by the extension architecture but are not all bundled as qualified production agents. Unsupported evidence remains a compatibility gap.</div>
+
+    <footer>Normative extension contract: <a href="specsLoader.html?spec=DS016-domains-extensions.md">DS016</a>. Theory and learning contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> through <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

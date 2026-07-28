@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LongTextJS Document Program — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / LongTextJS / The document program</div>
+    <p class="kicker">The document side</p>
+    <h1>LongTextJS is a program of this source</h1>
+    <p class="lead">LongTextJS turns one immutable document revision into an addressable world that CircuitJS can consume. It preserves what the source says, which interpretations were materialized, how they were produced, and what remains unknown. It does not decide whether a rule was violated.</p>
+
+    <h2 id="compiled">What is compiled</h2>
+    <p>For the current production path, the input is Markdown. The compiler does not reduce it to a summary or an embedding. It preserves canonical text, structure, global Unicode positions, block identities, channels, and exact quotations. It then adds typed observations required by the selected release.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  STRUCT[Markdown source + exact anchors] --> OBS[Structural observations]
+  OBS --> SEM[Demanded semantic observations]
+  SEM --> LIMIT[Coverage + capabilities + gaps]
+  LIMIT --> LTX[Canonical LongTextJS JSON]
+    </pre>
+    <p class="diagram-caption"><strong>Compilation adds meaning without replacing source.</strong> Deterministic structure is established first. Semantic producers add only typed candidates requested by the theory. Coverage and gaps travel with the resulting program.</p>
+
+    <h2 id="shape">The shape emitted today</h2>
+    <p><code>src/longtext/compiler.mjs</code> emits a <code>LongTextProgram</code> using dialect <code>longtextjs-json@1</code>. A normal program contains one source package, <code>view:whole</code>, the run task, blocks and anchors, structural scopes, observations, capabilities, coverage records, gaps, and diagnostics. This shortened example follows the actual output shape:</p>
+    <pre><code>{
+  "kind": "LongTextProgram",
+  "dialect": "longtextjs-json@1",
+  "id": "longtext:editorial-demo:input",
+  "source": {
+    "id": "source:input",
+    "revision": "sha256:…",
+    "mediaType": "text/markdown",
+    "language": "ro",
+    "content": "# Fragment\n\nMara a intrat…"
+  },
+  "views": [{
+    "id": "view:whole",
+    "scope": "scope:document",
+    "complete": true
+  }],
+  "observations": [{
+    "id": "observation:block:paragraph:…",
+    "type": "document.paragraph@1",
+    "status": "extracted",
+    "anchors": ["anchor:block:paragraph:…"],
+    "payload": { "text": "Mara a intrat…", "order": 2 },
+    "provenance": { "producer": "markdown-structural@1" }
+  }],
+  "coverage": [{
+    "types": ["document.paragraph@1"],
+    "mode": "closed-world",
+    "verified": true,
+    "method": "complete-structural-parse"
+  }],
+  "gaps": []
+}</code></pre>
+
+    <h2 id="source">Source, anchor, observation</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Object</th><th>What it asserts</th><th>What it does not assert</th></tr></thead>
+      <tbody>
+        <tr><td>Source package</td><td>These are the canonical bytes/text, revision, language, structure, and channels analyzed.</td><td>That any interpretation of the text is correct.</td></tr>
+        <tr><td>Anchor</td><td>This exact quote occupies this half-open Unicode code-point range in this block and revision.</td><td>That the quote has a particular semantic role.</td></tr>
+        <tr><td>Observation</td><td>A named producer interpreted or extracted this anchored source as a nominal versioned type.</td><td>That a rule has been satisfied or violated.</td></tr>
+      </tbody>
+    </table></div>
+    <p>This separation is why an invented model quotation cannot become evidence. Model output names an exact quote inside one source block. The materializer locates that quote again, computes the global anchor, validates the payload, and only then inserts a <code>proposed</code> observation. Repeated equal quotations are assigned to successive occurrences rather than collapsed onto the first match.</p>
+
+    <h2 id="status">Status preserves how something became known</h2>
+    <p>A deterministic paragraph observation is <code>extracted</code>. A model-identified object event is normally <code>proposed</code>. A search branch may add an <code>assumed</code> object. A circuit consequence is <code>derived</code>. A checker may mark one exact property <code>certified</code>. Human confirmation has its own status. Confidence can rank alternatives, but cannot silently change any of these categories.</p>
+    <p>This matters downstream. A deterministic state replay over model-proposed events can verify that the replay follows the released transition policy; it cannot retroactively prove that each event was semantically classified with mechanical certainty.</p>
+
+    <h2 id="demand">LongTextJS is selective, not total</h2>
+    <p>The runtime first compiles structure and then loads the release’s circuits. Their input ports determine the set of observation types to materialize. A lexical circuit may need only <code>document.paragraph@1</code>. A continuity circuit may additionally need object events, identity, order, modality, and an intervening-scope search. nllAgent does not attempt to formalize every possible fact in every document.</p>
+    <p>Semantic requests go through extraction profiles and the backend-neutral translation gateway. Configured AchillesAgentLib is preferred; the current Coding Agent reference adapter is the fallback. Both return schema-bound candidates to the same materializer. Neither backend constructs the source package, changes anchors, declares coverage unilaterally, or edits CircuitJS. See <a href="translation.html">Compilation and translation</a>.</p>
+
+    <h2 id="coverage">Coverage and gaps are part of the program</h2>
+    <p>Coverage records name the source revision, channel, scope, observation types, producer, method, exclusions, failures, and completeness mode. A complete structural scan can support “the phrase does not occur in any narrative paragraph in this view.” Top-k semantic retrieval cannot support “no notification exists anywhere.”</p>
+    <p>A gap is not a negative observation. It may identify an unavailable producer, invalid model output, unknown structure, unresolved identity, missing operational context, unsupported language, or insufficient materialization. The compatibility gate consumes these records before CircuitJS is allowed to make a claim that depends on them.</p>
+
+    <h2 id="files">Where to inspect it</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Implementation</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>src/longtext/compiler.mjs</code></td><td>Canonical Markdown source, blocks, anchors, structural observations, task, and structural coverage.</td></tr>
+        <tr><td><code>src/longtext/model-materializer.mjs</code></td><td>Demanded semantic prompts, response schema, exact quote validation, proposed observations, gaps, and captures.</td></tr>
+        <tr><td><code>src/runtime/analyzer.mjs</code></td><td>Selects demanded types, coordinates materialization, compatibility, and dynamic observation rounds.</td></tr>
+        <tr><td><code>runs/&lt;id&gt;/longtext.json</code></td><td>The complete canonical document program used by one production run.</td></tr>
+      </tbody>
+    </table></div>
+
+    <nav class="page-nav" aria-label="LongTextJS reading path">
+      <strong>Continue on the document side</strong>
+      <a href="translation.html">How observations are translated</a>
+      <a href="connection.html">How a circuit demands them</a>
+      <a href="artifacts.html">How the run preserves them</a>
+    </nav>
+
+    <footer>Normative contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS006-ingestion-anchors-views.md">DS006</a>, and <a href="specsLoader.html?spec=DS007-observations-identity-time.md">DS007</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

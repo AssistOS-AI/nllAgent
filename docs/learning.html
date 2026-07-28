@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Workflow — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Learning workflow</div>
+    <p class="kicker">Compile policy into a candidate, then prove it independently</p>
+    <h1>Learning with Coding Agents</h1>
+    <p class="lead">Learning in nllAgent is not online self-modification. It is a controlled build process in which a Coding Agent turns rulebooks, calibration documents, benchmark evidence, and production issues into reviewable candidate artifacts. The active release remains frozen throughout.</p>
+    <p>This page is the operational tutorial. Read <a href="learning-architecture.html">Architecture of learning</a> first for the chronological build, audit, qualification, and activation path.</p>
+
+    <h2 id="why-learning">Why learning is a separate workflow</h2>
+    <p>A natural rule rarely specifies every operational detail. “Do not enter another character’s mind” assumes a definition of scene, focalizer, direct mental access, reported speech, and allowed transitions. Reviewer corrections reveal which assumption was wrong: extraction, identity, scope, exception, policy, severity, or explanation. The system needs an agent capable of editing several coordinated artifacts, not merely a prompt that produces another verdict.</p>
+    <p>That flexibility is dangerous inside production. A document could contain instruction-like text, a reviewer could suggest a local exception, or a model could choose a convenient interpretation. nllAgent therefore gives the Coding Agent write access only to a disposable learning workspace. Production does not import those skills and cannot mutate the qualified theory.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  INPUT[Rules + examples + issues] --> STAGE[Coding Agent staging]
+  STAGE --> AUDIT{Host audit}
+  AUDIT -->|safe| REL[Independent gate → inactive release]
+  AUDIT -->|unsafe| REJECT[Rejected learning run]
+    </pre>
+    <p class="diagram-caption"><strong>Learning produces a candidate, never a live rule.</strong> The Coding Agent may propose coordinated changes. Host-side audit, benchmark qualification, and explicit activation remain independent gates.</p>
+
+    <h2 id="inputs">What a learning job is allowed to learn from</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Input</th><th>Contribution</th><th>Authority limit</th></tr></thead>
+      <tbody>
+        <tr><td>Rulebook Markdown</td><td>Definitions, triggers, exceptions, priorities, examples, and policy language.</td><td>Only declared authority sources define reusable rules.</td></tr>
+        <tr><td>Calibration documents</td><td>Representative natural language, structures, long-range dependencies, and domain vocabulary.</td><td>Examples illustrate a rule; they do not silently override authority.</td></tr>
+        <tr><td>Existing benchmark cases</td><td>Operational meaning and non-regression obligations already accepted by the project.</td><td>Expected outcomes cannot be rewritten merely to make a candidate pass.</td></tr>
+        <tr><td>Production issues</td><td>Concrete compatibility, materialization, verifier, budget, or runtime failures.</td><td>Document text is untrusted evidence, not instruction or policy.</td></tr>
+        <tr><td>Reviewer feedback</td><td>Scoped corrections to observations, identity, rules, exceptions, severity, or explanations.</td><td>Reviewer role and provenance determine what the correction may authorize.</td></tr>
+        <tr><td>Active release and platform contracts</td><td>Baseline theory, supported DSL grammar, operators, verifiers, and qualification constraints.</td><td>Trusted runtime and gate policy are read-only to learning.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="learning-command">Start a learning run</h2>
+    <pre><code>nllagent learn \
+  --agent editorial \
+  --rules ./rulebook
+
+# Ask the trusted parent to attempt qualification after safe promotion
+nllagent learn \
+  --agent editorial \
+  --rules ./rulebook \
+  --qualify</code></pre>
+    <p>The command locks the named agent, snapshots all rule Markdown files, selected issues and context, the active release, and the current authoring surface, then creates <code>learning-runs/&lt;learning-id&gt;/workspace/</code>. The configured Coding Agent process runs there with a bounded timeout and explicit final-output schema. The current reference adapter invokes OpenAI Codex, so <code>--codex-bin</code> is the shipped executable override; the learning contract itself is generic.</p>
+    <p><code>--qualify</code> does not let the Coding Agent approve its own work. It only authorizes the parent process to call the trusted qualification routine after the Coding Agent exits, its final object validates, and the filesystem audit permits promotion. Learning never activates the resulting release.</p>
+
+    <h2 id="workspace">Inside the staging workspace</h2>
+    <p>The workspace is a disposable copy, not a symlink to the live authoring tree. It contains the learning task, read-only snapshots and context, candidate-editable directories, the explicit result schema, and links to only the five learning skills. Process events, final output, diagnostics, and before/after inventories remain under the learning run for audit.</p>
+    <p>The Coding Agent receives a concrete contract: working directory, allowed skill names, allowed write roots, output schema, timeout, environment, non-interactive process behavior, and diagnostic locations. Different Coding Agent products may implement that boundary differently. Release semantics do not depend on vendor-specific flags.</p>
+
+    <h2 id="skills">The five learning skills form one compilation pipeline</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Skill</th><th>Main question</th><th>Principal artifacts</th></tr></thead>
+      <tbody>
+        <tr><td><code>nll-scope-project</code></td><td>What is the intended use, authority, document population, finding contract, and automation limit?</td><td>Scope contract, authority map, declared gaps.</td></tr>
+        <tr><td><code>nll-compile-theory</code></td><td>What is observable in LongTextJS and what must the reusable CircuitJS theory derive?</td><td>Rule cards, schemas, extraction profiles, circuits, witness and compatibility declarations.</td></tr>
+        <tr><td><code>nll-build-benchmark</code></td><td>Which natural positive, negative, exception, ambiguity, coverage, and long-range cases define the intended behavior?</td><td>Microcases, suites, expected layers, coverage matrix, counterexamples.</td></tr>
+        <tr><td><code>nll-learn-from-issues</code></td><td>Which layer caused each real failure and what is the smallest general repair?</td><td>Distilled cases, patches, new limits, regression evidence.</td></tr>
+        <tr><td><code>nll-qualify-release</code></td><td>Is the candidate internally complete and ready for the host’s trusted qualification command?</td><td>Candidate manifest, impact explanation, qualification request.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Skills guide the Coding Agent but are not trusted evaluators. Their output still passes parsers, schemas, circuit compilation, registry linking, benchmark execution, and host policy. The learning catalog is intentionally separate from repository-maintenance skills and from the narrow production observation and optional CNL-realization skills.</p>
+
+    <h2 id="editable-boundary">What may be changed</h2>
+    <p>Learning can promote changed regular files only under the agent’s authoring roots: rule cards or authority-derived documentation, observation schemas, extraction profiles, restricted circuits, benchmark cases and suites, proposals, and candidate packages. The runner rejects deletions, symbolic links, writes outside the whitelist, or an absent, unreadable, or schema-invalid final result.</p>
+    <p>The Coding Agent cannot change runtime source, verifier implementations, operator registries, qualification policy, previously qualified releases, production run history, or the active pointer. When a rule needs a new trusted capability, learning writes a proposal instead of hiding code inside a circuit.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  EDIT[Editable candidate files] --> DIFF[Before/after inventory]
+  DIFF --> POLICY{Whitelist + no delete/symlink}
+  POLICY -->|pass| PROMOTE[Promote regular files]
+  POLICY -->|fail| REJECT[Reject entire learning job]
+    </pre>
+    <p class="diagram-caption"><strong>Promotion is an all-or-nothing policy decision.</strong> A plausible final message cannot excuse a forbidden filesystem change. Unsafe staging output never reaches the live authoring surface.</p>
+
+    <h2 id="issue-to-release">Walkthrough: from a false positive to a release</h2>
+    <p>Suppose an editorial rule reports the phrase “de fapt” inside dialogue even though the guide restricts it only in narration.</p>
+    <ol>
+      <li><strong>Feedback captures the disputed layer.</strong> The reviewer attaches a false-positive or scope correction to the run and points to the dialogue passage.</li>
+      <li><strong>Learning snapshots the case.</strong> The issue, source evidence, current circuit, relevant extraction profile, and existing tests enter a new staging workspace.</li>
+      <li><strong>The failure is distilled.</strong> The Coding Agent creates a small natural positive case in narration, a close negative case in dialogue, and—if needed—a reported-speech boundary case. It does not reduce them to preapproved facts.</li>
+      <li><strong>The correct layer is patched.</strong> If discourse mode was extracted correctly, the CircuitJS scope filter changes. If dialogue was misclassified, the extraction profile and expected observation layer change instead. The distinction is visible.</li>
+      <li><strong>Local candidate tests run.</strong> Existing positive cases must remain valid while the new negative case stops producing a finding.</li>
+      <li><strong>The host audits and promotes.</strong> Only allowed candidate files leave staging.</li>
+      <li><strong>Qualification freezes and tests the bytes.</strong> Observation alignment, circuit compilation, natural suites, and immutable candidate digests must pass. A semantic diff records the affected rule and behavior.</li>
+      <li><strong>An operator activates explicitly.</strong> The old run remains unchanged. A new production run under the new release demonstrates the repaired behavior.</li>
+    </ol>
+
+    <h2 id="qualification">What trusted qualification checks</h2>
+    <p>Qualification loads the candidate independently of the Coding Agent process. It validates manifests and file containment, parses restricted circuits, links exact operator and verifier versions, derives each circuit’s critical observation contract, confirms that structural producers, extraction profiles, or approved adapters can supply those ports, snapshots the benchmark and candidate, runs all declared suites, and checks that neither snapshot changed during execution.</p>
+    <p>On success it copies an immutable release containing theory, extraction, compatibility, benchmark snapshot and results, semantic diff, impact map, observation contracts, alignment report, and digests. On failure it produces diagnostics and leaves production unchanged. <a href="benchmark.html#qualification">Benchmarks and qualification</a> explains the gate and current limitations.</p>
+
+    <h2 id="multiple-agents">Working with several specialized agents</h2>
+    <p>The runtime supports many named nllAgent workspaces and therefore many independent Coding Agent learning jobs. An editorial agent can evolve focalization and continuity circuits while a compliance agent evolves obligations and deadline benchmarks. Their workspaces, locks, authority, candidates, hidden project knowledge, releases, and activation pointers remain separate. The shared runtime contributes only stable DSLs, registries, storage formats, and qualification behavior.</p>
+    <p>This separation is preferable to a single agent with a giant mixed rulebook. It keeps ontology contracts small, benchmark failures attributable, release semantics reviewable, and domain authority explicit. Shared patterns should become reviewed schemas, operators, or templates—not copy-by-conversation between active production theories.</p>
+
+    <h2 id="when-not-to-learn">When not to open learning</h2>
+    <ul>
+      <li>When the missing input is an operational source, calendar, credential, or complete register that can simply be supplied.</li>
+      <li>When a one-off document is outside intended use and the project does not want to support that document family.</li>
+      <li>When feedback is vague and cannot identify an anchor, observation, rule, exception, severity, or expected behavior.</li>
+      <li>When a policy owner has not resolved a genuinely contested rule; the correct output may remain review-required.</li>
+      <li>When the change requires a new trusted operator or verifier; learning should produce a proposal and tests, not bypass the platform boundary.</li>
+    </ul>
+
+    <footer>Normative learning workflow: <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>. Benchmark and gate contracts: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

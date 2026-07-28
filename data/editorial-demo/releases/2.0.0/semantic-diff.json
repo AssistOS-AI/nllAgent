@@ -1,0 +1,24 @@
+{
+  "circuits": [
+    {
+      "afterDigest": "sha256:3c9fefd2e432151540dc662f64a708918f815fdafc6b630276d881e18825a590",
+      "beforeDigest": null,
+      "change": "added",
+      "id": "editorial.parca-frequency"
+    },
+    {
+      "afterDigest": "sha256:773289e6c752ce27d120585444dd34da4de0e67e79ab7a18ef96165b1e2edd55",
+      "beforeDigest": "sha256:fbe09e0f6c9fb5670f3b49f493fcfed8e1b77a4e5d73c1e767fff07f5244b8e9",
+      "change": "changed",
+      "id": "editorial.weak-phrase"
+    }
+  ],
+  "compatibilityChanged": true,
+  "from": "1.0.0",
+  "kind": "SemanticDiff",
+  "knownLimitations": [
+    "Dialogue scope is recognized by the released em-dash or en-dash paragraph-prefix convention."
+  ],
+  "schemaVersion": 1,
+  "to": "2.0.0"
+}

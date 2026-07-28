@@ -1,0 +1,7 @@
+{
+  "kind": "NaturalLinterBenchmarkCase",
+  "rule": "ED-001",
+  "family": "negative",
+  "validationStatus": "mechanically-derived",
+  "reportComparison": "structured"
+}

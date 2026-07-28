@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Two DSLs — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Why two DSLs</div>
+    <p class="kicker">A document world and a reusable theory</p>
+    <h1>Two DSLs, two CNL output profiles</h1>
+    <p class="lead">LongTextJS and CircuitJS exist because the concrete source and the reusable method are different programs. They can be combined retrospectively to produce a CNL audit or prospectively to produce a CNL document specification.</p>
+
+    <h2 id="split">The split in one example</h2>
+    <p>A manuscript says that Mara left her phone in the car. Seven chapters later, it says that she used the phone in a hotel room. The manuscript supplies passages, events, identity candidates, order, and uncertainty. It does not itself define whether an omitted retrieval is a continuity error.</p>
+    <p>The editorial rulebook supplies the continuity policy: which actions change possession or location, how state persists, which narrative jumps count as explanations, what intervening events must be searched, and what evidence is required before publishing a finding. Changing that policy can change the verdict while the manuscript remains byte-for-byte identical.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  TEXT[Manuscript passages] --> OBS[LongTextJS events + anchors]
+  THEORY[Editorial rule → CircuitJS state policy] --> CONTRACT{Required observations available?}
+  OBS --> CONTRACT{Required observations available?}
+  CONTRACT --> FIND[Continuity finding or explicit unknown]
+    </pre>
+    <p class="diagram-caption"><strong>Observation is not judgment.</strong> The document program supplies addressable premises. The theory program supplies the reusable method. The contract decides whether the method has enough premises to run.</p>
+
+    <h2 id="placement-test">A practical placement test</h2>
+    <p>Ask: <strong>could this value change because the rulebook changed, while the source document remained identical?</strong></p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Statement</th><th>Belongs to</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>“The phrase ‘de fapt’ occurs three times in this paragraph.”</td><td>LongTextJS</td><td>It is an anchored observation about this source revision.</td></tr>
+        <tr><td>“More than two occurrences are excessive in narration.”</td><td>CircuitJS</td><td>The threshold and scope come from reusable policy.</td></tr>
+        <tr><td>“The notification timestamp is 3 March at 10:12 +02:00.”</td><td>LongTextJS</td><td>It records a source event, precision, and provenance.</td></tr>
+        <tr><td>“The notification satisfied the 72-hour duty after applying the outage exception.”</td><td>CircuitJS</td><td>It depends on a norm, calendar, priority, and exception logic.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="concept-grid">
+      <section class="concept-card" id="longtextjs">
+        <h2>LongTextJS</h2>
+        <p>Created for one source revision and task. It preserves canonical text, structure, anchors, views, typed observations, identities, worlds, status, coverage, capabilities, gaps, and diagnostics. It is JSON-compatible data.</p>
+        <p><a href="longtextjs.html">Open the document-side tutorial →</a></p>
+      </section>
+      <section class="concept-card" id="circuitjs">
+        <h2>CircuitJS</h2>
+        <p>Created from authority and calibration, then frozen in a release. It declares typed ports, graph nodes, registered operators, budgets, error routes, verifiers, explanation policy, and finding contracts. It is a restricted declarative graph.</p>
+        <p><a href="circuitjs.html">Open the theory-side tutorial →</a></p>
+      </section>
+    </div>
+
+    <h2 id="not-universal">Why not use one universal representation?</h2>
+    <p>A scene, a legal obligation, and a pressure measurement do not share the same truth conditions, scope, exceptions, or verifier. A giant ontology would move those differences into opaque payloads and operators. nllAgent standardizes a smaller common boundary—type, source, anchor, scope, status, coverage, port, witness, and guarantee—while domain packages define the meanings they actually need.</p>
+    <p>The languages therefore do not need equal ontologies. LongTextJS may preserve observations unused by the current theory. CircuitJS may derive concepts, such as <code>continuityViolation</code>, that should never be extracted directly from source text. They need agreement only at the input ports that can influence a finding.</p>
+
+    <h2 id="cnl">Where CNL fits without becoming a third competing world</h2>
+    <p>CNL is an output family, not a third executable DSL. <code>CNL/Audit-1</code> states what validation circuits established about one existing source. <code>CNL/Plan-1</code> states what a future document should contain after planning circuits apply the same released knowledge to one idea. The plan records a rule-to-location witness, but it neither copies nor redefines the rules. LongTextJS remains the source world; CircuitJS remains executable judgment.</p>
+
+    <h2 id="why-it-works">Why the split remains executable</h2>
+    <p>The CircuitJS compiler derives an observation contract from actual graph dependencies. Qualification links every critical port to a structural producer, extraction profile, or approved adapter. Production checks the concrete LongTextJS materialization against that contract. This prevents two independently named vocabularies from merely looking compatible.</p>
+    <p>Continue to <a href="connection.html">The observation contract</a> for the exact static and runtime checks, then follow either <a href="verification.html">CNL audit mode</a>, <a href="generation.html">CNL specification mode</a>, or <a href="learning-architecture.html">one learning cycle</a>.</p>
+
+    <footer>Normative language contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> and <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

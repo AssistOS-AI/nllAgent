@@ -1,0 +1,7 @@
+{
+  "kind": "NaturalLinterBenchmarkCase",
+  "rule": "ED-002",
+  "family": "exception",
+  "validationStatus": "human-confirmed",
+  "reportComparison": "structured"
+}

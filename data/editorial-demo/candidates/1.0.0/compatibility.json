@@ -1,0 +1,14 @@
+{
+  "formats": [
+    "text/markdown"
+  ],
+  "id": "editorial-demo-markdown@1",
+  "languages": [
+    "ro"
+  ],
+  "maxCodePoints": 1000000,
+  "producers": [
+    "markdown-structural@1"
+  ],
+  "schemaVersion": 1
+}

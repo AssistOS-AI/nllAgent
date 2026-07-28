@@ -1,0 +1,44 @@
+{
+  "alignment": {
+    "ports": 3,
+    "status": "aligned"
+  },
+  "benchmark": {
+    "failed": 0,
+    "families": {
+      "adversarial": 1,
+      "boundary": 1,
+      "exception": 3,
+      "negative": 2,
+      "positive": 2,
+      "scope": 1
+    },
+    "passed": 10,
+    "policyFailures": [],
+    "rules": {
+      "ED-001": 5,
+      "ED-002": 5
+    },
+    "total": 10
+  },
+  "checks": [
+    "manifest",
+    "circuit-static-analysis",
+    "operator-linking",
+    "verification-dominance",
+    "compatibility-profile",
+    "observation-contract-producer-alignment",
+    "planning-circuit-and-cnl-authority-linking",
+    "available-agent-benchmarks",
+    "benchmark-snapshot-stability",
+    "candidate-snapshot-stability",
+    "copied-snapshot-integrity",
+    "semantic-diff-and-impact-map",
+    "release-file-digests"
+  ],
+  "kind": "QualificationResult",
+  "manifestDigest": "sha256:cb1a1427a0cf44dc349640621bd7f1ecc14277f9f3c978fe511c1d0cc4152614",
+  "release": "3.0.0",
+  "schemaVersion": 1,
+  "status": "qualified"
+}

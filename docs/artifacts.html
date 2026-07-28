@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artifacts and Statuses — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Artifacts and statuses</div>
+    <p class="kicker">The report is a view; the artifact graph is the evidence</p>
+    <h1>Persistent identity, provenance, and run results</h1>
+    <p class="lead">nllAgent stores two canonical CNL products. A validation run owns <code>CNLAuditReport</code>; a planning transaction owns <code>CNLGenerationPlan</code>. Markdown files are human-readable views, while the structured artifacts preserve reproducibility and contestability.</p>
+
+    <h2 id="identities">Four identities prevent silent history changes</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Identity</th><th>Lifetime</th><th>What remains fixed</th></tr></thead>
+      <tbody>
+        <tr><td><strong>NaturalLanguageLinterProject / named nllAgent</strong></td><td>Long-lived</td><td>Intended use, authority, agent-local authoring and benchmark lineage, release history, and operational policy.</td></tr>
+        <tr><td><strong>Candidate</strong></td><td>Until qualified or rejected</td><td>A proposed package version assembled from the current authoring surface.</td></tr>
+        <tr><td><strong>NaturalLanguageLinterRelease</strong></td><td>Immutable after qualification</td><td>The exact schemas, profiles, circuits, compatibility declarations, benchmark snapshot and results, verifier/operator references, and digests approved together.</td></tr>
+        <tr><td><strong>NaturalLanguageLinterRun</strong></td><td>Immutable historical execution</td><td>Input source, task, release, backend selection, accepted captures, trace, findings, limits, issues, and terminal status.</td></tr>
+      </tbody>
+    </table></div>
+    <p>A new release does not rewrite an old run. Rerunning the same document under a newer theory creates a second run that can be compared with the first. This is what makes policy changes, extractor repairs, and new capabilities auditable rather than retroactive.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  AGENT[Named agent] --> REL[Qualified release]
+  REL --> RUN[Document run]
+  RUN --> EVID[Findings + reviewer feedback]
+  RUN --> ISSUE[Issues + learning needs]
+    </pre>
+    <p class="diagram-caption"><strong>Lineage flows forward.</strong> Evidence from a run may motivate a later candidate, but it never edits the release or run that produced it.</p>
+
+    <h2 id="run-directory">Inside a production run directory</h2>
+    <p>A successful or controlled stopped invocation creates <code>data/&lt;agent&gt;/runs/&lt;run-id&gt;/</code>. The precise set can grow as optional features are used, but the core artifacts have stable roles:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Artifact</th><th>Question it answers</th></tr></thead>
+      <tbody>
+        <tr><td><code>run.json</code></td><td>Which agent, release, source digest, command context, backend, state, finding count, and issue identifiers define this run?</td></tr>
+        <tr><td><code>input.md</code></td><td>What exact UTF-8 Markdown did the runtime analyze?</td></tr>
+        <tr><td><code>source-package.json</code></td><td>How was the source divided into canonical blocks and addressed?</td></tr>
+        <tr><td><code>longtext.json</code></td><td>Which observations, views, identities, capabilities, coverage statements, gaps, and task entered analysis?</td></tr>
+        <tr><td><code>compatibility.json</code></td><td>Which circuit and port obligations were satisfied, limited, or blocked, and by which producer evidence?</td></tr>
+        <tr><td><code>coverage.json</code></td><td>Which source, scope, type, and method domains were inspected, and which gaps remain?</td></tr>
+        <tr><td><code>circuit-plan.json</code></td><td>Which circuits were active or blocked, and how were their nodes scheduled?</td></tr>
+        <tr><td><code>semantic-trace.json</code></td><td>Which typed node inputs, outputs, dependencies, and dynamic observation requests produced the result?</td></tr>
+        <tr><td><code>findings.json</code></td><td>Which structured findings passed publication requirements?</td></tr>
+        <tr><td><code>cnl-audit.json</code></td><td>What canonical <code>CNL/Audit-1</code> object binds status, compatibility, coverage, audit observations, findings, conflicts, limits, and issue?</td></tr>
+        <tr><td><code>verifier-results.json</code></td><td>Which witnesses were accepted or rejected, by what checker, for which properties?</td></tr>
+        <tr><td><code>conflicts.json</code></td><td>Which verified results share a rule, subject, and scope but have incompatible verdicts?</td></tr>
+        <tr><td><code>model-captures.json</code></td><td>Which Achilles or Coding Agent requests and responses supplied model-assisted evidence?</td></tr>
+        <tr><td><code>translation/call-NNNN/</code></td><td>For the reference Coding Agent backend, what prompt, schema, result, event stream, and diagnostics belonged to one call?</td></tr>
+        <tr><td><code>report.md</code></td><td>How were the structured status, limits, findings, evidence, and remediation rendered for a user?</td></tr>
+      </tbody>
+    </table></div>
+    <p>The requested <code>--output</code> file is a copy of <code>report.md</code>, a deterministic view of <code>cnl-audit.json</code>. The JSON is the canonical audit product; the external Markdown path is a delivery convenience.</p>
+
+    <h2 id="generation-directory">Inside a CNL planning transaction</h2>
+    <p><code>data/&lt;agent&gt;/planning-runs/&lt;id&gt;/</code> stores <code>planning.json</code>, the original <code>idea.md</code>, its LongTextJS program, canonical <code>CNL/Plan-1</code> in <code>cnl-plan.json</code>, rendered <code>plan.cnl.md</code>, planning compatibility and trace files, and any semantic-observation model captures. The plan contains its mechanically checked rule-to-plan witness. Optional realization adds <code>realization/document.md</code>, realization captures, and <code>realization/attempts/attempt-NN/</code> directories with complete nested CNL audit evidence.</p>
+    <p>The external plan and optional document paths are delivery copies; the planning directory is the lineage. The final record identifies the plan and, when relevant, which realization attempt succeeded or why the last candidate needs review. See <a href="generation.html#artifacts">the worked artifact tree</a>.</p>
+
+    <h2 id="finding">Anatomy of a finding</h2>
+    <p>A finding is not just a message and location. It retains the rule identity and normative basis, verdict and severity, primary and supporting anchors, premise provenance, witness, verifier decision, guarantee, explanation envelope, remediation, limitations, circuit and release identity, and run scope. Those fields allow several different disputes:</p>
+    <ul>
+      <li>“The quotation is not the passage the rule should inspect” contests the anchor or view.</li>
+      <li>“Those two mentions are different phones” contests identity.</li>
+      <li>“Dialogue is exempt” contests circuit scope or exception priority.</li>
+      <li>“The supplied log was incomplete” contests coverage.</li>
+      <li>“This policy source has lower authority” contests the theory or operational context.</li>
+      <li>“The explanation says more than the witness proves” contests rendering or guarantee propagation.</li>
+    </ul>
+    <p>Feedback records the object being contested, rather than appending an unstructured exception to the active release.</p>
+
+    <h2 id="terminal-statuses">Terminal statuses are valid outputs</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Status</th><th>Meaning</th><th>CLI exit</th></tr></thead>
+      <tbody>
+        <tr><td><code>reported</code></td><td>All declared preconditions for the active findings were satisfied. Findings can still make the policy result blocking.</td><td>0, or 2 for blocking findings</td></tr>
+        <tr><td><code>reported-with-limits</code></td><td>The reported circuits and scopes completed, with explicit non-critical compatibility or materialization limits.</td><td>0, or 2 for blocking findings</td></tr>
+        <tr><td><code>stopped-incompatible</code></td><td>A critical language, format, ontology, producer, source, or operational-context obligation is missing.</td><td>3</td></tr>
+        <tr><td><code>stopped-incomplete</code></td><td>Required dynamic materialization or coverage could not be completed.</td><td>4</td></tr>
+        <tr><td><code>stopped-budget</code></td><td>The approved run, model, dynamic-round, operator, or wall-time budget ended before the required analysis completed.</td><td>5</td></tr>
+        <tr><td><code>review-required-conflict</code></td><td>Verified alternatives are incompatible and the release has no authorized rule to collapse them.</td><td>6</td></tr>
+      </tbody>
+    </table></div>
+    <p>Only <code>reported</code> and explicitly scoped <code>reported-with-limits</code> are reports of completed work. None of the stopped states means “no violation.” In CI, keep their exit codes distinct from blocking findings so missing knowledge is not mislabeled as compliance.</p>
+
+    <h2 id="release-directory">What qualification freezes in a release</h2>
+    <p>A qualified release under <code>data/&lt;agent&gt;/releases/&lt;version&gt;/</code> is a closed file set. Its manifest names and digests all shipped files; undeclared additions or modified bytes make loading fail. Depending on the candidate, the snapshot includes circuits, schemas, extraction profiles, compatibility declarations, authority mappings, benchmark cases and results, derived observation contracts, alignment report, semantic diff, impact map, qualification report, and release manifest.</p>
+    <p>The active pointer is stored separately. Activation first loads and validates the release so a stale or altered snapshot cannot become current. Ordinary production resolves the pointer once at run start and does not switch releases mid-execution.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  SNAP[Candidate + benchmark snapshot] --> TEST[Qualification results]
+  TEST -->|pass| PACK[Closed release file set]
+  TEST -->|fail| REVISE[Candidate revision]
+  PACK --> PROD[Activation → new runs]
+    </pre>
+    <p class="diagram-caption"><strong>Qualification freezes; activation selects.</strong> The tested candidate bytes and natural cases travel together into the release. A separate pointer determines which qualified version future runs use.</p>
+
+    <h2 id="issues-feedback">Issues and feedback are different evidence</h2>
+    <p>An issue is generated by the runtime when a contract or mechanism fails: incompatibility, incomplete coverage, verifier rejection, benchmark mismatch, operator error, or unexpected runtime failure. It records reproduction context, affected release and circuits, diagnostics, and remediation classes. Feedback is an explicit reviewer statement about a run, observation, finding, severity, or explanation. It carries the reviewer’s message, type, target, and provenance.</p>
+    <p>Learning may snapshot both when authorized. Neither has authority to modify a release directly. A production document that says “ignore this rule” remains source data; even if it causes an issue, it does not become rulebook authority.</p>
+
+    <h2 id="provenance">Provenance and local reproducibility</h2>
+    <p>Canonical serialization and content digests detect accidental changes, close the qualified file set, key caches, and support semantic diffs. They are local consistency mechanisms, not signatures and not proof that a semantic judgment is correct. A release can reproduce which model capture and observation were accepted; evaluating a live model again is a new inference unless the old capture is explicitly replayed.</p>
+    <p>The runtime preserves dependencies from source blocks and operational context to observations, circuit nodes, witnesses, and findings. A changed source, identity, calendar, extraction profile, or theory can invalidate dependent results. When a complete slice cannot be demonstrated, the safe behavior is full recomputation.</p>
+
+    <h2 id="debugging">Debug a run from the outside inward</h2>
+    <ol>
+      <li><strong>Read <code>report.md</code> and <code>run.json</code>.</strong> Confirm agent, release, terminal status, active and blocked circuits, findings, and issue identifiers.</li>
+      <li><strong>For a stopped run, inspect <code>compatibility.json</code> and <code>coverage.json</code>.</strong> Determine which critical type, scope, status, producer, source, or context was missing.</li>
+      <li><strong>For a suspect observation, inspect <code>longtext.json</code>, source anchors, and <code>model-captures.json</code>.</strong> Verify quotation, block, payload, epistemic status, and producer.</li>
+      <li><strong>For a wrong derivation, inspect <code>circuit-plan.json</code> and <code>semantic-trace.json</code>.</strong> Follow the exact nodes and resolved operator versions.</li>
+      <li><strong>For a rejected or overclaimed result, inspect <code>verifier-results.json</code>.</strong> Compare checked properties and diagnostics with the witness and guarantee.</li>
+      <li><strong>Record the correction at the failing layer.</strong> Use feedback for reviewer evidence or preserve the runtime issue for a later learning job.</li>
+    </ol>
+
+    <footer>Normative artifact and provenance contracts: <a href="specsLoader.html?spec=DS003-cli-agent-workspace.md">DS003</a>, <a href="specsLoader.html?spec=DS004-artifacts-releases.md">DS004</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, and <a href="specsLoader.html?spec=DS014-storage-provenance-incremental.md">DS014</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

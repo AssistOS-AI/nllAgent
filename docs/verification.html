@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture of One Verification — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / How they connect / One verification</div>
+    <p class="kicker">Production architecture</p>
+    <h1>A production run, in the order it actually happens</h1>
+    <p class="lead">Audit mode applies one immutable release to one immutable Markdown snapshot. It produces a canonical <code>CNLAuditReport</code> whose observations passed their declared verification path, or a stopped audit that names the missing contract, evidence, budget, or agreement.</p>
+
+    <pre class="mermaid">
+flowchart TB
+  SNAP[Input + active release snapshot] --> LTX[Compile + materialize LongTextJS]
+  LTX --> GATE{Compatibility and coverage}
+  GATE -->|ready| AUDIT[Execute + verify + CNL audit]
+  GATE -->|stopped| AUDIT
+  AUDIT --> RECORD[Persist canonical audit + Markdown view]
+    </pre>
+    <p class="diagram-caption"><strong>The production transaction.</strong> Judgment begins only after the document program satisfies the theory’s input contracts. Both success and refusal are persisted outcomes.</p>
+
+    <h2 id="inputs">The two fixed inputs</h2>
+    <p>A normal command names an agent and input file. The workspace’s active pointer selects a qualified release unless the command specifies an exact release. Before analysis, the runtime validates the Markdown file and named agent, reads the input, verifies the release, creates a run directory, copies <code>input.md</code>, and records the source and release digests in <code>run.json</code>.</p>
+    <pre><code>nllagent run \
+  --agent editorial-demo \
+  --input manuscript.md \
+  --output report.md</code></pre>
+    <p>A release published while this command is running cannot change the run. A rerun with a different release or new model inference is a new transaction.</p>
+
+    <h2 id="steps">The execution path</h2>
+    <ol class="step-list">
+      <li><strong>Create the structural document world.</strong> <code>compileMarkdown()</code> builds the source package, blocks, exact anchors, structural observations, <code>view:whole</code>, task, capabilities, closed-world structural coverage, gaps, and diagnostics. These deterministic objects exist before any model call.</li>
+      <li><strong>Load and compile the released theories.</strong> Each circuit listed by the release is loaded from JSON or restricted <code>.circuit.mjs</code>, normalized to plain data, linked to registered operators and verifiers, statically checked, and compiled. Its external input ports form the observation demand.</li>
+      <li><strong>Materialize only demanded semantic types.</strong> <code>src/runtime/analyzer.mjs</code> unions the circuit input types and selects matching released extraction profiles. The backend selector prefers configured AchillesAgentLib; otherwise <code>auto</code> uses the current Coding Agent reference adapter. Every returned candidate still passes the shared schema and exact-anchor materializer.</li>
+      <li><strong>Evaluate compatibility.</strong> The runtime compares the LongTextJS program with the release profile and each circuit contract. It checks concrete counts, types, accepted statuses, guarantees, producer capabilities, gaps, channels, structures, and coverage. Each circuit becomes ready or blocked; the aggregate becomes compatible, compatible with limits, or incompatible.</li>
+      <li><strong>Execute ready circuits.</strong> The scheduler supplies immutable typed observations to the graph, enforces node and wall-time budgets, invokes only registered capabilities, and preserves node outputs and trace. A circuit may emit a typed <code>NeedObservation</code> when it discovers a bounded missing premise.</li>
+      <li><strong>Perform bounded dynamic materialization.</strong> The analyzer collects those demands, invokes matching released profiles, and reruns the circuit. The default maximum is two dynamic rounds. A critical demand still unresolved at the limit makes the run incomplete; it does not become an absent fact.</li>
+      <li><strong>Verify and publish findings.</strong> Verifier nodes inspect candidate witnesses. Rejections remain in <code>verifier-results.json</code> and can create an issue, but do not become findings. Conflicting verified findings become <code>review-required-conflict</code>.</li>
+      <li><strong>Assemble the CNL audit.</strong> <code>src/report/cnl-audit.mjs</code> converts every published finding into a <code>CNLAuditObservation</code> and binds it to status, release, source digest, compatibility, coverage, conflicts, limitations, and any processing issue. The deterministic renderer derives <code>report.md</code> from this canonical object.</li>
+      <li><strong>Persist the transaction.</strong> The runtime writes the document program, compatibility decision, coverage, circuit plan, trace, findings, conflicts, verifier results, model captures, <code>cnl-audit.json</code>, its Markdown view, terminal status, and any issue.</li>
+    </ol>
+
+    <h2 id="example">Concrete path: the released weak-phrase rule</h2>
+    <p>The input contains “De fapt” in an ordinary paragraph. The released circuit needs <code>document.paragraph@1</code> with <code>extracted</code> status and closed-world coverage. The deterministic Markdown compiler supplies both, so no semantic backend is needed for that port. Compatibility marks the circuit ready.</p>
+    <p>The lexical operator scans all supplied paragraph observations, applies the released term, locale, whole-word, case, scope, and dialogue-prefix policy, and constructs a candidate with its exact anchor. <code>text.exact-match@1</code> rereads the source span. If it accepts, the finding includes <code>ED-001</code>, the source-rule reference, passage, verdict, severity, explanation, remediation, limitation, and verifier result. If the same phrase occurs in a dash-prefixed dialogue paragraph, the released scope convention excludes it before publication.</p>
+
+    <h2 id="semantic-path">Concrete semantic variant: object continuity</h2>
+    <p>The offline integration suite also exercises a long-range path in which a translation backend proposes anchored leave and use events for the same object. A state circuit replays the event policy and may request intervening retrieve, transfer, or replacement events. If the released producer materializes none with adequate scope, the witness records both source events, identity evidence, state history, search domain, and coverage. The verifier checks the replay. The result can be evidence-certified for that replay while still retaining the model-assisted status of the event semantics.</p>
+    <p>If the source cannot establish identity or intervening coverage, the circuit must not report a certified continuity violation. The run becomes limited, incomplete, or conflicted according to which contract failed.</p>
+
+    <h2 id="normative-audit">Concrete normative audit: evidence is incomplete</h2>
+    <p>A legal or policy release can audit an incident notice against precompiled definitions, authority, deadlines, exceptions, and evidence policy. Suppose the source proves the confirmation time but supplies only a partial email export rather than the complete official notification log. LongTextJS records the available evidence and open-world coverage. The circuit may calculate the possible deadline, but it cannot turn “not found in this export” into “notification did not occur.”</p>
+    <p>The resulting <code>CNLAuditObservation</code> can therefore say <code>undetermined</code>, cite the applicable article and supplied record, explain that the closed-world premise is missing, and request the official log. This is a useful legal audit result precisely because it refuses a stronger non-compliance claim than the evidence supports.</p>
+
+    <h2 id="states">Terminal states and exit codes</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Status</th><th>Meaning</th><th>CLI exit</th></tr></thead>
+      <tbody>
+        <tr><td><code>reported</code> / <code>reported-with-limits</code></td><td>The allowed findings and declared limits were rendered. Blocking finding severities use a separate failure exit.</td><td>0, or 2 with blocking findings</td></tr>
+        <tr><td><code>stopped-incompatible</code></td><td>A critical observation contract cannot be satisfied for this document.</td><td>3</td></tr>
+        <tr><td><code>stopped-incomplete</code></td><td>A critical dynamic demand or required coverage remains unresolved.</td><td>4</td></tr>
+        <tr><td><code>stopped-budget</code></td><td>The run exhausted an approved resource bound.</td><td>5</td></tr>
+        <tr><td><code>review-required-conflict</code></td><td>Incompatible verified findings share the same rule, subject, and scope.</td><td>6</td></tr>
+        <tr><td><code>runtime-fault</code></td><td>An unexpected typed runtime failure ended the transaction.</td><td>70</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="implementation">Code and artifact map</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Phase</th><th>Implementation</th><th>Primary artifact</th></tr></thead>
+      <tbody>
+        <tr><td>Snapshot and transaction</td><td><code>src/runtime/production-run.mjs</code></td><td><code>run.json</code>, <code>input.md</code></td></tr>
+        <tr><td>Document compilation and orchestration</td><td><code>src/runtime/analyzer.mjs</code>, <code>src/longtext/</code></td><td><code>longtext.json</code>, <code>coverage.json</code></td></tr>
+        <tr><td>Translation selection</td><td><code>src/model/translation-backends.mjs</code></td><td><code>model-captures.json</code>, <code>translation/</code></td></tr>
+        <tr><td>Contract decision</td><td><code>src/runtime/compatibility.mjs</code></td><td><code>compatibility.json</code></td></tr>
+        <tr><td>Graph execution</td><td><code>src/runtime/scheduler.mjs</code></td><td><code>circuit-plan.json</code>, <code>semantic-trace.json</code></td></tr>
+        <tr><td>Publication</td><td>verifier registry, <code>src/report/cnl-audit.mjs</code>, and <code>src/report/markdown-renderer.mjs</code></td><td><code>verifier-results.json</code>, <code>findings.json</code>, <code>cnl-audit.json</code>, <code>report.md</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="callout"><strong>Why the run is inspectable:</strong> the source revision, document program, theory version, compatibility obligations, model captures, graph outputs, verifier decisions, and report are separate artifacts. A reviewer can dispute the layer that is wrong instead of sending a vague correction to one opaque response.</div>
+
+    <nav class="page-nav" aria-label="Verification reading path">
+      <strong>Inspect one layer more deeply</strong>
+      <a href="longtextjs.html">Document compilation</a>
+      <a href="connection.html">Compatibility contract</a>
+      <a href="operators.html">Execution and verification</a>
+      <a href="artifacts.html">Persisted evidence</a>
+    </nav>
+
+    <footer>Normative production contracts: <a href="specsLoader.html?spec=DS003-cli-agent-workspace.md">DS003</a>, <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, and <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>.</footer>
+  </main>
+</div>
+</body>
+</html>
