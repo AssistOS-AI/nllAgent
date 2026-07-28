@@ -1,7 +1,7 @@
 {
-  "defaultLanguage": "ro",
-  "description": "Executable Romanian editorial agent for validation and circuit-produced CNL generation plans.",
-  "intendedUse": "Review Romanian Markdown prose or compile a prose idea into a CNL generation plan under the released editorial rules.",
+  "defaultLanguage": "en",
+  "description": "Executable English editorial agent for validation and circuit-produced CNL generation plans.",
+  "intendedUse": "Review English Markdown prose or compile a prose idea into a CNL generation plan under the published editorial rules.",
   "kind": "NaturalLanguageLinterProject",
   "learning": {
     "selectedIssueStatuses": [
@@ -11,8 +11,8 @@
   },
   "name": "editorial-demo",
   "requiredCircuits": [
-    "editorial.weak-phrase@3.0.0",
-    "editorial.parca-frequency@3.0.0"
+    "editorial.weak-phrase@0.1.0",
+    "editorial.perhaps-frequency@0.1.0"
   ],
   "retention": {
     "issues": "retain",

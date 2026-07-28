@@ -41,16 +41,16 @@ test('planning produces a useful CNL artifact without invoking any text-generati
   const { root, dataRoot } = await workspace('nllagent-planning-');
   const outputPath = join(root, 'plan.cnl.md');
   const result = await executeCnlPlanningRun({
-    dataRoot, agentName: 'editorial-demo', releaseVersion: '3.1.0',
+    dataRoot, agentName: 'editorial-demo', releaseVersion: '0.1.0',
     inputPath: ideaPath, outputPath,
     translation: { backend: 'none', repoRoot: resolve('.') }
   });
   assert.equal(result.status, 'planned');
   assert.equal(result.realization, null);
   const plan = await readFile(outputPath, 'utf8');
-  assert.match(plan, /Mara returning to an empty railway station/u);
+  assert.match(plan, /Alice returning to an empty railway station/u);
   assert.match(plan, /## Content sequence/u);
-  assert.match(plan, /editorial\.scene-cnl-plan@3\.1\.0/u);
+  assert.match(plan, /editorial\.scene-cnl-plan@0\.1\.0/u);
   assert.match(plan, /ED-001: realizationGuidance:3, realizationGuidance:5/u);
   assert.doesNotMatch(plan, /CNLConstraint|MUST-NOT|modality/u);
   const runRoot = join(dataRoot, 'editorial-demo', 'planning-runs', result.planningRun);
@@ -63,11 +63,11 @@ test('optional realization uses the CNL plan and validation circuits for bounded
   const outputPath = join(root, 'plan.cnl.md');
   const realizationOutputPath = join(root, 'draft.md');
   const model = gatewayReturning([
-    'De fapt, gara părea parcă goală, parcă uitată, parcă stinsă.',
-    'Gara rămăsese goală sub lumina serii. Mara ascultă ecoul pașilor.\n\n— Ultimul tren a plecat, spuse impiegatul.'
+    'In fact, the station seemed perhaps empty, perhaps forgotten, perhaps extinguished.',
+    'The station remained empty in the evening light. Alice listened to her footsteps echo.\n\n— The final train has left, said the attendant.'
   ]);
   const result = await executeCnlPlanningRun({
-    dataRoot, agentName: 'editorial-demo', releaseVersion: '3.1.0', inputPath: ideaPath,
+    dataRoot, agentName: 'editorial-demo', releaseVersion: '0.1.0', inputPath: ideaPath,
     outputPath, realizeOutputPath: realizationOutputPath, maximumRevisions: 2,
     modelGateway: model.gateway
   });
@@ -76,16 +76,16 @@ test('optional realization uses the CNL plan and validation circuits for bounded
   assert.equal(result.findings, 0);
   assert.deepEqual(model.calls.map((call) => call.taskRole), ['realization', 'revision']);
   assert.match(model.calls[0].prompt, /CNL GENERATION PLAN/u);
-  assert.doesNotMatch(await readFile(realizationOutputPath, 'utf8'), /De fapt/iu);
+  assert.doesNotMatch(await readFile(realizationOutputPath, 'utf8'), /In fact/iu);
   const runRoot = join(dataRoot, 'editorial-demo', 'planning-runs', result.planningRun);
   assert.ok((await stat(join(runRoot, 'realization', 'attempts', 'attempt-01', 'validation', 'findings.json'))).isFile());
 });
 
 test('optional realization exits 2 and preserves the final candidate after its revision budget', async () => {
   const { root, dataRoot } = await workspace('nllagent-realization-exhausted-');
-  const model = gatewayReturning(['De fapt, peronul părea parcă gol, parcă rece, parcă uitat.']);
+  const model = gatewayReturning(['In fact, the platform seemed perhaps empty, perhaps cold, perhaps forgotten.']);
   const result = await executeCnlPlanningRun({
-    dataRoot, agentName: 'editorial-demo', releaseVersion: '3.1.0', inputPath: ideaPath,
+    dataRoot, agentName: 'editorial-demo', releaseVersion: '0.1.0', inputPath: ideaPath,
     outputPath: join(root, 'plan.cnl.md'), realizeOutputPath: join(root, 'draft.md'),
     maximumRevisions: 0, modelGateway: model.gateway
   });
@@ -100,7 +100,7 @@ test('optional realization preserves a validation stopped state', async () => {
   const { root, dataRoot } = await workspace('nllagent-realization-stopped-');
   const model = gatewayReturning(['Text\u0000invalid.']);
   const result = await executeCnlPlanningRun({
-    dataRoot, agentName: 'editorial-demo', releaseVersion: '3.1.0', inputPath: ideaPath,
+    dataRoot, agentName: 'editorial-demo', releaseVersion: '0.1.0', inputPath: ideaPath,
     outputPath: join(root, 'plan.cnl.md'), realizeOutputPath: join(root, 'draft.md'),
     maximumRevisions: 2, modelGateway: model.gateway
   });
@@ -112,7 +112,7 @@ test('optional realization preserves a validation stopped state', async () => {
 test('only optional realization requires a model backend', async () => {
   const { root, dataRoot } = await workspace('nllagent-realization-no-backend-');
   await assert.rejects(() => executeCnlPlanningRun({
-    dataRoot, agentName: 'editorial-demo', releaseVersion: '3.1.0', inputPath: ideaPath,
+    dataRoot, agentName: 'editorial-demo', releaseVersion: '0.1.0', inputPath: ideaPath,
     outputPath: join(root, 'plan.cnl.md'), realizeOutputPath: join(root, 'draft.md'),
     translation: { backend: 'none', repoRoot: resolve('.') }
   }), (error) => error.code === 'realization-backend-required' && Boolean(error.details.issue));

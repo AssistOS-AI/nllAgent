@@ -28,7 +28,7 @@ test('CLI turns one Markdown file into a persisted Markdown report', async () =>
   const report = await readFile(output, 'utf8');
   assert.match(report, /mechanically-certified/u);
   assert.match(report, /^# CNL\/Audit-1 audit report/mu);
-  assert.match(report, /> De fapt/u);
+  assert.match(report, /> In fact/u);
   const result = JSON.parse(stdout.read());
   assert.equal(result.findings, 1);
   const runRoot = join(dataRoot, 'editorial-demo', 'runs', result.run.id);
@@ -79,7 +79,7 @@ test('CLI plan produces CNL without a model and optionally realizes it', async (
   ), 'utf8'));
   assert.equal(planning.kind, 'NaturalLanguageLinterPlanningRun');
   assert.match(await readFile(output, 'utf8'), /CNL\/Plan-1 generation specification/u);
-  assert.match(await readFile(output, 'utf8'), /Mara/u);
+  assert.match(await readFile(output, 'utf8'), /Alice/u);
   assert.equal(result.realization, null);
 });
 
@@ -100,7 +100,7 @@ test('CLI realizes a CNL plan only when --realize-output is requested', async ()
     stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: root, repoRoot: resolve('.'),
     processRunner: async (command, args) => {
       await writeJson(args[args.indexOf('-o') + 1], {
-        document: 'Mara ajunse pe peron sub lumina serii.\n\n— Ultimul tren a plecat, spuse impiegatul.'
+        document: 'Alice reached the platform in the evening light.\n\n— The final train has left, said the attendant.'
       });
       return { code: 0, signal: null, stdout: '', stderr: '' };
     }
@@ -109,7 +109,7 @@ test('CLI realizes a CNL plan only when --realize-output is requested', async ()
   const result = JSON.parse(stdout.read());
   assert.equal(result.status, 'realized');
   assert.match(await readFile(plan, 'utf8'), /CNL\/Plan-1 generation specification/u);
-  assert.match(await readFile(draft, 'utf8'), /Mara/u);
+  assert.match(await readFile(draft, 'utf8'), /Alice/u);
 });
 
 test('CLI uses stable usage and runtime failure exit codes', async () => {

@@ -17,21 +17,21 @@ test('incompatible production stops, writes a report, and creates a reusable iss
   const dataRoot = join(root, 'data');
   const agentRoot = join(dataRoot, 'editorial-demo');
   await cp(resolve('data/editorial-demo'), agentRoot, { recursive: true });
-  const releaseRoot = join(agentRoot, 'releases', '1.0.0');
-  const circuitPath = join(releaseRoot, 'circuits', 'weak-phrase.circuit.json');
-  const circuit = JSON.parse(await readFile(circuitPath, 'utf8'));
-  circuit.inputs.paragraphs.type = 'narrative.scene@1';
-  await writeJson(circuitPath, circuit);
+  const releaseRoot = join(agentRoot, 'releases', '0.1.0');
+  const compatibilityPath = join(releaseRoot, 'compatibility.json');
+  const compatibility = JSON.parse(await readFile(compatibilityPath, 'utf8'));
+  compatibility.languages = ['fr'];
+  await writeJson(compatibilityPath, compatibility);
   const manifestPath = join(releaseRoot, 'release.json');
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  manifest.files.find((entry) => entry.path === 'circuits/weak-phrase.circuit.json').digest = sha256Bytes(await readFile(circuitPath));
+  manifest.files.find((entry) => entry.path === 'compatibility.json').digest = sha256Bytes(await readFile(compatibilityPath));
   await writeJson(manifestPath, manifest);
-  await writeJson(join(releaseRoot, 'qualification.json'), {
-    kind: 'QualificationResult', schemaVersion: 1, status: 'qualified',
-    release: '1.0.0', manifestDigest: digestJson(manifest), fixture: true
+  await writeJson(join(releaseRoot, 'publication.json'), {
+    kind: 'ReleasePublicationResult', schemaVersion: 1, status: 'published',
+    release: '0.1.0', manifestDigest: digestJson(manifest), fixture: true
   });
   await writeJson(join(agentRoot, 'active-release.json'), {
-    kind: 'ActiveReleasePointer', schemaVersion: 1, release: '1.0.0', manifestDigest: digestJson(manifest)
+    kind: 'ActiveReleasePointer', schemaVersion: 1, release: '0.1.0', manifestDigest: digestJson(manifest)
   });
   const output = join(root, 'stopped.md');
   const stdout = capture();
@@ -61,7 +61,7 @@ test('agent, release, issue, and feedback CLI operations use structured stores',
   const feedbackOut = capture();
   code = await runCli([
     'feedback', 'add', '--agent', 'fresh-agent', '--data-root', dataRoot,
-    '--run', 'run-external', '--type', 'observation-correction', '--message', 'The actor is Mara.', '--json'
+    '--run', 'run-external', '--type', 'observation-correction', '--message', 'The actor is Alice.', '--json'
   ], { stdout: feedbackOut.stream, stderr: stderr.stream, env: {}, cwd: root });
   assert.equal(code, 0, stderr.read());
   assert.equal(JSON.parse(feedbackOut.read()).feedback.type, 'observation-correction');

@@ -18,12 +18,12 @@
     <div class="breadcrumbs"><a href="index.html">Documentation</a> / Architecture map</div>
     <p class="kicker">The system in one page</p>
     <h1>Two programs, two CNL outputs, one learning loop</h1>
-    <p class="lead">LongTextJS represents the concrete input; CircuitJS represents reusable rule knowledge. Validation turns a document into a CNL audit. Planning turns an idea into a CNL generation specification. Learning builds and qualifies the circuits used by both.</p>
+    <p class="lead">LongTextJS represents the concrete input; CircuitJS represents reusable rule knowledge. Validation turns a document into a CNL audit. Planning turns an idea into a CNL generation specification. Learning builds candidates for both; maintainers publish them explicitly.</p>
 
     <pre class="mermaid">
 flowchart TB
   INPUT[Document or idea] --> LTX[LongTextJS]
-  CIR[Qualified CircuitJS release] --> GRAPHS[Validation or planning graph]
+  CIR[Published CircuitJS release] --> GRAPHS[Validation or planning graph]
   LTX --> GRAPHS --> CNL[CNL audit or generation plan]
   CNL -. optional plan realization returns as input .-> INPUT
     </pre>
@@ -42,7 +42,7 @@ flowchart TB
       </section>
       <section class="concept-card">
         <h2>Architecture of learning</h2>
-        <p>Authority, examples, feedback, and issues enter an isolated authoring job. Candidate schemas, producers, circuits, and benchmarks are audited and qualified into a new release. The important question is: <em>what must change before future runs may judge more or judge differently?</em></p>
+        <p>Authority, examples, feedback, and issues enter an isolated authoring job. The job produces candidate schemas, producers, circuits, and benchmarks. A maintainer later chooses whether to publish that candidate. The important question is: <em>what must change before future runs may judge more or judge differently?</em></p>
         <p><a href="learning-architecture.html">Follow learning chronologically →</a></p>
       </section>
     </div>
@@ -53,17 +53,17 @@ flowchart TB
       <tbody>
         <tr><td>Source / judgment</td><td>LongTextJS records anchored observations; CircuitJS derives rule-dependent conclusions.</td><td>An interpretation is not presented as source, and extraction does not decide the verdict it is meant to support.</td></tr>
         <tr><td>Candidate / publication</td><td>Operators may propose results; registered verifiers and finding contracts control emission.</td><td>A plausible candidate is not presented as a verified finding.</td></tr>
-        <tr><td>Learning / production</td><td>Learning edits staged candidates; production reads an immutable qualified release.</td><td>A production document or reviewer comment cannot rewrite the rule during the run.</td></tr>
+        <tr><td>Learning / production</td><td>Learning edits staged candidates; production reads an immutable published release.</td><td>A production document or reviewer comment cannot rewrite the rule during the run.</td></tr>
       </tbody>
     </table></div>
 
     <h2 id="connection">The connector is a contract, not a shared giant ontology</h2>
-    <p>Circuit compilation walks backward from every output and derives the LongTextJS types that can influence it. Qualification proves that each critical type has an approved producer. During a run, compatibility proves that this particular source produced acceptable observations and coverage. These are different checks: a release may know how to produce <code>narrative.object-event@1</code> in general and still fail to produce enough such events for one damaged or unfamiliar document.</p>
+    <p>Circuit compilation walks backward from every output and derives the LongTextJS types that can influence it. Pre-publication checks require each critical type to have an approved producer. During a run, compatibility proves that this particular source produced acceptable observations and coverage. These are different checks: a release may know how to produce <code>narrative.object-event@1</code> in general and still fail to produce enough such events for one damaged or unfamiliar document.</p>
     <p>The detailed mechanism is in <a href="connection.html">The observation contract</a>. This is the central link between the two halves of the documentation.</p>
 
     <h2 id="deployment">Implementation shape</h2>
-    <p>The current product is a modular local Node.js application, not a required microservice deployment. <code>src/runtime/production-run.mjs</code> owns direct validation, <code>src/generation/runner.mjs</code> owns planning and the optional realization branch, <code>src/runtime/analyzer.mjs</code> supplies the shared validation path, <code>src/learning/runner.mjs</code> owns isolated authoring, and <code>src/release/manager.mjs</code> owns qualification and activation.</p>
-    <div class="callout warning"><strong>Architecture versus extension surface.</strong> The runtime supports versioned schemas and registered reasoning operators, but the repository does not ship a qualified implementation for every literary, legal, scientific, multimodal, or solver-backed theory described by the broader design. Missing domain capability remains a compatibility gap.</div>
+    <p>The current product is a modular local Node.js application, not a required microservice deployment. <code>src/runtime/production-run.mjs</code> owns direct validation, <code>src/generation/runner.mjs</code> owns planning and the optional realization branch, <code>src/runtime/analyzer.mjs</code> supplies the shared validation path, <code>src/learning/runner.mjs</code> owns isolated authoring, and <code>src/release/manager.mjs</code> owns explicit publication and active-pointer replacement.</p>
+    <div class="callout warning"><strong>Architecture versus extension surface.</strong> The runtime supports versioned schemas and registered reasoning operators, but the repository does not ship a published implementation for every literary, legal, scientific, multimodal, or solver-backed theory described by the broader design. Missing domain capability remains a compatibility gap.</div>
 
     <nav class="page-nav" aria-label="Architecture reading path">
       <strong>Continue by question</strong>
@@ -73,7 +73,7 @@ flowchart TB
       <a href="circuit-tutorial.html">How does the graph execute step by step?</a>
       <a href="verification.html">How does a run execute?</a>
       <a href="generation.html">How does an idea become CNL?</a>
-      <a href="learning-architecture.html">How is a release learned?</a>
+      <a href="learning-architecture.html">How is a candidate built and published?</a>
     </nav>
 
     <footer>Normative boundaries: <a href="specsLoader.html?spec=DS000-vision.md">DS000</a>, <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>

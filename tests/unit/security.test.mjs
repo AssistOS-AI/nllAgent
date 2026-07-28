@@ -15,7 +15,7 @@ async function activeReleaseRoot(dataRoot) {
   return join(agentRoot, 'releases', pointer.release);
 }
 
-test('qualified release files cannot change behind the active pointer', async () => {
+test('published release files cannot change behind the active pointer', async () => {
   const root = await mkdtemp(join(tmpdir(), 'nllagent-integrity-'));
   const dataRoot = join(root, 'data');
   await cp(resolve('data/editorial-demo'), join(dataRoot, 'editorial-demo'), { recursive: true });
@@ -24,12 +24,12 @@ test('qualified release files cannot change behind the active pointer', async ()
   await assert.rejects(() => loadActiveRelease(agent), (error) => error.code === 'release-integrity-failed');
 });
 
-test('qualified releases reject files added outside their manifest', async () => {
+test('published releases reject files added outside their manifest', async () => {
   const root = await mkdtemp(join(tmpdir(), 'nllagent-release-extra-'));
   const dataRoot = join(root, 'data');
   await cp(resolve('data/editorial-demo'), join(dataRoot, 'editorial-demo'), { recursive: true });
   await writeFile(
-    join(await activeReleaseRoot(dataRoot), 'circuits', 'unqualified.circuit.mjs'),
+    join(await activeReleaseRoot(dataRoot), 'circuits', 'undeclared.circuit.mjs'),
     'export default circuit({});\n'
   );
   const agent = await loadAgent(dataRoot, 'editorial-demo');

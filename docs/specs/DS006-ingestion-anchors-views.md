@@ -50,7 +50,7 @@ Response: The user contract explicitly supplies `.md` files. The architecture an
 
 ### Question #2: Are semantic scenes inferred during structural ingestion?
 
-Response: No. Ingestion exposes objective structure. Scene segmentation is a domain observation with producer version, evidence, alternatives, and benchmark qualification.
+Response: No. Ingestion exposes objective structure. Scene segmentation is a domain observation with producer version, evidence, alternatives, and benchmark support.
 
 ### Question #3: Can an anchor quote be redacted in a report?
 

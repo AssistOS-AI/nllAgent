@@ -26,24 +26,24 @@
       stage at a time.</div>
 
     <h2 id="lifecycle">A theory has a different lifecycle</h2>
-    <p>A production document may change daily. A qualified rule theory should remain stable across many documents until authority, evidence, or feedback justifies a new release. CircuitJS is therefore authored and tested in learning, locked into an immutable release, and only read during production.</p>
+    <p>A production document may change daily. A published rule theory should remain stable across many documents until authority, evidence, or feedback justifies a new release. CircuitJS is therefore authored and tested in learning, locked into an immutable release by a manual publication command, and only read during production.</p>
 
     <pre class="mermaid">
 flowchart TB
   AUTHOR[Rulebook → restricted author form] --> GRAPH[Canonical plain-data graph]
   GRAPH --> STATIC[Static compilation + linking]
-  STATIC --> QUAL[Natural benchmark qualification]
-  QUAL --> REL[Immutable release]
+  STATIC --> CHECKS[Natural benchmark checks]
+  CHECKS --> REL[Manual immutable publication]
     </pre>
-    <p class="diagram-caption"><strong>The theory becomes production code only through qualification.</strong> The author notation cannot add executable capabilities. Static analysis and natural cases must agree before the graph is frozen into a release.</p>
+    <p class="diagram-caption"><strong>The theory becomes production code only through an explicit manual publication command.</strong> The author notation cannot add executable capabilities. Static analysis and natural cases must agree before the graph is frozen into a release.</p>
 
     <h2 id="real-circuit">A circuit that exists in the repository</h2>
-    <p>The <code>editorial-demo</code> candidate contains this restricted author module. It finds the exact Romanian phrase “de fapt” only in released narrative paragraph scope and publishes a finding only after replay verification:</p>
+    <p>The <code>editorial-demo</code> candidate contains this restricted author module. It finds the exact English phrase “in fact” only in published narrative paragraph scope and publishes a finding only after replay verification:</p>
     <pre><code>export default circuit({
   kind: 'CircuitJS',
   id: 'editorial.weak-phrase',
-  version: '2.0.0',
-  description: 'Find “de fapt” in narrative Markdown paragraphs.',
+  version: '0.1.0',
+  description: 'Find “in fact” in narrative Markdown paragraphs.',
   sourceRuleReferences: [
     'authority/style-guide.md#rule-ed-001-weak-phrase-in-narration'
   ],
@@ -125,7 +125,7 @@ flowchart TB
     <nav class="page-nav" aria-label="CircuitJS reading path">
       <strong>Continue on the theory side</strong>
       <a href="operators.html">How operators and verifiers execute</a>
-      <a href="benchmark.html">How natural cases qualify a theory</a>
+      <a href="benchmark.html">How natural cases test a theory</a>
       <a href="connection.html">How ports connect to LongTextJS</a>
     </nav>
 

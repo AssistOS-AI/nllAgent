@@ -1,7 +1,0 @@
-{
-  "kind": "NaturalLinterBenchmarkCase",
-  "rule": "ED-002",
-  "family": "scope",
-  "validationStatus": "human-confirmed",
-  "reportComparison": "structured"
-}

@@ -17,13 +17,13 @@ const candidate = {
   appliedRules: ['RULE-1'], sourceRuleReferences: ['authority/rules.md#rule-1'],
   ruleApplications: [{ rule: 'RULE-1', planLocations: ['realizationGuidance:1'] }],
   plan: {
-    title: 'A concrete scene plan', sourceIdea: 'Mara returns to the station.',
+    title: 'A concrete scene plan', sourceIdea: 'Alice returns to the station.',
     document: {
-      type: 'literary scene', language: 'Romanian', audience: 'adult readers',
+      type: 'literary scene', language: 'English', audience: 'adult readers',
       purpose: 'Render the supplied idea as a complete scene.'
     },
     contentPlan: [
-      { id: 'opening', instruction: 'Establish Mara and the empty station.' },
+      { id: 'opening', instruction: 'Establish Alice and the empty station.' },
       { id: 'ending', instruction: 'End with the employee speaking.', dependsOn: ['opening'] }
     ],
     realizationGuidance: ['Preserve every explicit fact from the idea.']
@@ -32,7 +32,7 @@ const candidate = {
 
 test('CNL is an idea-specific generation plan, not a natural-language constraint list', () => {
   const plan = finalizeCnlPlan(candidate, {
-    release: '3.1.0', planningCircuit: 'editorial.scene-cnl-plan@3.1.0'
+    release: '0.1.0', planningCircuit: 'editorial.scene-cnl-plan@0.1.0'
   });
   const rendered = renderCnlPlan(plan);
   assert.equal(plan.kind, 'CNLGenerationPlan');
@@ -40,7 +40,7 @@ test('CNL is an idea-specific generation plan, not a natural-language constraint
   assert.equal(Object.hasOwn(plan, 'constraints'), false);
   assert.doesNotMatch(rendered, /MUST-NOT|modality|CNLConstraint/u);
   assert.match(rendered, /## Content sequence/u);
-  assert.match(rendered, /Mara returns to the station/u);
+  assert.match(rendered, /Alice returns to the station/u);
   assert.match(rendered, /Applied rules: RULE-1/u);
   assert.match(rendered, /RULE-1: realizationGuidance:1/u);
   assert.equal(plan.verification.status, 'mechanically-certified');
@@ -66,7 +66,7 @@ test('the same CNL contract represents a normative document plan without copying
       },
       contentPlan: [
         { id: 'identity', instruction: 'Identify the controller, incident, jurisdiction, and confirmation time.' },
-        { id: 'timing', instruction: 'State the applicable timing and qualified outage evidence.', dependsOn: ['identity'] },
+        { id: 'timing', instruction: 'State the applicable timing and documented outage evidence.', dependsOn: ['identity'] },
         { id: 'evidence', instruction: 'List attached records and mark unavailable evidence.', dependsOn: ['timing'] }
       ],
       realizationGuidance: ['Do not state a fact that is absent from the supplied evidence.']
@@ -94,20 +94,20 @@ test('CNL validation rejects incomplete plans and unknown step dependencies', ()
 test('planning circuits compile and produce one verified plan from LongTextJS idea observations', async () => {
   const registries = createStandardRegistries();
   const source = await loadCircuitSource(resolve(
-    'data/editorial-demo/candidates/3.1.0/planning/editorial-scene-plan.circuit.mjs'
+    'data/editorial-demo/candidates/0.1.0/planning/editorial-scene-plan.circuit.mjs'
   ));
   const compiled = compileCircuit(source, registries);
   assert.equal(compiled.circuit.purpose, 'planning');
   assert.equal(compiled.circuit.outputs.plan.$node, 'published-plan');
 
   const agent = await loadAgent(resolve('data'), 'editorial-demo');
-  const release = await loadRelease(agent, '3.1.0');
+  const release = await loadRelease(agent, '0.1.0');
   const result = await compileCnlGenerationPlan({
-    agentName: 'editorial-demo', idea: 'Mara revine seara în gara goală.',
-    language: 'ro', release, registries
+    agentName: 'editorial-demo', idea: 'Alice returns to the empty station at dusk.',
+    language: 'en', release, registries
   });
   assert.equal(result.plan.kind, 'CNLGenerationPlan');
-  assert.match(result.plan.sourceIdea, /Mara revine/u);
+  assert.match(result.plan.sourceIdea, /Alice returns/u);
   assert.deepEqual(result.plan.provenance.appliedRules, ['ED-001', 'ED-002']);
   assert.deepEqual(result.plan.verification.ruleApplications, [
     { rule: 'ED-001', planLocations: ['realizationGuidance:3', 'realizationGuidance:5'] },

@@ -60,7 +60,7 @@ async function executeProductionRun(options) {
   const command = `nllagent run --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)}`;
   let registries = options.registries || createStandardRegistries();
   const run = await createRun(agent, options.inputPath, inputText, release, command, {
-    node: process.version, package: 'natural-language-linter-agent@1.0.0',
+    node: process.version, package: 'natural-language-linter-agent@0.1.0',
     operators: registries.operators.describe().map((entry) => entry.id),
     verifiers: registries.verifiers.describe().map((entry) => entry.id)
   });

@@ -11,7 +11,7 @@ test('model profiles route through the injected Achilles-compatible gateway and 
       calls.push(request);
       return {
         result: { observations: [{
-          quote: 'Mara știa', payload: { experiencer: 'Mara', modality: 'asserted' },
+          quote: 'Alice knew', payload: { experiencer: 'Alice', modality: 'asserted' },
           confidence: 0.91, alternatives: [{ modality: 'reported' }], reason: 'The clause directly attributes knowledge.'
         }] },
         capture: { gateway: 'stub-achilles@1', model: 'stub' }
@@ -19,7 +19,7 @@ test('model profiles route through the injected Achilles-compatible gateway and 
     }
   };
   const registries = createStandardRegistries({ modelGateway });
-  const program = compileMarkdown('Mara știa răspunsul.\n', { language: 'ro' });
+  const program = compileMarkdown('Alice knew the answer.\n', { language: 'en' });
   const result = await materializeModelProfiles(program, [{
     id: 'narrative-mind@1', outputType: 'narrative.mental-state@1',
     instruction: 'Identify direct mental-state attribution.',
@@ -32,7 +32,7 @@ test('model profiles route through the injected Achilles-compatible gateway and 
   assert.equal(Object.hasOwn(calls[0], 'tier'), false);
   const observation = program.observations.find((item) => item.type === 'narrative.mental-state@1');
   assert.equal(observation.status, 'proposed');
-  assert.equal(program.anchors[observation.anchors[0]].quote, 'Mara știa');
+  assert.equal(program.anchors[observation.anchors[0]].quote, 'Alice knew');
   assert.equal(program.coverage.at(-1).mode, 'open-world');
   await materializeModelProfiles(program, [{
     id: 'narrative-mind@1', outputType: 'narrative.mental-state@1',
@@ -49,15 +49,15 @@ test('materialization keeps ambiguity and negation but rejects a hallucinated so
       return {
         result: { observations: [
           {
-            quote: 'nu lăsase telefonul',
-            payload: { actor: 'Mara', action: 'leave', polarity: 'negated', modality: 'asserted' },
+            quote: 'had not left the phone',
+            payload: { actor: 'Alice', action: 'leave', polarity: 'negated', modality: 'asserted' },
             confidence: 0.82,
-            alternatives: [{ actor: 'Ilie', reason: 'Pronoun resolution remains possible in wider context.' }],
+            alternatives: [{ actor: 'Bob', reason: 'Pronoun resolution remains possible in wider context.' }],
             reason: 'The source explicitly negates the leave event.'
           },
           {
-            quote: 'Mara își recuperă telefonul',
-            payload: { actor: 'Mara', action: 'retrieve', polarity: 'positive', modality: 'asserted' },
+            quote: 'Alice retrieved her phone',
+            payload: { actor: 'Alice', action: 'retrieve', polarity: 'positive', modality: 'asserted' },
             confidence: 0.99,
             alternatives: [],
             reason: 'This recovery wording was inferred but is absent from the supplied block.'
@@ -68,7 +68,7 @@ test('materialization keeps ambiguity and negation but rejects a hallucinated so
     }
   };
   const registries = createStandardRegistries({ modelGateway });
-  const program = compileMarkdown('Mara spuse că nu lăsase telefonul în mașină.\n', { language: 'ro' });
+  const program = compileMarkdown('Alice said that she had not left the phone in the car.\n', { language: 'en' });
   const result = await materializeModelProfiles(program, [{
     id: 'narrative-events@1', outputType: 'narrative.object-event@1',
     instruction: 'Extract object events while preserving polarity, modality, and alternatives.',
@@ -85,7 +85,7 @@ test('materialization keeps ambiguity and negation but rejects a hallucinated so
   const observation = program.observations.find((item) => item.type === 'narrative.object-event@1');
   assert.equal(observation.payload.polarity, 'negated');
   assert.equal(observation.alternatives.length, 1);
-  assert.equal(program.anchors[observation.anchors[0]].quote, 'nu lăsase telefonul');
+  assert.equal(program.anchors[observation.anchors[0]].quote, 'had not left the phone');
   assert.equal(program.gaps.length, 1);
   assert.equal(program.gaps[0].kind, 'model-output');
   assert.match(program.gaps[0].failures.join(' '), /absent from the source block/u);

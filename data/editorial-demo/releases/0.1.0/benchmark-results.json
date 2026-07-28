@@ -1,0 +1,116 @@
+{
+  "kind": "BenchmarkResult",
+  "passed": true,
+  "release": "0.1.0",
+  "results": [
+    {
+      "findingCount": 0,
+      "id": "ed001-dialogue-exception",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed001-negative-clean",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed001-whole-word-boundary",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed002-dialogue-exception",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed002-exactly-two",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed002-paragraph-scope",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 1,
+      "id": "ed002-three-in-one",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 1,
+      "id": "weak-phrase",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "public"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed001-code-instruction",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "adversarial"
+    },
+    {
+      "findingCount": 0,
+      "id": "ed002-code-scope",
+      "layerFailures": [],
+      "passed": true,
+      "semanticEvaluation": null,
+      "status": "reported",
+      "suite": "adversarial"
+    }
+  ],
+  "schemaVersion": 1,
+  "summary": {
+    "failed": 0,
+    "families": {
+      "adversarial": 1,
+      "boundary": 1,
+      "exception": 3,
+      "negative": 2,
+      "positive": 2,
+      "scope": 1
+    },
+    "passed": 10,
+    "policyFailures": [],
+    "rules": {
+      "ED-001": 5,
+      "ED-002": 5
+    },
+    "total": 10
+  }
+}

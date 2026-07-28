@@ -26,7 +26,7 @@ Every computational node resolves a registered operator, every verification node
 
 Achilles calls go only through `LLMAgent.executePrompt()`. Translation-class roles prefer configured Spark models. When Achilles is not configured, the Coding Agent translation adapter runs in a call folder under the current run with only `nll-translate-longtext`; it produces proposed observations or semantic evaluation JSON, not code changes.
 
-The learning Coding Agent runs from a disposable per-run staging copy and sees symbolic links to only the five learning skills. Authority, feedback, specifications, release context, and trusted registries are copied for reading, while only staged authoring, benchmark, proposal, candidate, and current learning-run files are promotable. Deletions and protected changes fail the audit without touching the real agent. Qualification occurs after controlled promotion and process exit, and activation remains a separate command.
+The learning Coding Agent runs from a disposable per-run staging copy and sees symbolic links to only the five learning skills. Authority, feedback, specifications, release context, and trusted registries are copied for reading, while only staged authoring, benchmark, proposal, candidate, and current learning-run files are promotable. Deletions and protected changes fail the audit without touching the real agent. Publication is a later explicit maintainer command outside learning.
 
 ## Budgets and stored diagnostics
 
@@ -34,7 +34,7 @@ Model providers and Coding Agent adapters use their normal runtime configuration
 
 ## Local release consistency
 
-Release manifests name exact schemas, circuits, operators, verifiers, profiles, adapters, runtime versions, and authority sources. Qualification records ordinary content digests so loading and activation can detect accidental changes or partially updated packages. A changed operator or model profile triggers the affected tests. This is local consistency checking; the project does not require a separate signing infrastructure.
+Release manifests name exact schemas, circuits, operators, verifiers, profiles, adapters, runtime versions, and authority sources. Manual publication records ordinary content digests so loading can detect accidental changes or partially updated packages before the active pointer changes. A changed operator or model profile triggers the affected tests. This is local consistency checking; the project does not require a separate signing infrastructure.
 
 ## Feedback authority
 
@@ -42,7 +42,7 @@ Feedback records its run, type, message, optional finding, and reviewer context.
 
 ## Recovery
 
-If a release is found faulty, the active pointer can move back to a previously qualified release. Old releases and runs are retained so their behavior remains explainable. The semantic diff and impact map identify affected rules and reports. The failure becomes an issue and, when useful, a minimal regression case.
+If a release is found faulty, the active pointer can move back to a previously published release. Old releases and runs are retained so their behavior remains explainable. The semantic diff and impact map identify affected rules and reports. The failure becomes an issue and, when useful, a minimal regression case.
 
 Findings state their actual guarantee: exact mechanical check, evidence replay over proposed observations, model judgment, human confirmation, or review required. The project does not need a global autonomy label to express this distinction.
 
@@ -62,8 +62,8 @@ Response: A policy may allow a distinct exploratory run with reduced guarantee a
 
 ### Question #4: How is prompt injection handled during CNL planning and optional realization?
 
-Response: The idea is untrusted LongTextJS input and cannot modify planning circuits or authority. CNL is emitted only through the qualified planning graph and trusted verifier. If realization is requested, the plan and previous candidate are untrusted call content; the Coding Agent links only `nll-realize-cnl`, cannot edit release artifacts, and returns schema-bound text. The realized text is re-ingested as untrusted data and cannot instruct its own validation circuits.
+Response: The idea is untrusted LongTextJS input and cannot modify planning circuits or authority. CNL is emitted only through the published planning graph and trusted verifier. If realization is requested, the plan and previous candidate are untrusted call content; the Coding Agent links only `nll-realize-cnl`, cannot edit release artifacts, and returns schema-bound text. The realized text is re-ingested as untrusted data and cannot instruct its own validation circuits.
 
 # Conclusion
 
-The project uses concrete boundaries where they help: source/instruction separation, restricted MJS, registered operations, exact-quote validation, agent-local skills, changed-path audit, budgets, replay verification, local release consistency, and separate activation. These mechanisms support ambitious semantic experiments without hiding uncertainty or adding unrelated infrastructure.
+The project uses concrete boundaries where they help: source/instruction separation, restricted MJS, registered operations, exact-quote validation, agent-local skills, changed-path audit, budgets, replay verification, local release consistency, and explicit manual publication. These mechanisms support ambitious semantic experiments without hiding uncertainty or adding unrelated infrastructure.

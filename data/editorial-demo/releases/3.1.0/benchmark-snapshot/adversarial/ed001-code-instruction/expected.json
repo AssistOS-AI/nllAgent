@@ -1,5 +1,0 @@
-{
-  "schemaVersion": 1,
-  "circuit": { "status": "reported", "findingCount": 0, "findingRules": [] },
-  "observations": [{ "type": "document.code-block@1", "quote": "de fapt" }]
-}

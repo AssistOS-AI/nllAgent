@@ -28,7 +28,7 @@ test('quality gaps limit a produced observation type without blocking its circui
   const circuit = compileConsumer('narrative.event-check', 'events', {
     type: 'narrative.event@1', critical: true, statuses: ['proposed']
   }, registries);
-  const program = compileMarkdown('Mara left the phone in the car.\n');
+  const program = compileMarkdown('Alice left the phone in the car.\n');
   program.capabilities.push({
     type: 'narrative.event@1', producer: 'profile:narrative-events@1',
     coverage: 'open', statuses: ['proposed']

@@ -3,12 +3,12 @@ id: DS019
 title: CNL Generation Specifications and Optional Text Realization
 status: implemented
 owner: nllAgent maintainers
-summary: Defines CNL/Plan-1, idea-to-specification circuits, rule-to-plan verification, optional realization, audit reuse, CLI behavior, provenance, and qualification.
+summary: Defines CNL/Plan-1, idea-to-specification circuits, rule-to-plan verification, optional realization, audit reuse, CLI behavior, provenance, and publication checks.
 ---
 
 # Introduction
 
-NaturalLanguageLinterAgent has two complementary CNL production modes. Audit mode compiles an existing document into `CNLAuditReport` as defined by DS011. Specification mode compiles a high-level idea into a precise `CNLGenerationPlan` for creating a new document. The second mode does not begin by asking a model to draft freely. It first produces an intermediate CNL artifact under the qualified release:
+NaturalLanguageLinterAgent has two complementary CNL production modes. Audit mode compiles an existing document into `CNLAuditReport` as defined by DS011. Specification mode compiles a high-level idea into a precise `CNLGenerationPlan` for creating a new document. The second mode does not begin by asking a model to draft freely. It first produces an intermediate CNL artifact under the published release:
 
 ```text
 high-level idea -> LongTextJS -> CircuitJS planning -> CNL generation plan
@@ -36,7 +36,7 @@ Planning starts with an idea that does not yet have a final document:
 idea -> LongTextJS observations -> planning circuits -> CNLGenerationPlan
 ```
 
-The paths share source ingestion, observations, schemas, authority mappings, registered operators, compatibility, coverage, provenance, release qualification, and rule identities. Their outputs differ. Validation findings are assembled into a CNL audit about a fixed source. A planning circuit emits a verified CNL specification derived from the source idea.
+The paths share source ingestion, observations, schemas, authority mappings, registered operators, compatibility, coverage, provenance, publication checks, and rule identities. Their outputs differ. Validation findings are assembled into a CNL audit about a fixed source. A planning circuit emits a verified CNL specification derived from the source idea.
 
 If final realization is requested, the path continues:
 
@@ -45,7 +45,7 @@ CNLGenerationPlan -> LLM realization -> Markdown candidate
 Markdown candidate -> LongTextJS -> unchanged validation circuits -> findings
 ```
 
-Validation remains the final oracle. A valid CNL plan proves that the intended document was planned through the qualified theory, not that any model realization is automatically conformant.
+Validation remains the final oracle. A valid CNL plan proves that the intended document was planned through the published theory, not that any model realization is automatically conformant.
 
 ## CNL/Plan-1 artifact
 
@@ -89,7 +89,7 @@ The validation graph itself should normally stay separate from the planning grap
 - validation asks whether an existing source supplies a violating witness;
 - planning asks what ordered document design should be produced from an idea so the eventual realization has the required structure and avoids known failure modes.
 
-A release therefore lists validation `circuits` and optional `planningCircuits`. It does not embed generation metadata in validation circuits, and there are no `separate`, `embedded`, or `hybrid` runtime modes. A coding agent may derive both circuit families from the same rule cards and benchmark evidence during learning, but qualification compiles and tests each declared graph explicitly.
+A release therefore lists validation `circuits` and optional `planningCircuits`. It does not embed generation metadata in validation circuits, and there are no `separate`, `embedded`, or `hybrid` runtime modes. A coding agent may derive both circuit families from the same rule cards and benchmark evidence during learning, but manual publication compiles and tests each declared graph explicitly.
 
 This separation prevents validation from acquiring model effects or content-search behavior. It also permits specialized planning without duplicating the validation oracle. If a domain has a genuinely bidirectional primitive, both circuit families may call the same registered operator under separate typed nodes.
 
@@ -98,17 +98,17 @@ This separation prevents validation from acquiring model effects or content-sear
 Input idea:
 
 ```markdown
-Write two Romanian narrative paragraphs about Mara returning to an empty railway
+Write two English narrative paragraphs about Alice returning to an empty railway
 station at dusk. End with a station employee saying that the final train departed.
 ```
 
 LongTextJS preserves the exact lines and source digest. The editorial planning circuit applies ED-001 and ED-002 and emits a CNL plan with this shape:
 
 ```text
-Document: short Romanian literary scene for adult readers
+Document: short English literary scene for adult readers
 
 1. establish-scene
-   Establish Mara, the empty station, dusk, and the restrained atmosphere.
+   Establish Alice, the empty station, dusk, and the restrained atmosphere.
 2. develop-action
    Develop the central action through concrete perception and movement.
 3. close-scene
@@ -116,8 +116,8 @@ Document: short Romanian literary scene for adult readers
 
 Realization guidance:
 - preserve every explicit fact from the idea;
-- avoid “de fapt” in narrative paragraphs;
-- use “parcă” no more than twice in one narrative paragraph;
+- avoid “in fact” in narrative paragraphs;
+- use “perhaps” no more than twice in one narrative paragraph;
 - treat dash-prefixed paragraphs as dialogue for these rules.
 
 Plan verification:
@@ -129,7 +129,7 @@ This is not ED-001 and ED-002 rewritten as CNL constraints. It is a plan for thi
 
 ## Concrete normative example
 
-Suppose a qualified release represents the approved law and organizational procedure for incident notices. The input idea is “prepare the authority notification for incident 17.” LongTextJS materializes the requested incident, intended audience, known dates, jurisdiction, and available evidence. A planning circuit can produce:
+Suppose a published release represents the approved law and organizational procedure for incident notices. The input idea is “prepare the authority notification for incident 17.” LongTextJS materializes the requested incident, intended audience, known dates, jurisdiction, and available evidence. A planning circuit can produce:
 
 ```text
 Document: formal incident notification to the competent authority
@@ -139,7 +139,7 @@ Document: formal incident notification to the competent authority
 2. describe-material-facts
    Describe scope, affected systems, and verified impact without unsupported claims.
 3. establish-timing
-   Present the applicable deadline and any qualified outage interval.
+   Present the applicable deadline and any applicable outage interval.
 4. enumerate-actions
    List containment, recovery, notification, and evidence-preservation actions.
 5. close-with-evidence
@@ -188,9 +188,9 @@ Each transaction creates `planning-runs/<id>/planning.json` and stores:
 
 Optional realization adds `realization/model-captures.json`, `realization/document.md`, and one `realization/attempts/attempt-NN/` directory per candidate. Each attempt contains the candidate plus a complete ordinary validation artifact set. The externally requested files are delivery copies; the planning-run directory is the durable lineage.
 
-## Qualification and tests
+## Publication checks and tests
 
-Qualification compiles every `planningCircuits` entry with the restricted loader, type checks its LongTextJS ports, checks verification dominance, requires the `planning.cnl-plan@1` construction path, validates all claimed rule identities against the authority map, checks producer alignment, and freezes the graph in the immutable release.
+Manual publication compiles every `planningCircuits` entry with the restricted loader, type checks its LongTextJS ports, checks verification dominance, requires the `planning.cnl-plan@1` construction path, validates all claimed rule identities against the authority map, checks producer alignment, and freezes the graph in the immutable release.
 
 Current acceptance tests prove:
 
@@ -203,7 +203,7 @@ Current acceptance tests prove:
 - each realized candidate is revalidated by unchanged validation circuits;
 - finding exhaustion, incompatible output, missing backend, artifacts, and CLI exit codes remain explicit.
 
-The release gate currently qualifies plan structure, provenance, linking, deterministic behavior, and the ordinary validation benchmark. It does not yet claim that a model will realize every qualified plan well. A future planning benchmark should use idea-to-CNL expected layers and separate optional realization quality tests.
+The publication command currently checks plan structure, provenance, linking, deterministic behavior, and the ordinary validation benchmark. It does not claim that a model will realize every published plan well. A future planning benchmark should use idea-to-CNL expected layers and separate optional realization quality tests.
 
 # Decisions & Questions
 

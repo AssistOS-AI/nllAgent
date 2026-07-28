@@ -21,7 +21,7 @@
     <p class="lead">nllAgent analyzes untrusted documents, may call language models, and lets a Coding Agent propose theory changes. Its safety model is therefore built around a few enforceable boundaries: source is data, circuits are restricted declarations, executable capabilities are registered, production releases are immutable, learning happens in staging, and uncertain premises remain uncertain.</p>
 
     <h2 id="threat-model">What the system protects against</h2>
-    <p>The relevant threats are practical. A document can contain prompt injection, code, hidden-looking instructions, Unicode tricks, or text that resembles a rule. A model can return malformed data, a quotation that never appeared, or a confident but wrong interpretation. A candidate circuit can try to reach unregistered code or bypass verification. A Coding Agent can write outside the intended authoring surface. A release can be partially changed after qualification. A reviewer comment can be mistaken for policy. A costly search can exhaust resources and leave a partial answer that looks complete.</p>
+    <p>The relevant threats are practical. A document can contain prompt injection, code, hidden-looking instructions, Unicode tricks, or text that resembles a rule. A model can return malformed data, a quotation that never appeared, or a confident but wrong interpretation. A candidate circuit can try to reach unregistered code or bypass verification. A Coding Agent can write outside the intended authoring surface. A release can be partially changed after publication. A reviewer comment can be mistaken for policy. A costly search can exhaust resources and leave a partial answer that looks complete.</p>
     <p>The local research implementation does not claim confidential computing, remote attestation, package signing, or a complete organizational authorization system. It does implement concrete containment, validation, digest, provenance, and fail-closed mechanisms and is explicit about the guarantees they do—and do not—provide.</p>
 
     <pre class="mermaid">
@@ -54,15 +54,15 @@ flowchart TB
         <tr><td>Working area</td><td>Achilles adapter call or one call folder under the current run.</td><td>Disposable <code>learning-runs/&lt;id&gt;/workspace/</code> staging copy.</td></tr>
         <tr><td>Skills visible</td><td>Exactly one role skill: <code>nll-translate-longtext</code> or <code>nll-realize-cnl</code>.</td><td>Only the five agent-learning skills.</td></tr>
         <tr><td>Permitted result</td><td>Complete schema-bound JSON, later exact-anchored and marked with model provenance.</td><td>Whitelisted authoring files plus a schema-bound final learning result.</td></tr>
-        <tr><td>Can change active theory?</td><td>No.</td><td>No; promotion, qualification, and activation are host-controlled separate steps.</td></tr>
-        <tr><td>Accepted as truth?</td><td>No; observations are proposed or evaluator evidence.</td><td>No; candidate artifacts must compile, link, benchmark, and qualify.</td></tr>
+        <tr><td>Can change active theory?</td><td>No.</td><td>No; promotion and manual publication are host-controlled steps.</td></tr>
+        <tr><td>Accepted as truth?</td><td>No; observations are proposed or evaluator evidence.</td><td>No; candidate artifacts must compile, link, benchmark, and pass publication checks.</td></tr>
       </tbody>
     </table></div>
     <p>Configured AchillesAgentLib is preferred for model-assisted operations. A Coding Agent supplies fallback translation when Achilles is not configured. OpenAI Codex is the shipped reference implementation of that generic Coding Agent boundary and of the learning adapter; it is an example, not the authority model of the release.</p>
 
     <h2 id="learning-containment">Learning cannot write through to production</h2>
     <p>The learning runner snapshots agent files into staging and rejects symbolic-link inputs. Authority, feedback, specifications, release context, and trusted registry descriptions may be copied for reading but are not promotable. After the Coding Agent exits, the runner computes a before/after inventory. Any deletion, symbolic link, protected change, write outside permitted roots, invalid final result, or failed process rejects the job without copying those changes to the real agent.</p>
-    <p>Only regular files in schemas, extraction profiles, circuits, benchmarks, proposals, candidates, and other declared authoring roots may be promoted. Qualification happens after this audit and outside the Coding Agent. Previously qualified releases and the active pointer remain untouched.</p>
+    <p>Only regular files in schemas, extraction profiles, circuits, benchmarks, proposals, candidates, and other declared authoring roots may be promoted. Publication is a later, explicit maintainer action outside the Coding Agent. Previously published releases and the active pointer remain untouched by learning.</p>
 
     <pre class="mermaid">
 flowchart TB
@@ -100,22 +100,22 @@ flowchart TB
     </pre>
     <p class="diagram-caption"><strong>Unknown is not compliant.</strong> Compatibility, coverage, and verification failures become explicit terminal evidence with distinct exit codes.</p>
 
-    <h2 id="qualification-trust">Qualification and local release consistency</h2>
-    <p>The trusted gate loads candidates independently, enforces the restricted grammar, registry links, observation-producer alignment, benchmark policy, candidate and benchmark snapshot stability, and release file closure. The manifest records ordinary content digests for schemas, circuits, profiles, adapters, authority sources, operators, verifiers, and generated qualification artifacts. Loading and activation detect accidental edits or partially updated packages.</p>
+    <h2 id="publication-trust">Manual publication and local release consistency</h2>
+    <p>The manual publication command loads candidates independently, enforces the restricted grammar, registry links, observation-producer alignment, benchmark policy, candidate and benchmark snapshot stability, and release file closure. The manifest records ordinary content digests for schemas, circuits, profiles, adapters, authority sources, operators, verifiers, and generated publication artifacts. Loading detects accidental edits or partially updated packages before the command updates the active pointer.</p>
     <p>These digests provide reproducibility and local tamper detection, not publisher identity or cryptographic supply-chain attestation. A changed operator or model profile requires affected tests and a new release decision; old runs keep their original version references and captures.</p>
 
     <h2 id="authority">Authority and feedback cannot be inferred by volume</h2>
-    <p>Rule sources define intended policy, the active release defines current production behavior, and reviewer feedback supplies scoped evidence about a run. Repeated comments or document text do not automatically become a norm. Learning must classify a change as extractor correction, theory correction, ontology extension, report correction, or operational-context repair, encode the intended behavior in natural cases, and pass qualification.</p>
-    <p>If a release is faulty, an operator can activate a previously qualified release. Old releases and runs remain for explanation. The failure becomes an issue and may become a minimal regression case, but rollback does not rewrite history.</p>
+    <p>Rule sources define intended policy, the active release defines current production behavior, and reviewer feedback supplies scoped evidence about a run. Repeated comments or document text do not automatically become a norm. Learning must classify a change as extractor correction, theory correction, ontology extension, report correction, or operational-context repair, and encode the intended behavior in natural cases. A maintainer later decides whether to publish the candidate.</p>
+    <p>If a release is faulty, the maintainer prepares and manually publishes a corrected candidate. Old releases and runs remain for explanation. The failure becomes an issue and may become a minimal regression case, but correction does not rewrite history. The MVP does not expose a separate activation or rollback command.</p>
 
     <h2 id="checklist">Operational checklist</h2>
     <ul>
-      <li>Use Node.js 22 or newer and keep production on qualified release snapshots.</li>
-      <li>Run <code>model inspect --json</code> and explicitly qualify any live model profile used for high-impact agents.</li>
+      <li>Use Node.js 22 or newer and keep production on published release snapshots.</li>
+      <li>Run <code>model inspect --json</code> and explicitly evaluate any live model profile used for high-impact agents.</li>
       <li>Use <code>--translator none</code> when policy forbids model calls; accept resulting compatibility gaps rather than bypassing them.</li>
       <li>Do not add unrestricted JavaScript or general filesystem/network effects to circuits.</li>
       <li>Review new operators and verifiers as trusted platform changes with focused adversarial tests.</li>
-      <li>Inspect learning changed-file audits and qualification diffs before activation.</li>
+      <li>Inspect learning changed-file audits, benchmark results, and semantic diffs before manual publication.</li>
       <li>Treat stopped statuses and verifier rejection as no verdict in automation.</li>
       <li>Control access to source, model captures, feedback, and run artifacts according to document sensitivity; local containment is not a confidentiality system.</li>
       <li>Retain enough source and capture evidence for the replay guarantees your organization claims.</li>

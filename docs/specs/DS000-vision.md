@@ -14,13 +14,13 @@ NaturalLanguageLinterAgent is a framework for constructing persistent specialize
 
 ## Two CNL production modes
 
-The same qualified knowledge can inspect an existing document or specify a new one. Audit mode compiles a document through LongTextJS, executes validation circuits, verifies findings, and assembles them into `CNL/Audit-1`. Specification mode compiles an idea through LongTextJS, executes planning circuits, and emits `CNL/Plan-1`. The plan is a first-class output and does not require an LLM. A caller may optionally ask a bounded model role to realize it, after which the candidate enters the unchanged audit path. Any conformance claim comes from that audit, never from planning or realization itself.
+The same published theory can inspect an existing document or specify a new one. Audit mode compiles a document through LongTextJS, executes validation circuits, verifies findings, and assembles them into `CNL/Audit-1`. Specification mode compiles an idea through LongTextJS, executes planning circuits, and emits `CNL/Plan-1`. The plan is a first-class output and does not require an LLM. A caller may optionally ask a bounded model role to realize it, after which the candidate enters the unchanged audit path. Any conformance claim comes from that audit, never from planning or realization itself.
 
 ## Specialized use cases
 
 An editorial agent may validate style, focalization, dialogue exceptions, repetition, character knowledge, continuity, chronology, and contradiction. Given a synopsis or scene idea, its planning circuits may instead produce a CNL plan that fixes characters, setting, scene sequence, continuity-sensitive events, focalization, and realization guidance before prose is written. A normative agent may validate case evidence, obligations, deadlines, exceptions, authority, and record completeness against identified laws, regulations, contracts, or policies. Given an intent such as “prepare the notice for incident 17,” it may produce a CNL plan for the required sections, facts, deadlines, exceptions, evidence, and claims before any notice is drafted. Technical and scientific agents may do the same for specifications, procedures, manuals, protocols, and structured reports.
 
-Each of these is a separate qualified agent with an explicit intended use, authority set, vocabulary, compatibility profile, benchmark, circuits, and guarantee limits. The framework must not advertise one universal agent that silently substitutes generic model knowledge for a missing domain package. Normative output establishes only the conformance supported by the selected release and evidence; it is not an unbounded claim of legal truth.
+Each of these is a separate specialized agent with an explicit intended use, authority set, vocabulary, compatibility profile, benchmark, circuits, and guarantee limits. The framework must not advertise one universal agent that silently substitutes generic model knowledge for a missing domain package. Normative output establishes only the conformance supported by the selected release and evidence; it is not an unbounded claim of legal truth.
 
 ## Neuro-symbolic execution boundary
 
@@ -40,9 +40,9 @@ The system must maintain a hard architectural separation between the production 
 
 The production plane may validate an existing document or compile an idea into CNL and, when explicitly requested, realize and validate a candidate. Semantic extraction, realization, and revision may use configured AchillesAgentLib or the role-specific Coding Agent adapter defined by DS018. Planning itself is CircuitJS execution and may be deterministic. No route may change circuit definitions, alter benchmark expectations, modify the active release, load learning skills, or reinterpret input content as an authority source.
 
-The learning plane may invoke a configured Coding Agent with explicit learning skills, read the selected rule and example folders, inspect agent benchmark cases and issue artifacts, produce candidate schemas and circuits, add regression cases, request qualification, and build a candidate release. It must not silently promote a candidate, rewrite immutable historical releases, or weaken qualification checks to make a candidate pass.
+The learning plane may invoke a configured Coding Agent with explicit learning skills, read the selected rule and example folders, inspect agent benchmark cases and issue artifacts, produce candidate schemas and circuits, add regression cases, and build a candidate package. It must stop at the candidate boundary. Only a maintainer may invoke the separate manual publication command, which reruns trusted checks, creates the immutable release, and updates the active pointer.
 
-`Coding Agent` is an architectural role, not a product name. It means a tool-using agent that can inspect and edit a staged repository workspace under a declared process, filesystem, skill, and output contract. OpenAI Codex is the current reference adapter and a concrete example; other coding agents may implement the same boundary without changing LongTextJS, CircuitJS, benchmark, qualification, or release semantics.
+`Coding Agent` is an architectural role, not a product name. It means a tool-using agent that can inspect and edit a staged repository workspace under a declared process, filesystem, skill, and output contract. OpenAI Codex is the current reference adapter and a concrete example; other coding agents may implement the same boundary without changing LongTextJS, CircuitJS, benchmark, publication, or release semantics.
 
 ## Epistemic discipline
 
@@ -56,7 +56,7 @@ The runtime must support at least these terminal outcomes: `reported`, `reported
 
 The system's ethical commitments follow from its operational boundaries. Source text must remain distinguishable from interpretation. Claims must remain bounded by the property actually verified and by the weakest material premise. Reviewers must be able to contest anchors, observations, identity, scope, coverage, authority, rules, witnesses, and rendering independently. Abstention and stopped states are valid outcomes, not failures to be hidden. A new release must not rewrite historical results, and disputed policies may remain separate lineages instead of being collapsed into an apparent consensus.
 
-People and organizations remain responsible for intended use, legitimate authority, consequential decisions, privacy, and access. A fluent explanation, a model consensus, or a mechanically replayed downstream calculation must not disguise an uncertain or policy-dependent premise. Learning and production must use least privilege and retain only the source and model artifacts permitted by project policy. Scientific references in tutorial documentation explain design lineage; they do not substitute for implementation, benchmark, qualification, or run evidence.
+People and organizations remain responsible for intended use, legitimate authority, consequential decisions, privacy, and access. A fluent explanation, a model consensus, or a mechanically replayed downstream calculation must not disguise an uncertain or policy-dependent premise. Learning and production must use least privilege and retain only the source and model artifacts permitted by project policy. Scientific references in tutorial documentation explain design lineage; they do not substitute for implementation, benchmark, publication checks, or run evidence.
 
 ## Complete capability surface
 
@@ -76,11 +76,11 @@ Response: The required product interaction is a local CLI over Markdown. A file-
 
 ### Question #2: Does “complete system” mean every research problem is solved universally?
 
-Response: No. It means the architecture, lifecycle, extension contracts, failure states, and implemented generic machinery cover the complete described system. Domain extractors and solvers remain qualified modules. The runtime must expose unsupported areas honestly rather than claim universal natural-language understanding.
+Response: No. It means the architecture, lifecycle, extension contracts, failure states, and implemented generic machinery cover the complete described system. Domain extractors and solvers remain separately evaluated modules. The runtime must expose unsupported areas honestly rather than claim universal natural-language understanding.
 
 ### Question #3: Can production improve itself automatically?
 
-Response: Production may create issues and learning needs automatically. Only the isolated learning workflow may propose changes, and promotion remains gated and explicit. This preserves release identity and prevents input text from rewriting its judge.
+Response: Production may create issues and learning needs automatically. Only the isolated learning workflow may propose changes. Publication is a separate manual maintainer action and is never a continuation of the production or learning command. This preserves release identity and prevents input text from rewriting its judge.
 
 ### Question #4: Why may production use a Coding Agent without collapsing the two planes?
 
@@ -88,7 +88,7 @@ Response: Each model-assisted production call receives one schema and one narrow
 
 ### Question #5: Is nllAgent only a validator?
 
-Response: No. A qualified release may compile a high-level idea into a CNL generation plan through LongTextJS and planning circuits. The plan is the primary authoring artifact. A model may optionally realize or revise a document from it; that document is then compiled through LongTextJS and judged by the same frozen validation circuits. Planning never bypasses validation or promotes model output to compliance by assertion.
+Response: No. A published release may compile a high-level idea into a CNL generation plan through LongTextJS and planning circuits. The plan is the primary authoring artifact. A model may optionally realize or revise a document from it; that document is then compiled through LongTextJS and judged by the same frozen validation circuits. Planning never bypasses validation or promotes model output to compliance by assertion.
 
 ### Question #6: Why not put the document, rules, and request into one long-context LLM call?
 
@@ -100,7 +100,7 @@ Response: No. Standards and research papers explain the origin and expected valu
 
 ### Question #8: Which product name is canonical?
 
-Response: `NaturalLanguageLinterAgent` is the full product name and `nllAgent` is the short repository, library, CLI, and operational name. Persistent kinds use the `NaturalLanguageLinter…` prefix. The shortened historical prefix is not valid for newly authored artifacts; immutable qualified releases that already contain it remain unchanged solely for reproducible history.
+Response: `NaturalLanguageLinterAgent` is the full product name and `nllAgent` is the short repository, library, CLI, and operational name. Persistent kinds use the `NaturalLanguageLinter…` prefix. The MVP starts with one real published baseline, `0.1.0`; documentation and fixtures must not invent predecessor releases merely to imply history.
 
 # Conclusion
 

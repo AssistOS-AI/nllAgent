@@ -14,13 +14,13 @@ Compatibility determines whether a release has the language, producers, resource
 
 ## Compatibility profile
 
-A release profile must declare supported formats, adapter versions, languages, genres, structural patterns, schema versions, producer profiles, maximum source sizes, operational-context dependencies, calendars, registries, unit systems, model profiles, circuit-specific limits, and qualification evidence.
+A release profile must declare supported formats, adapter versions, languages, genres, structural patterns, schema versions, producer profiles, maximum source sizes, operational-context dependencies, calendars, registries, unit systems, model profiles, circuit-specific limits, and publication evidence.
 
 ## Alignment levels
 
 Structural alignment verifies media type, channels, block structure, schema shape, cardinality, fields, units, and enum values. Semantic alignment verifies definitions, positive and negative examples, invariants, discriminating probes, scope meanings, world policy, and approved adapter losses. Operational alignment verifies producer availability, language support, external context, access rights, resource budget, and achievable coverage.
 
-The release builder must construct and persist a producer-consumer matrix from every circuit's backward-derived observation contract. Each critical port must resolve to an exact structural producer, extraction profile, or approved adapter whose statuses, coverage mode, and attainable guarantee satisfy the port. Human confirmation and mechanical certification are not interchangeable producer capabilities. Benchmark evidence remains a separate qualification obligation and must not be inferred merely from nominal producer linkage.
+The release builder must construct and persist a producer-consumer matrix from every circuit's backward-derived observation contract. Each critical port must resolve to an exact structural producer, extraction profile, or approved adapter whose statuses, coverage mode, and attainable guarantee satisfy the port. Human confirmation and mechanical certification are not interchangeable producer capabilities. Benchmark evidence remains a separate publication obligation and must not be inferred merely from nominal producer linkage.
 
 ## Preflight
 
@@ -56,7 +56,7 @@ Response: Only when each limit is outside the declared scope of the requested re
 
 ### Question #3: Does every issue become a learning job?
 
-Response: No. Policy prioritizes issues by severity, recurrence, blocked-document value, generalizability, and qualification cost. All remain available for later analysis.
+Response: No. Policy prioritizes issues by severity, recurrence, blocked-document value, generalizability, and evaluation cost. All remain available for later analysis.
 
 ### Question #4: What happens when semantic translation is disabled?
 

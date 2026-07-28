@@ -53,7 +53,7 @@ The CLI option `--translator` accepts `auto`, `achilles`, `codex`, or `none`.
 | `codex` | Compatibility identifier for the currently shipped Coding Agent reference adapter, even when Achilles is configured. |
 | `none` | Register no semantic translation operators. Deterministic circuits remain usable; a release requiring semantic observations reports a compatibility gap. |
 
-`--no-llm` is retained as an alias for `--translator none`. The default is `auto`. The selector runs once per command context. A normal production run creates its Coding Agent adapter workspace under that run directory. Benchmark and qualification commands create separate agent-local temporary processing directories. Selection does not alter the active release or its circuit definitions.
+`--no-llm` is retained as an alias for `--translator none`. The default is `auto`. The selector runs once per command context. A normal production run creates its Coding Agent adapter workspace under that run directory. Benchmark and publication commands create separate agent-local temporary processing directories. Selection does not alter the active release or its circuit definitions.
 
 ## Achilles configuration and Spark preference
 
@@ -166,7 +166,7 @@ Default tests are offline but behavioral. They prove:
 - semantic benchmark evaluation uses multiple perspectives;
 - unavailable translation and exhausted budgets produce explicit gaps or terminal states.
 
-Live model tests are optional because they require credentials and consume external capacity. An agent may separately qualify a live profile with agent-owned evaluation data.
+Live model tests are optional because they require credentials and consume external capacity. An agent may separately evaluate a live profile with agent-owned data.
 
 # Decisions & Questions
 

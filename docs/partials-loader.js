@@ -13,7 +13,7 @@ const PRIMARY_NAVIGATION = `<nav class="sidebar" aria-label="Primary documentati
   <p class="sidebar__section">CircuitJS · theory side</p>
   <a href="circuitjs.html">The theory program</a>
   <a href="operators.html">Operators and verification</a>
-  <a href="benchmark.html">Benchmarks and qualification</a>
+  <a href="benchmark.html">Benchmarks and publication</a>
 
   <p class="sidebar__section">How they connect</p>
   <a href="connection.html">The observation contract</a>

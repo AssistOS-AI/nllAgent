@@ -1,6 +1,6 @@
 {
   "name": "natural-language-linter-agent",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Declarative LongTextJS and CircuitJS runtime with persistent agents, benchmarks, and Coding Agent-driven learning.",
   "type": "module",
   "main": "src/index.mjs",
@@ -22,7 +22,7 @@
     ".agents/skills/nll-compile-theory/",
     ".agents/skills/nll-build-benchmark/",
     ".agents/skills/nll-learn-from-issues/",
-    ".agents/skills/nll-qualify-release/",
+    ".agents/skills/nll-prepare-release/",
     ".agents/skills/nll-translate-longtext/",
     ".agents/skills/nll-realize-cnl/",
     "README.md",

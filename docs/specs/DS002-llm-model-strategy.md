@@ -22,7 +22,7 @@ All semantic runtime operations pass through one backend-neutral `TranslationGat
 
 The Achilles and Coding Agent gateways build the same canonical semantic request before dispatch. The request digest includes the role, template, model tier, routing tags, prompt, output schema, and semantic context, but excludes backend routing details that do not change the requested meaning. Both backends record this digest and the response digest. Captures are stored in `model-captures.json`, outside the LongTextJS semantic object. A replay gateway indexes accepted captures by the same digest and refuses a request without an exact semantic capture.
 
-Manual runtime overrides must take precedence over environment settings. Supported semantic tiers are `fast`, `standard`, `premium`, and `verifier-independent`. Provider-specific model names belong in runtime configuration, never in CircuitJS semantics. A release must record the profile identifier and digest used during qualification.
+Manual runtime overrides must take precedence over environment settings. Supported semantic tiers are `fast`, `standard`, `premium`, and `verifier-independent`. Provider-specific model names belong in runtime configuration, never in CircuitJS semantics. A release must record the profile identifier and digest used during its publication checks.
 
 ## Role separation
 

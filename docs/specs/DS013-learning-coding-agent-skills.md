@@ -16,7 +16,7 @@ Learning compiles Markdown rules, examples, reviewer feedback, and accumulated i
 
 `nllagent learn --agent <name> --rules <folder>` must validate the agent and rule folder, snapshot Markdown rules, selected open issues, requested benchmark suites, the active release manifest, relevant DS contracts, serious-issue register, and operator/verifier catalogs into a learning-run record. The original rule folder is always copied into the run before the Coding Agent starts.
 
-The learning job progresses through triage, authority mapping, scope confirmation, rule cards, vocabulary, observation contracts, circuit pattern selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, qualification request, and summary. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
+The learning job progresses through triage, authority mapping, scope confirmation, rule cards, vocabulary, observation contracts, circuit pattern selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, and summary. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
 
 ## Coding Agent adapter
 
@@ -38,13 +38,13 @@ Learning skills are self-contained Anthropic-style skill folders. The minimum se
 - `nll-compile-theory` for rule cards, vocabulary, observation contracts, patterns, circuits, and witnesses;
 - `nll-build-benchmark` for microcase mining, contrastive cases, mutation proposals, and coverage;
 - `nll-learn-from-issues` for issue triage, failure localization, regression cases, and candidate repair;
-- `nll-qualify-release` for invoking local qualification and interpreting its report without changing the gate.
+- `nll-prepare-release` for checking candidate readiness without invoking publication or changing trusted checks.
 
 Each skill must use imperative instructions, concise progressive disclosure, `agents/openai.yaml` with implicit invocation disabled, local references where needed, and no imports from the host `src/`. Skills may call documented CLI commands, which are stable host interfaces.
 
 ## Permitted changes
 
-The learning process may write only staged agent authoring artifacts, benchmark cases, candidate packages, proposals, and current learning-run artifacts. It may propose new operators or verifiers in a proposal folder, but cannot register them. Context copies, active release pointers, qualified release contents, platform verifier code, release thresholds, CLI policy, and repository DS contracts are non-promotable even if the Coding Agent alters their staging copies.
+The learning process may write only staged agent authoring artifacts, benchmark cases, candidate packages, proposals, and current learning-run artifacts. It may propose new operators or verifiers in a proposal folder, but cannot register them. Context copies, active release pointers, published release contents, platform verifier code, release thresholds, CLI policy, and repository DS contracts are non-promotable even if the Coding Agent alters their staging copies.
 
 ## Issue learning
 
@@ -52,9 +52,9 @@ Issue triage must classify failure at ingestion, anchor, observation, identity, 
 
 Candidate repair must state a falsifiable hypothesis, affected artifacts, impact slice, new tests, and residual limitations. Several competing candidates may be retained. The first plausible patch is not automatically selected.
 
-## Promotion
+## Candidate completion and manual publication
 
-The Coding Agent may request qualification through a schema-validated `qualification-request.json` containing a semantic candidate version, requested checks, and known limitations. When `learn` is invoked with `--qualify`, the parent process may execute the requested gate only after the Coding Agent exits, the changed-path audit passes, and the final result plus qualification request validate. Successful qualification creates a qualified release but never activates it; an operator must run `release activate` separately. Without qualification, the job preserves the adapter's schema-bound terminal state as `completed`, `needs-review`, or `blocked`; a blocked job returns the learning-failure exit class rather than being mislabeled as completed.
+The learning command always stops after promoting audited authoring changes and preserving the adapter's schema-bound terminal state as `completed`, `needs-review`, or `blocked`. A blocked job returns the learning-failure exit class rather than being mislabeled as completed. Learning cannot create `publication.json`, write under `releases/`, or edit `active-release.json`. After reviewing the candidate and its benchmark evidence, a maintainer may separately run `nllagent release publish --agent <name> --candidate <version>`. That command reruns trusted checks; a request emitted by the Coding Agent cannot trigger it.
 
 # Decisions & Questions
 
@@ -66,9 +66,9 @@ Response: The learning runner starts the configured Coding Agent in a disposable
 
 Response: Separate outputs localize failure, reduce confirmation bias, allow different access policies, and keep the transition from authority to circuit reviewable.
 
-### Question #3: May the learning runner activate a release automatically?
+### Question #3: May the learning runner publish a release automatically?
 
-Response: Not by default. Candidate generation and gate execution may be automated; activation is a distinct authority action so behavior cannot drift silently.
+Response: No. Learning ends with a candidate and readiness evidence. Publication is a distinct manual maintainer command so production behavior cannot drift silently.
 
 ### Question #4: Why audit changed paths after the Coding Agent already ran?
 
@@ -76,16 +76,16 @@ Response: The audit is the promotion policy. A Coding Agent may explore within a
 
 ### Question #5: Why use a Coding Agent instead of only fixed generators?
 
-Response: Rulebooks, counterexamples, schemas, circuits, and benchmark repairs require repository-scale coding judgment. The Coding Agent performs that open-ended compilation, while staging, focused skills, static contracts, benchmarks, and the trusted release gate constrain what becomes executable production theory. The adapter boundary allows the implementation to change without changing the learned artifact contract.
+Response: Rulebooks, counterexamples, schemas, circuits, and benchmark repairs require repository-scale coding judgment. The Coding Agent performs that open-ended compilation, while staging, focused skills, static contracts, benchmarks, and manual trusted publication constrain what becomes executable production theory. The adapter boundary allows the implementation to change without changing the learned artifact contract.
 
 ### Question #6: What must another Coding Agent implement?
 
-Response: It must accept an explicit staged workspace, task, skill catalog, timeout, and result schema; run without interactive decisions; return a schema-valid terminal result and attributable event or diagnostic capture; and tolerate the same post-run changed-path audit. It receives no authority to promote or activate releases.
+Response: It must accept an explicit staged workspace, task, skill catalog, timeout, and result schema; run without interactive decisions; return a schema-valid terminal result and attributable event or diagnostic capture; and tolerate the same post-run changed-path audit. It receives no authority to publish releases or edit the active pointer.
 
 ### Question #7: How do learning agents add planning support?
 
-Response: They may propose dedicated planning circuits, idea-specific plan examples, rule-to-plan witnesses, observation profiles, planning operators, and idea-to-CNL benchmark cases in a candidate. They should derive planning and validation graphs from the same approved rule cards and reuse authority identities, schemas, and operators where their semantics coincide. They must not turn the rulebook into a CNL constraint list. They cannot edit the production realization skill, trusted CNL verifier, qualified releases, or activation pointer.
+Response: They may propose dedicated planning circuits, idea-specific plan examples, rule-to-plan witnesses, observation profiles, planning operators, and idea-to-CNL benchmark cases in a candidate. They should derive planning and validation graphs from the same approved rule cards and reuse authority identities, schemas, and operators where their semantics coincide. They must not turn the rulebook into a CNL constraint list. They cannot edit the production realization skill, trusted CNL verifier, published releases, or active pointer.
 
 # Conclusion
 
-Learning is a software and knowledge compilation workflow. A Coding Agent accelerates artifact generation and repair, while focused skills, agent-local writes, natural benchmarks, changed-path audit, qualification, and separate activation prevent a candidate from becoming silent production policy.
+Learning is a software and knowledge compilation workflow. A Coding Agent accelerates artifact generation and repair, while focused skills, agent-local writes, natural benchmarks, changed-path audit, and separate manual publication prevent a candidate from becoming silent production policy.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Benchmarks and Qualification — NaturalLanguageLinterAgent</title>
+  <title>Benchmarks and Publication Checks — NaturalLanguageLinterAgent</title>
   <link rel="stylesheet" href="styles.css">
   <script defer src="partials-loader.js"></script>
   <script type="module">
@@ -15,13 +15,13 @@
 <div class="layout">
   <aside data-include="partials/nav.html"></aside>
   <main>
-    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Benchmarks and qualification</div>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Benchmarks and publication checks</div>
     <p class="kicker">Natural cases define the operational meaning of a theory</p>
     <h1>Benchmarks that can reject a plausible mistake</h1>
     <p class="lead">An nllAgent benchmark begins with the kind of text production will receive, not with preformalized facts. Each case separately states what LongTextJS should observe and what CircuitJS should conclude, so a failure can be traced to translation, identity, coverage, theory, verification, or reporting.</p>
 
     <h2 id="why-natural">Why cases remain natural text</h2>
-    <p>If a focalization test starts with JSON saying <code>experiencer=Ilie</code> and <code>focalizer=Mara</code>, it proves only that the circuit can compare two values. It does not test whether the system can distinguish direct mental access from a visible inference in prose. Conversely, treating a hundred-page novel as one test makes disagreement almost impossible to localize.</p>
+    <p>If a focalization test starts with JSON saying <code>experiencer=Bob</code> and <code>focalizer=Alice</code>, it proves only that the circuit can compare two values. It does not test whether the system can distinguish direct mental access from a visible inference in prose. Conversely, treating a hundred-page novel as one test makes disagreement almost impossible to localize.</p>
     <p>nllAgent uses small natural microcases for precise properties and larger scenarios for composition. A microcase can be a paragraph, short scene, table fragment, or several distant excerpts joined by a context envelope. It preserves the minimum context needed for the rule while retaining source-like language.</p>
 
     <pre class="mermaid">
@@ -29,8 +29,8 @@ flowchart TB
   TEXT[Natural input.md] --> LAYER[Expected observation layer]
   LAYER --> THEORY[Expected circuit behavior]
   LAYER --> REPORT[Expected reviewer report]
-  THEORY --> CASE[Qualified case + provenance]
-  REPORT --> CASE[Qualified case + provenance]
+  THEORY --> CASE[Validated case + provenance]
+  REPORT --> CASE[Validated case + provenance]
     </pre>
     <p class="diagram-caption"><strong>One case, several oracles.</strong> Natural input exercises the whole pipeline. Structured layers locate the cause of failure; the Markdown expectation keeps the human-facing contract visible.</p>
 
@@ -49,7 +49,7 @@ flowchart TB
         <tr><td><code>case.json</code></td><td>Rule, family, validation status, report comparison mode, rationale, and optional semantic rubric or transformation lineage.</td></tr>
       </tbody>
     </table></div>
-    <p>All four must be regular files in an agent-owned directory. Incomplete folders, symlinks, duplicate case identifiers, or missing expected layers fail qualification. A case may additionally carry approved observations, context-envelope metadata, transformation lineage, or fixture context.</p>
+    <p>All four must be regular files in an agent-owned directory. Incomplete folders, symlinks, duplicate case identifiers, or missing expected layers fail the benchmark. A case may additionally carry approved observations, context-envelope metadata, transformation lineage, or fixture context.</p>
 
     <h3>A concrete structured expectation</h3>
     <pre><code>{
@@ -57,7 +57,7 @@ flowchart TB
   "observations": [
     {
       "type": "document.paragraph@1",
-      "quote": "De fapt"
+      "quote": "In fact"
     }
   ],
   "circuit": {
@@ -114,7 +114,7 @@ flowchart TB
   RUN --> SEM[Semantic perspectives]
   STRUCT --> RESULT[Layered case result]
   SEM --> RESULT
-  RESULT --> GATE[Suite and release policy]
+  RESULT --> GATE[Suite and publication policy]
     </pre>
     <p class="diagram-caption"><strong>Structured truth stays primary.</strong> Semantic evaluation can detect a materially changed explanation, but it cannot excuse wrong status, observations, coverage, findings, or guarantees.</p>
 
@@ -133,11 +133,10 @@ flowchart TB
       <li>Run the complete suite and confirm the new case rejects the intended defect without rewriting older oracles.</li>
     </ol>
 
-    <h2 id="qualification">From candidate to immutable release</h2>
+    <h2 id="publication">From candidate to immutable release</h2>
     <pre><code>nllagent benchmark --agent editorial --json
-nllagent release qualify --agent editorial --candidate 1.1.0
-nllagent release activate --agent editorial --release 1.1.0</code></pre>
-    <p>The qualification gate applies checks in dependency order. Later utility cannot compensate for an earlier constitutional failure:</p>
+nllagent release publish --agent editorial --candidate 0.1.0</code></pre>
+    <p>The manual publication command applies checks in dependency order. Later utility cannot compensate for an earlier safety failure:</p>
     <ol>
       <li>Validate candidate and benchmark containment, regular files, manifests, schemas, restricted module form, and canonical artifacts.</li>
       <li>Compile every circuit, link exact operator and verifier versions, enforce verification dominance, and derive observation contracts.</li>
@@ -146,15 +145,15 @@ nllagent release activate --agent editorial --release 1.1.0</code></pre>
       <li>Confirm candidate and benchmark bytes did not change during execution.</li>
       <li>Compute the semantic circuit diff and impact map against lineage.</li>
       <li>Copy the exact tested snapshots into a temporary release, verify the copies and digests, persist results and alignment artifacts, and atomically publish the immutable version.</li>
-      <li>Leave activation for the separate operator command.</li>
+      <li>Update the active pointer only after the immutable release has been loaded and verified successfully.</li>
     </ol>
 
-    <h3 id="current-scope">What qualification currently proves</h3>
+    <h3 id="current-scope">What publication checks currently prove</h3>
     <p>The implemented local gate proves the static CircuitJS and registry checks it records, critical observation-producer alignment, structured results for every suite it executes, declared benchmark-policy coverage, candidate and benchmark snapshot stability, local digests, semantic diff, and impact mapping. The included <code>editorial-demo</code> currently exercises ten public and adversarial cases across two lexical rules, including positive, clean negative, whole-word, exact threshold, paragraph scope, dialogue exceptions, code-fence scope, and instruction-like source text.</p>
-    <div class="callout warning"><strong>Do not overread the gate.</strong> The repository does not yet generate mutated CircuitJS or LongTextJS programs and calculate a mutation score. It also does not yet run differential implementations, shadow or canary traffic, or a complete precision, recall, latency, cost, review-time, and complexity qualification program. A natural case stored under <code>benchmark/mutations/</code> is useful, but is not equivalent to generated mutation execution. These limits remain explicit in <a href="../serious_issues.md">serious issues</a>.</div>
+    <div class="callout warning"><strong>Do not overread the checks.</strong> The repository does not yet generate mutated CircuitJS or LongTextJS programs and calculate a mutation score. It also does not yet run differential implementations, shadow or canary traffic, or a complete precision, recall, latency, cost, review-time, and complexity evaluation program. A natural case stored under <code>benchmark/mutations/</code> is useful, but is not equivalent to generated mutation execution. These limits remain explicit in <a href="../serious_issues.md">serious issues</a>.</div>
 
     <h2 id="next">Continue the lifecycle</h2>
-    <p>Read <a href="learning.html#issue-to-release">Learning workflow</a> to see how feedback becomes a regression case, <a href="artifacts.html#release-directory">Artifacts</a> for the qualified release contents, <a href="translation.html#captures-replay">Translation</a> for semantic evaluator captures, and <a href="security.html#qualification-trust">Runtime boundaries</a> for gate independence.</p>
+    <p>Read <a href="learning.html#issue-to-release">Learning workflow</a> to see how feedback becomes a regression case, <a href="artifacts.html#release-directory">Artifacts</a> for the published release contents, <a href="translation.html#captures-replay">Translation</a> for semantic evaluator captures, and <a href="security.html#publication-trust">Runtime boundaries</a> for publication independence.</p>
     <footer>Normative benchmark and release-gate contract: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a>.</footer>
   </main>
 </div>

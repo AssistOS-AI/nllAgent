@@ -1,9 +1,9 @@
 'use strict';
 
-const AUDIT_SOURCE = 'Mara a intrat în cameră. De fapt, fereastra era deschisă.';
-const DIALOGUE_SOURCE = '— De fapt, fereastra era deschisă, spuse Mara.';
+const AUDIT_SOURCE = 'Alice entered the room. In fact, the window was open.';
+const DIALOGUE_SOURCE = '— In fact, the window was open, said Alice.';
 const PLAN_SOURCE = [
-  'Write two Romanian narrative paragraphs about Mara returning to an empty railway station at dusk.',
+  'Write two English narrative paragraphs about Alice returning to an empty railway station at dusk.',
   'End with a station employee saying that the final train departed.'
 ].join('\n');
 
@@ -18,8 +18,8 @@ function pointOffset(value, utf16Offset) {
 }
 
 function lexicalRanges(text, term) {
-  const source = text.toLocaleLowerCase('ro');
-  const expected = term.toLocaleLowerCase('ro');
+  const source = text.toLocaleLowerCase('en');
+  const expected = term.toLocaleLowerCase('en');
   const ranges = [];
   let cursor = 0;
   while (cursor <= source.length - expected.length) {
@@ -84,7 +84,7 @@ function auditSteps(rawSource) {
     }]
   };
   const circuit = {
-    id: 'editorial.weak-phrase@3.0.0',
+    id: 'editorial.weak-phrase@0.1.0',
     input: {
       name: 'paragraphs',
       type: 'document.paragraph@1',
@@ -98,7 +98,7 @@ function auditSteps(rawSource) {
       'findings: emit verified'
     ],
     rule: {
-      id: 'ED-001', term: 'de fapt', wholeWord: true, caseSensitive: false,
+      id: 'ED-001', term: 'in fact', wholeWord: true, caseSensitive: false,
       excludedPrefixes: ['—', '–']
     }
   };
@@ -124,7 +124,7 @@ function auditSteps(rawSource) {
     witness: {
       kind: 'ExactTextMatch',
       observationId: paragraph.id,
-      term: 'de fapt',
+      term: 'in fact',
       caseSensitive: false,
       wholeWord: true,
       excludedPrefixes: ['—', '–']
@@ -166,7 +166,7 @@ function auditSteps(rawSource) {
       kind: 'CNLAuditObservation',
       rule: finding.rule,
       verdict: finding.verdict,
-      statement: 'The narrative paragraph contains the weak phrase “de fapt”.',
+      statement: 'The narrative paragraph contains the weak phrase “in fact”.',
       evidence: [finding.mainAnchor],
       guarantee: finding.guarantee,
       verifier: finding.verifierResult.verifier
@@ -248,7 +248,7 @@ function planningSteps(rawSource) {
   }));
   const sourceIdea = nonEmptyLines.join('\n');
   const circuit = {
-    id: 'editorial.scene-cnl-plan@3.1.0', purpose: 'planning',
+    id: 'editorial.scene-cnl-plan@0.1.0', purpose: 'planning',
     input: {
       name: 'idea', type: 'document.line@1', cardinality: 'at-least-one',
       statuses: ['extracted'], coverage: 'closed-world'
@@ -260,10 +260,10 @@ function planningSteps(rawSource) {
     ]
   };
   const planBody = {
-    title: 'Plan for a controlled Romanian literary scene',
+    title: 'Plan for a controlled English literary scene',
     sourceIdea,
     document: {
-      type: 'short literary scene in Markdown', language: 'Romanian',
+      type: 'short literary scene in Markdown', language: 'English',
       audience: 'adult literary readers',
       purpose: 'Realize the supplied idea as a coherent scene with concrete narrative prose.'
     },
@@ -275,8 +275,8 @@ function planningSteps(rawSource) {
     realizationGuidance: [
       'Preserve every explicit fact from the idea.',
       'Use restrained, concrete narrative prose.',
-      'Do not use “de fapt” in narrative paragraphs.',
-      'Use “parcă” no more than twice in one narrative paragraph.',
+      'Do not use “in fact” in narrative paragraphs.',
+      'Use “perhaps” no more than twice in one narrative paragraph.',
       'Treat dash-prefixed Markdown paragraphs as dialogue.'
     ]
   };

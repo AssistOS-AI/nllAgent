@@ -33,7 +33,7 @@
     <div class="table-wrap"><table>
       <thead><tr><th>Object</th><th>Beginner's question</th><th>Example</th></tr></thead>
       <tbody>
-        <tr><td>Source</td><td>What exact text or idea did the user supply?</td><td><code>De fapt</code> occurs at a
+        <tr><td>Source</td><td>What exact text or idea did the user supply?</td><td><code>In fact</code> occurs at a
           Unicode range in one Markdown snapshot.</td></tr>
         <tr><td>LongTextJS observation</td><td>What typed thing did the compiler observe, and where?</td><td>An
           extracted <code>document.paragraph@1</code> linked to the range containing the paragraph.</td></tr>
@@ -54,7 +54,7 @@
     <p>The browser model below mirrors the current <code>editorial-demo</code> lexical and planning paths. It is an
       educational simulator, not the production runtime: it does not load a release, create cryptographic hashes, or
       make model calls. Its stages, value shapes, exclusion rule, verification checks, and publication boundary are
-      derived from the actual release 4.0.0 and scheduler implementation.</p>
+      derived from the actual MVP release 0.1.0 and scheduler implementation.</p>
 
     <section class="circuit-lab" aria-labelledby="tutorial-lab-title">
       <h3 id="tutorial-lab-title">Interactive circuit walkthrough</h3>
@@ -95,7 +95,7 @@
     <ol class="step-list">
       <li>Start with the positive audit and move to “Candidate operator.” Notice that the operator returns
         <code>FindingCandidate</code>, not <code>Finding</code>.</li>
-      <li>Change <code>De fapt</code> to <code>Defaptic</code>. Whole-word policy should produce no candidate.</li>
+      <li>Change <code>In fact</code> to <code>In factually</code>. Whole-word policy should produce no candidate.</li>
       <li>Select the dialogue example. Remove its initial dash and rebuild. The same words become eligible because the
         released exception is encoded as a source-prefix policy.</li>
       <li>Select the planning example. Edit the idea and inspect “Plan construction.” The rulebook stays fixed, but
@@ -106,9 +106,9 @@
 
     <h2 id="two-times">3. Compilation time and execution time are different</h2>
     <p>This distinction prevents many misunderstandings. Compilation asks whether a theory is a valid, schedulable
-      program. Execution asks what that already-qualified theory produces for one LongTextJS instance.</p>
+      program. Execution asks what that already-published theory produces for one LongTextJS instance.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>Compilation and qualification</th><th>Production execution</th></tr></thead>
+      <thead><tr><th>Compilation and publication checks</th><th>Production execution</th></tr></thead>
       <tbody>
         <tr><td>Parse the restricted <code>.circuit.mjs</code> author expression into JSON-compatible data.</td><td>Load
           the immutable compiled graph selected by the run's release.</td></tr>
@@ -133,7 +133,7 @@
       JavaScript function calls executed during production.</p>
     <pre><code>inputs: {
   observations: port('paragraphs'),    // external LongTextJS records
-  rules: [{ id: 'ED-001', term: 'de fapt', /* released policy */ }]
+  rules: [{ id: 'ED-001', term: 'in fact', /* published policy */ }]
 }
 
 inputs: {
@@ -213,7 +213,7 @@ flowchart TB
       can prove that the supplied event sequence has a gap. It cannot prove that a model classified every event or
       identity correctly unless those premises have their own stronger evidence.</p>
 
-    <p>For example, a model may propose “Mara left phone-1 in the car” and later “Mara used phone-1 in the hotel.” A
+    <p>For example, a model may propose “Alice left phone-1 in the car” and later “Alice used phone-1 in the hotel.” A
       continuity operator orders all materialized events and looks for retrieve, transfer, or replacement transitions.
       Its witness includes both events, the object identity, the intervening event domain, and coverage. The verifier
       replays the state transition. If extraction between the scenes is incomplete, the responsible result is
@@ -309,7 +309,7 @@ flowchart TB
     </nav>
 
     <footer>The interactive model teaches the execution shape. The production authorities are the immutable circuit,
-      LongTextJS program, scheduler trace, verifier record, DS contracts, and qualified release.</footer>
+      LongTextJS program, scheduler trace, verifier record, DS contracts, and published release.</footer>
   </main>
 </div>
 </body>

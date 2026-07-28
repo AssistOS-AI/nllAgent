@@ -3,8 +3,8 @@ import test from 'node:test';
 import { compileMarkdown } from '../../src/longtext/compiler.mjs';
 
 test('Markdown compilation preserves Unicode code-point anchors and coverage', () => {
-  const source = '# Titlu\n\nȘtefan spune ceva. De fapt, pleacă.\n';
-  const program = compileMarkdown(source, { language: 'ro' });
+  const source = '# Title\n\nStephen says something. In fact, he leaves.\n';
+  const program = compileMarkdown(source, { language: 'en' });
   assert.equal(program.source.content, source);
   assert.equal(program.views[0].complete, true);
   assert.equal(program.coverage[0].mode, 'closed-world');

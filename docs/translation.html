@@ -22,7 +22,7 @@
     <p>Start with <a href="longtextjs.html">the LongTextJS document program</a> if you need the surrounding source, anchor, status, coverage, and gap model. This page focuses only on the semantic materialization step.</p>
 
     <h2 id="purpose">What this layer does—and does not do</h2>
-    <p>When a release circuit consumes <code>narrative.object-event@1</code>, the runtime needs observations such as “Mara left the phone in the car” and “Mara used the phone in the hotel,” including exact evidence, scope, negation, and modality. A translation backend receives a neutral demand and selected source fragments, then returns schema-bound candidate observations. The LongTextJS compiler validates and anchors those candidates before admitting them.</p>
+    <p>When a release circuit consumes <code>narrative.object-event@1</code>, the runtime needs observations such as “Alice left the phone in the car” and “Alice used the phone in the hotel,” including exact evidence, scope, negation, and modality. A translation backend receives a neutral demand and selected source fragments, then returns schema-bound candidate observations. The LongTextJS compiler validates and anchors those candidates before admitting them.</p>
     <p>The translator does <em>not</em> decide whether the two events form a continuity error. It does not see a hidden expected verdict, edit the active circuit, declare coverage by itself, or publish a finding. That separation keeps extraction errors distinguishable from rule errors and allows the same document world to be reused by several circuits.</p>
 
     <pre class="mermaid">
@@ -77,11 +77,11 @@ flowchart TB
     <p>The current reference implementation is OpenAI Codex. That is why the public compatibility option is currently named <code>--translator codex</code>, the executable override is <code>--codex-bin</code>, and <code>NLL_CODEX_BIN</code> is recognized. Codex is an example of the broader Coding Agent role, not part of LongTextJS or CircuitJS semantics. Another adapter may use a different executable or protocol if it preserves workspace isolation, skill restriction, schema output, captures, timeouts, and capability boundaries.</p>
 
     <h2 id="request-walkthrough">Walk through one extraction call</h2>
-    <p>Assume a continuity circuit demands <code>narrative.object-event@1</code> and the source block reads: “Mara left her phone in the glove compartment.”</p>
+    <p>Assume a continuity circuit demands <code>narrative.object-event@1</code> and the source block reads: “Alice left her phone in the glove compartment.”</p>
     <ol>
       <li><strong>Demand planning:</strong> the analyzer sees that no structural producer can create the required semantic type and selects the release’s extraction profile for that type.</li>
       <li><strong>Neutral request:</strong> the profile supplies the observation schema, permitted event kinds, instructions to preserve negation and modality, source block identifiers, and the required exact quotation. It does not ask whether continuity is violated.</li>
-      <li><strong>Backend call:</strong> Achilles or the Coding Agent returns a candidate with kind <code>leave</code>, actor <code>Mara</code>, object <code>phone</code>, location <code>glove compartment</code>, and the quoted sentence.</li>
+      <li><strong>Backend call:</strong> Achilles or the Coding Agent returns a candidate with kind <code>leave</code>, actor <code>Alice</code>, object <code>phone</code>, location <code>glove compartment</code>, and the quoted sentence.</li>
       <li><strong>Compiler validation:</strong> the response must satisfy the complete nested schema. The quote is searched in the named block, an exact Unicode anchor is created, enums and fields are checked, and provenance records the profile and backend capture.</li>
       <li><strong>Admission or gap:</strong> a valid candidate becomes a <code>proposed</code> LongTextJS observation. A missing quote, unknown field, wrong block, malformed response, or exhausted budget becomes a diagnostic and capability gap.</li>
       <li><strong>Later judgment:</strong> CircuitJS can correlate this event with later events. The model response itself never becomes a finding.</li>
@@ -120,7 +120,7 @@ nllagent run ... --translator none</code></pre>
 
     <h2 id="implementation">Implementation and tests</h2>
     <p>The backend resolver lives in <code>src/model/translation-backends.mjs</code>; Achilles integration and configuration inspection live in <code>src/model/achilles-gateway.mjs</code>; the shipped Coding Agent implementation lives in <code>src/model/codex-translation-backend.mjs</code>; materialization and anchoring are coordinated by <code>src/longtext/compiler.mjs</code> and <code>src/runtime/analyzer.mjs</code>. Tests use controlled <code>LLMAgent.executePrompt()</code> and process doubles so the default suite is deterministic and credential-independent. They cover route selection, Spark preference, complete schemas, Unicode and repeated anchors, request digests, captures, replay, Coding Agent workspace isolation, and an end-to-end semantic continuity circuit.</p>
-    <p>Those offline tests validate the integration contract, not a live provider’s quality. High-impact releases still need explicit live-profile qualification against representative agent-owned cases, as recorded in <a href="../serious_issues.md">serious issues</a>.</p>
+    <p>Those offline tests validate the integration contract, not a live provider’s quality. High-impact releases still need explicit live-profile evaluation against representative agent-owned cases, as recorded in <a href="../serious_issues.md">serious issues</a>.</p>
 
     <footer>Normative backend contract: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>. Model strategy and guarantees: <a href="specsLoader.html?spec=DS002-llm-model-strategy.md">DS002</a>.</footer>
   </main>

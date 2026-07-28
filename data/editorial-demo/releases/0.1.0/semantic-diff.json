@@ -1,0 +1,31 @@
+{
+  "circuits": [
+    {
+      "afterDigest": "sha256:17a4b9ef108de02862425ed2a08c11318ab8d808386861f8e1eb3f466ba2cf1e",
+      "beforeDigest": null,
+      "change": "added",
+      "id": "editorial.perhaps-frequency"
+    },
+    {
+      "afterDigest": "sha256:c00c850db78eb294c637c0fd3efc611891d0ce0f6d5c7ea55db686e5f896c72f",
+      "beforeDigest": null,
+      "change": "added",
+      "id": "editorial.scene-cnl-plan"
+    },
+    {
+      "afterDigest": "sha256:f6ef8171d2d61f11821c8bb7f941e2224b2655e2109fbd793dd80d63d0110d84",
+      "beforeDigest": null,
+      "change": "added",
+      "id": "editorial.weak-phrase"
+    }
+  ],
+  "compatibilityChanged": true,
+  "from": null,
+  "kind": "SemanticDiff",
+  "knownLimitations": [
+    "Dialogue scope is recognized by the em-dash or en-dash paragraph-prefix convention.",
+    "The demonstration planning circuit targets a short English literary scene; final text realization is optional and model-assisted."
+  ],
+  "schemaVersion": 1,
+  "to": "0.1.0"
+}

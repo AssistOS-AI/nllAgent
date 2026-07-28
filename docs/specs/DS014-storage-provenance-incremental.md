@@ -28,7 +28,7 @@ The implementation must expose source, materialization, circuit catalog, operato
 
 Writes must be atomic through temporary sibling files and rename. Directories representing runs, releases, candidates, and learning jobs must use lock files with owner metadata and bounded expiry. A second process must not edit the same candidate or active pointer concurrently. Stale locks require an explicit recovery command or validated expiry policy.
 
-The filesystem implementation uses exclusive-create locks carrying process, host, operation, acquisition, and expiry metadata. A production run holds its unique run lock until terminalization. Qualification and activation share an agent release lock, and a learning job holds an agent learning lock that serializes candidate authoring. Contention fails immediately with `workspace-locked`; it never waits indefinitely or silently breaks a stale lock.
+The filesystem implementation uses exclusive-create locks carrying process, host, operation, acquisition, and expiry metadata. A production run holds its unique run lock until terminalization. Manual publication holds an agent release lock, and a learning job holds an agent learning lock that serializes candidate authoring. Contention fails immediately with `workspace-locked`; it never waits indefinitely or silently breaks a stale lock.
 
 Run creation fixes source digest, agent manifest, release manifest, operational context, model profile, operator registry, verifier registry, and task. Later publication cannot change the snapshot. Checkpoints must include their dependency digests so resume rejects stale state.
 

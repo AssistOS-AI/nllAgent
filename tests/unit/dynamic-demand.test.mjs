@@ -24,7 +24,7 @@ test('an unresolved critical NeedObservation stops incomplete instead of becomin
     manifest: { version: '1.0.0', circuits: ['circuits/demand.json'], extractionProfiles: [] }
   };
   const analysis = await analyzeText({
-    agentName: 'test', text: 'Mara folosește telefonul.\n', release,
+    agentName: 'test', text: 'Alice uses the phone.\n', release,
     registries: createStandardRegistries()
   });
   assert.equal(analysis.status, 'stopped-incomplete');

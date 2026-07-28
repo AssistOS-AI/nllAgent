@@ -60,7 +60,7 @@ Circuit errors are values with stable codes, including `no-match`, `not-applicab
 
 ## Educational execution model
 
-The technical documentation must include a beginner-oriented, interactive execution tutorial grounded in a qualified repository circuit. The tutorial must distinguish compilation from production execution and show the concrete values at source snapshot, LongTextJS observation, derived observation contract, compatibility and port binding, operator candidate, verifier result, `emit`, and final CNL assembly. It must cover at least one accepted finding, one legitimate empty result caused by an exception, and one planning circuit that emits `CNL/Plan-1`.
+The technical documentation must include a beginner-oriented, interactive execution tutorial grounded in a published repository circuit. The tutorial must distinguish compilation from production execution and show the concrete values at source snapshot, LongTextJS observation, derived observation contract, compatibility and port binding, operator candidate, verifier result, `emit`, and final CNL assembly. It must cover at least one accepted finding, one legitimate empty result caused by an exception, and one planning circuit that emits `CNL/Plan-1`.
 
 The browser walkthrough is an explicitly labeled educational simulator. It may mirror deterministic released behavior for exploration, but it must not claim to load the active release or replace the production compiler, scheduler, verifier, or run trace. Explanations must distinguish empty match, rejected witness, incompatible input, incomplete coverage, and budget exhaustion.
 
@@ -84,7 +84,7 @@ Response: No. MJS is the surface notation for building the same declarative grap
 
 ### Question #5: What is the executable output of observation-contract derivation?
 
-Response: Compilation emits an `ObservationContract` for the external LongTextJS input ports actually consumed by the graph, including nominal types, versions, cardinality, accepted statuses, coverage, and guarantee requirements. Qualification then links each critical demand to a declared producer.
+Response: Compilation emits an `ObservationContract` for the external LongTextJS input ports actually consumed by the graph, including nominal types, versions, cardinality, accepted statuses, coverage, and guarantee requirements. Manual publication then links each critical demand to a declared producer.
 
 ### Question #6: Can validation and planning share CircuitJS?
 

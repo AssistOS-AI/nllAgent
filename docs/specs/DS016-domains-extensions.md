@@ -8,7 +8,7 @@ summary: Defines extension packaging for editorial, normative, technical, scient
 
 # Introduction
 
-The core system must support radically different document theories without embedding each domain in the runtime. Extensions enter through common contracts and remain independently qualified.
+The core system must support radically different document theories without embedding each domain in the runtime. Extensions enter through common contracts and remain independently evaluated.
 
 # Core Content
 
@@ -50,7 +50,7 @@ Critical runtime properties such as verification dominance, fixpoint monotonicit
 
 ### Question #1: When should a repeated circuit pattern become a primitive?
 
-Response: Only after multiple qualified circuits demonstrate stable semantics, a clear contract, measurable complexity reduction, verifier support, and mutation tests. The primitive proposal must preserve existing behavior.
+Response: Only after multiple evaluated circuits demonstrate stable semantics, a clear contract, measurable complexity reduction, verifier support, and mutation tests. The primitive proposal must preserve existing behavior.
 
 ### Question #2: Is multimodal support part of the default Markdown CLI?
 
@@ -66,4 +66,4 @@ Response: It must provide representative ideas, idea-observation schemas, one or
 
 # Conclusion
 
-Domain breadth comes from qualified modules and solver contracts, not from weakening the core into an opaque universal prompt. Unsupported extensions remain explicit gaps.
+Domain breadth comes from published modules and solver contracts, not from weakening the core into an opaque universal prompt. Unsupported extensions remain explicit gaps.

@@ -1,6 +1,0 @@
-{
-  "schemaVersion": 1,
-  "circuit": { "status": "reported", "findingCount": 1, "findingRules": ["ED-002"] },
-  "findings": [{ "rule": "ED-002", "verdict": "editorial-warning", "severity": "warning", "guarantee": "mechanically-certified", "quote": "parcă" }],
-  "observations": [{ "type": "document.paragraph@1", "quote": "Parcă ploua" }]
-}

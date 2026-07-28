@@ -1,0 +1,15 @@
+{
+  "affectedCircuits": [
+    "editorial.perhaps-frequency",
+    "editorial.scene-cnl-plan",
+    "editorial.weak-phrase"
+  ],
+  "affectedRules": [
+    "authority/style-guide.md#rule-ed-001-weak-phrase-in-narration",
+    "authority/style-guide.md#rule-ed-002-repeated-perhaps-in-one-narrative-paragraph"
+  ],
+  "kind": "ImpactMap",
+  "reanalysisRequired": true,
+  "release": "0.1.0",
+  "schemaVersion": 1
+}

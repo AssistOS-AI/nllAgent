@@ -1,0 +1,252 @@
+{
+  "benchmarkPolicy": {
+    "minimumCases": 10,
+    "requireCaseMetadata": true,
+    "rules": [
+      {
+        "requiredFamilies": [
+          "positive",
+          "negative",
+          "exception",
+          "adversarial"
+        ],
+        "rule": "ED-001"
+      },
+      {
+        "requiredFamilies": [
+          "positive",
+          "boundary",
+          "scope",
+          "exception"
+        ],
+        "rule": "ED-002"
+      }
+    ]
+  },
+  "benchmarkSnapshot": "benchmark-snapshot",
+  "blockingSeverities": [
+    "error",
+    "critical",
+    "blocker"
+  ],
+  "circuits": [
+    "circuits/weak-phrase.circuit.mjs",
+    "circuits/perhaps-frequency.circuit.mjs"
+  ],
+  "compatibilityProfile": "compatibility.json",
+  "description": "MVP English editorial audit and CNL generation-plan candidate.",
+  "files": [
+    {
+      "digest": "sha256:f30c1a35295a2ddb4e730193aea136e9e5537ff8554ab7fe2723f0ddc1b259f3",
+      "path": "alignment-report.json"
+    },
+    {
+      "digest": "sha256:051bbd7c7eb4e7446385935e53986f4ac28c7f1815517851f26e8d03ed372de7",
+      "path": "authority-map.json"
+    },
+    {
+      "digest": "sha256:61d036d63be6b63c70186606b544f794edd82f3bf04b1371e54276cdc23d27e8",
+      "path": "benchmark-results.json"
+    },
+    {
+      "digest": "sha256:ceb7e264ff9f4db9471caf778495d1b2fb4d50cce419df323829c1f6b82df40d",
+      "path": "benchmark-snapshot/adversarial/ed001-code-instruction/case.json"
+    },
+    {
+      "digest": "sha256:802f343bf8125190105d21f88e72c32b148214ac17e394f05726ef69ecf2ebea",
+      "path": "benchmark-snapshot/adversarial/ed001-code-instruction/expected.json"
+    },
+    {
+      "digest": "sha256:4e606dc153aaefa672d7bf1ffee6f201776c4538dfeee678160bc5bc36149d03",
+      "path": "benchmark-snapshot/adversarial/ed001-code-instruction/expected.md"
+    },
+    {
+      "digest": "sha256:1b12304cde6ca35bb8cc1abf2531c10afe5e58c96d92fdca14522e6ea0d34a61",
+      "path": "benchmark-snapshot/adversarial/ed001-code-instruction/input.md"
+    },
+    {
+      "digest": "sha256:0a0ff1f1f10638517ca5a4a7a551daa2539330cc6caefb99aa5a7cc176f3794d",
+      "path": "benchmark-snapshot/adversarial/ed002-code-scope/case.json"
+    },
+    {
+      "digest": "sha256:8bc0a58a8ad85ffcdc49c16f59dcebb0c27392306423d32fbf8e4527ce9b0732",
+      "path": "benchmark-snapshot/adversarial/ed002-code-scope/expected.json"
+    },
+    {
+      "digest": "sha256:977afdb02b77cc8158a13a9e98c43a05b439f43b9ea32fac406a6ab2d02718d6",
+      "path": "benchmark-snapshot/adversarial/ed002-code-scope/expected.md"
+    },
+    {
+      "digest": "sha256:025933ebd29498d65cb2cd4c906c19f2cccb40e1f1b3bb2a00e59f997815736c",
+      "path": "benchmark-snapshot/adversarial/ed002-code-scope/input.md"
+    },
+    {
+      "digest": "sha256:16aace07f3edb1f147d64dc22eb4e6be0becf8270c2e46fa388189a13e31b4c3",
+      "path": "benchmark-snapshot/public/ed001-dialogue-exception/case.json"
+    },
+    {
+      "digest": "sha256:0cf01dfd2e6ee56ff7fe1f30bf44594515a5a48b21a66929a5388ba0dc975306",
+      "path": "benchmark-snapshot/public/ed001-dialogue-exception/expected.json"
+    },
+    {
+      "digest": "sha256:774bb3c385e1937fab1a1501281c64f29be19206c51f5438215e16e3dc1f0b4e",
+      "path": "benchmark-snapshot/public/ed001-dialogue-exception/expected.md"
+    },
+    {
+      "digest": "sha256:ee33fd86cdb48b2ab28c2f0f443df14c174144603b63d53409664195fd4612d3",
+      "path": "benchmark-snapshot/public/ed001-dialogue-exception/input.md"
+    },
+    {
+      "digest": "sha256:b7ed1159fc15274e05f0a1cdd061efc761638faebdc87b0f33cfffd875283e74",
+      "path": "benchmark-snapshot/public/ed001-negative-clean/case.json"
+    },
+    {
+      "digest": "sha256:313773972c4f7a5e269824e928164618f4f5bd352160a551baa16c7752d6ce15",
+      "path": "benchmark-snapshot/public/ed001-negative-clean/expected.json"
+    },
+    {
+      "digest": "sha256:99eb4ccd343d735394d8110dcfcb9fd32bff1b61bbaf1d670bc908c8e7d3b8f6",
+      "path": "benchmark-snapshot/public/ed001-negative-clean/expected.md"
+    },
+    {
+      "digest": "sha256:66e374bb95c7e3e044d35ced18628551c349903a21a6cbbfd39b2974ffcc53c7",
+      "path": "benchmark-snapshot/public/ed001-negative-clean/input.md"
+    },
+    {
+      "digest": "sha256:9ac8bd1f0156c02760d7de713d0d2e351e1c5d4dc0b508db606dd56697959399",
+      "path": "benchmark-snapshot/public/ed001-whole-word-boundary/case.json"
+    },
+    {
+      "digest": "sha256:7646571a4c4ba73516fd79c7e16ea0507184d91de52a515e8a3c98d4a4f69ff8",
+      "path": "benchmark-snapshot/public/ed001-whole-word-boundary/expected.json"
+    },
+    {
+      "digest": "sha256:5c059308471050884a52d8bc8af79b483a24a0f87b9abfb467fbae5171cc230b",
+      "path": "benchmark-snapshot/public/ed001-whole-word-boundary/expected.md"
+    },
+    {
+      "digest": "sha256:490b141f70f820c1e978526205aacaa241df698e4f297a69f7c7022ddf80a2f2",
+      "path": "benchmark-snapshot/public/ed001-whole-word-boundary/input.md"
+    },
+    {
+      "digest": "sha256:0a0ff1f1f10638517ca5a4a7a551daa2539330cc6caefb99aa5a7cc176f3794d",
+      "path": "benchmark-snapshot/public/ed002-dialogue-exception/case.json"
+    },
+    {
+      "digest": "sha256:5947acb3d24ceec8ce84e7a41c26adc58c473c8dd55e87e464f3b1b1838be5cf",
+      "path": "benchmark-snapshot/public/ed002-dialogue-exception/expected.json"
+    },
+    {
+      "digest": "sha256:5f13f003fcde94fc756a528a707752f747a5c40fba304707d2589c8860b90181",
+      "path": "benchmark-snapshot/public/ed002-dialogue-exception/expected.md"
+    },
+    {
+      "digest": "sha256:fc5dbea6785ee20e999026c3454af69833aa6bed93910e4c50e6a7982735f828",
+      "path": "benchmark-snapshot/public/ed002-dialogue-exception/input.md"
+    },
+    {
+      "digest": "sha256:1d7f5b1165342c7ac07f0b4049505a28a68567ab66d3770eca56bc73a4c75e2b",
+      "path": "benchmark-snapshot/public/ed002-exactly-two/case.json"
+    },
+    {
+      "digest": "sha256:b7ab37af4156932ffbf99dd08f14c71dfc48ca25bddedc9938f209d5a9afcb30",
+      "path": "benchmark-snapshot/public/ed002-exactly-two/expected.json"
+    },
+    {
+      "digest": "sha256:ebd0ad5c94ed1a293b1cd252d797686e91b34f6df1c32fe52d9fcdb124c52148",
+      "path": "benchmark-snapshot/public/ed002-exactly-two/expected.md"
+    },
+    {
+      "digest": "sha256:ae7c627f2051f334bd1d6efec0b47b2bbcbbe8c74db63c0e47ab839b16209372",
+      "path": "benchmark-snapshot/public/ed002-exactly-two/input.md"
+    },
+    {
+      "digest": "sha256:1d1f0ea547d3f9e750478ef46c35eae5a8465abac3d16dcf29c8b403d0e25de4",
+      "path": "benchmark-snapshot/public/ed002-paragraph-scope/case.json"
+    },
+    {
+      "digest": "sha256:e920816bc5adfbeff29657af5a6d2bff0ab7b36459101e1f7a55d3afe9d8660e",
+      "path": "benchmark-snapshot/public/ed002-paragraph-scope/expected.json"
+    },
+    {
+      "digest": "sha256:45a8956221e4d41ddf81ab63bb993c10e268484225c6f469a17ad984abe6443b",
+      "path": "benchmark-snapshot/public/ed002-paragraph-scope/expected.md"
+    },
+    {
+      "digest": "sha256:d23ee704b938c6289040ed60a545c6ca96a5976af604a278f780299b7fef29ee",
+      "path": "benchmark-snapshot/public/ed002-paragraph-scope/input.md"
+    },
+    {
+      "digest": "sha256:562608b31f1569fee8624c6f4e582775ee052ea716c4a2bbe22788a93b5f6e06",
+      "path": "benchmark-snapshot/public/ed002-three-in-one/case.json"
+    },
+    {
+      "digest": "sha256:b4c33eb207e5239c75b836aad6fc272a91fd6826086bf998a074ea7a88cb9e9b",
+      "path": "benchmark-snapshot/public/ed002-three-in-one/expected.json"
+    },
+    {
+      "digest": "sha256:4f3b144fca7ea2a649cfe38c77e518b621022b0508210113f0a2257e8821d03a",
+      "path": "benchmark-snapshot/public/ed002-three-in-one/expected.md"
+    },
+    {
+      "digest": "sha256:48ea40d59cceced799b38663cf8c3015d489af707fd0c5e9947ae915965b9a02",
+      "path": "benchmark-snapshot/public/ed002-three-in-one/input.md"
+    },
+    {
+      "digest": "sha256:f107e06e16980f4e3c0e43002befe2271408bf757be0168cee657d99ba45bd77",
+      "path": "benchmark-snapshot/public/weak-phrase/case.json"
+    },
+    {
+      "digest": "sha256:c9eb32a7158cd0cdd5ac84aeadab6d3eb53cb1c11e9423f2fe915c10ff63a710",
+      "path": "benchmark-snapshot/public/weak-phrase/expected.json"
+    },
+    {
+      "digest": "sha256:c62f8bd819a92e1005e9d1ae6ce526ac9742f05b40dbdf0057637df94297481a",
+      "path": "benchmark-snapshot/public/weak-phrase/expected.md"
+    },
+    {
+      "digest": "sha256:076f8286ee460737969da24629a45305b894f809c06262685dad9ad670d696f3",
+      "path": "benchmark-snapshot/public/weak-phrase/input.md"
+    },
+    {
+      "digest": "sha256:53a7baed3da67e82869f82cf220b76270b9cc445bcca6295b3739091758ff0e8",
+      "path": "circuits/perhaps-frequency.circuit.mjs"
+    },
+    {
+      "digest": "sha256:45496d90057b0be6b8d2d54981ecfcc16bbfc11137ac25f6d8d95f42f50bb2ae",
+      "path": "circuits/weak-phrase.circuit.mjs"
+    },
+    {
+      "digest": "sha256:56753b00c0f2ab90c27417fe495fc2dc747aafcbe599060971c3c2a12106738f",
+      "path": "compatibility.json"
+    },
+    {
+      "digest": "sha256:b59565a81f2856d891e4f456928c31b5e607e53c19bd93bc4cc47f6bfa8accbc",
+      "path": "impact-map.json"
+    },
+    {
+      "digest": "sha256:0e28a14ac1359052f04111848894b469fd45719af2f25f64dba143678a06bbfd",
+      "path": "observation-contracts.json"
+    },
+    {
+      "digest": "sha256:297b8b4335e1514d4d5714e56fe74b785064df09e11043ecf70d4becd0e02ef8",
+      "path": "planning/editorial-scene-plan.circuit.mjs"
+    },
+    {
+      "digest": "sha256:2e743d75757f0ab1e62c5327c81524f4b870bdf1937a9b4ef7d49cb7abafb196",
+      "path": "semantic-diff.json"
+    }
+  ],
+  "intendedUse": "Audit English Markdown narrative paragraphs or compile an English prose idea into an intermediate CNL generation plan under ED-001 and ED-002.",
+  "kind": "NaturalLanguageLinterRelease",
+  "knownLimitations": [
+    "Dialogue scope is recognized by the em-dash or en-dash paragraph-prefix convention.",
+    "The demonstration planning circuit targets a short English literary scene; final text realization is optional and model-assisted."
+  ],
+  "planningCircuits": [
+    "planning/editorial-scene-plan.circuit.mjs"
+  ],
+  "publishedBy": "manual-release@1",
+  "status": "published",
+  "version": "0.1.0"
+}

@@ -31,7 +31,7 @@
     <h2 id="map">The conceptual map</h2>
     <pre class="mermaid">
 flowchart TB
-  REL[Authority + examples → qualified release]
+  REL[Authority + examples → published release]
   INPUT[Existing document or idea] --> LTX[LongTextJS source world]
   REL --> EXEC[Validation or planning CircuitJS]
   LTX --> EXEC --> CNL[CNL/Audit-1 or CNL/Plan-1]
@@ -51,7 +51,7 @@ flowchart TB
           separately states how released rules transform observations into an audit or plan.</td><td>That the semantic
           observation proposed by a model is automatically correct.</td></tr>
         <tr><td>Typed observation contracts</td><td>A circuit declares the shape, status, scope, cardinality, and
-          coverage it needs. Qualification links those demands to approved producers.</td><td>That similarly named
+          coverage it needs. Manual publication links those demands to approved producers.</td><td>That similarly named
           concepts in two domains have the same meaning.</td></tr>
         <tr><td>Candidate / verifier separation</td><td>A complex or model-assisted operator can propose a witness;
           a smaller checker controls publication of the property it knows how to verify.</td><td>Any semantic property
@@ -86,7 +86,7 @@ flowchart TB
       <li><strong>Honest abstention.</strong> <code>undetermined</code>, <code>review-required</code>, and stopped states
         are useful results. Missing evidence must not be translated into compliance or non-compliance.</li>
       <li><strong>Authority separation.</strong> A production document, model output, or isolated review comment cannot
-        become a rule merely by appearing in the input. Authority changes pass through learning and qualification.</li>
+        become a rule merely by appearing in the input. Authority changes pass through learning and manual publication.</li>
       <li><strong>Non-retroactivity.</strong> A new release does not rewrite what an older release concluded. Reanalysis
         is a new run whose differences remain inspectable.</li>
       <li><strong>Human responsibility.</strong> Legal, editorial, scientific, and organizational policy owners remain
@@ -111,7 +111,7 @@ flowchart TB
         <tr><td>Evidence certified</td><td>Evidence, scope, rubric use, and control flow were checked, but at least one
           semantic premise remains model-assisted.</td><td>A candidate passage is grounded in the declared scene and
           focalizer evidence.</td></tr>
-        <tr><td>Model judgment</td><td>A qualified model applied a bounded rubric. The result remains an interpretation,
+        <tr><td>Model judgment</td><td>An evaluated model applied a bounded rubric. The result remains an interpretation,
           not a theorem.</td><td>A passage explains an emotion too directly for one editorial policy.</td></tr>
         <tr><td>Human confirmed</td><td>An authorized reviewer accepted a claim for the specified policy and release.</td>
           <td>An editor confirms the intended focalization exception.</td></tr>
@@ -221,8 +221,8 @@ flowchart TB
           circuit behavior.</td><td>Localizes extraction, theory, exception, and coverage failures.</td></tr>
         <tr><td>Benchmark</td><td>Versioned public, development, hidden, long-scenario, metamorphic, and mutation
           evidence for an intended use.</td><td>Tests a release without claiming universal correctness.</td></tr>
-        <tr><td>Qualification / release gate</td><td>The independent checks that compile, link, benchmark, digest, and
-          freeze a candidate.</td><td>Separates the agent proposing a theory from production activation.</td></tr>
+        <tr><td>Manual publication</td><td>The explicit maintainer command that compiles, links, benchmarks, digests, and
+          freezes a candidate before updating the active pointer.</td><td>Separates the agent proposing a theory from the authority to change production.</td></tr>
         <tr><td>Compatibility gate</td><td>The run-time proof that this input can satisfy the selected release's
           contracts.</td><td>A release can be valid yet inapplicable to an unfamiliar document.</td></tr>
         <tr><td>LearningNeed / issue</td><td>A persistent, typed object explaining a blocked run, disagreement, or
@@ -266,7 +266,7 @@ flowchart TB
         <tr><td><a href="https://people.eecs.berkeley.edu/~sseshia/pubs/b2hd-alur-fmcad13.html">Syntax-Guided
           Synthesis</a> and <a href="https://doi.org/10.1007/s00236-017-0294-5">CEGIS</a></td><td>Restrict the
           program space by a grammar and refine candidates using counterexamples.</td><td>Learning agents may propose
-          circuits, but qualification—not agent confidence—controls release.</td></tr>
+          circuits, but manual publication—not agent confidence—controls release.</td></tr>
         <tr><td><a href="https://doi.org/10.1145/263699.263712">Proof-Carrying Code</a></td><td>A complex producer
           can supply a simpler object that a smaller trusted checker validates against a policy.</td><td>A document
           witness is not a formal proof unless its verifier contract actually establishes a formal property.</td></tr>
@@ -385,9 +385,9 @@ flowchart TB
     <p>The page deliberately includes concepts broader than the current demonstration agent. The repository currently
       implements canonical LongTextJS, restricted CircuitJS validation and planning graphs, observation contracts,
       registered operators and replay verifiers, CNL audit and plan artifacts, compatibility and coverage gates,
-      immutable releases, natural benchmark qualification, isolated learning, and optional bounded realization.
+      immutable releases, natural benchmark checks, isolated learning, and optional bounded realization.
       Event-calculus-style state, argumentation, solver, multimodal, and richer legal modules are extension patterns
-      unless a selected release actually includes and qualifies them. A scientific citation explains a design lineage;
+      unless a selected published release actually includes them and provides the required evidence. A scientific citation explains a design lineage;
       only code, tests, release evidence, and an applicable run establish that a capability exists for a document.</p>
 
     <nav class="page-nav" aria-label="Concept reading paths">
@@ -402,7 +402,7 @@ flowchart TB
     </nav>
 
     <footer>Primary sources explain the intellectual lineage. The repository's DS specifications, implementation,
-      tests, qualified release, and run artifacts define what nllAgent actually claims.</footer>
+      tests, published release, and run artifacts define what nllAgent actually claims.</footer>
   </main>
 </div>
 </body>

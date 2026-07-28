@@ -20,7 +20,7 @@ Generated or learned CircuitJS and LongTextJS artifacts must normalize to JSON-c
 
 ## Layout
 
-Reusable implementation belongs in `src/`, grouped by bounded responsibility: core utilities, LongTextJS compilation, CircuitJS compilation and execution, storage, releases, reporting, benchmark qualification, learning orchestration, model integration, security, and CLI parsing. Thin entrypoints belong in `bin/` or `src/cli/`. Tests mirror those boundaries under `tests/unit/` and `tests/integration/`.
+Reusable implementation belongs in `src/`, grouped by bounded responsibility: core utilities, LongTextJS compilation, CircuitJS compilation and execution, storage, releases, reporting, benchmark and publication checks, learning orchestration, model integration, security, and CLI parsing. Thin entrypoints belong in `bin/` or `src/cli/`. Tests mirror those boundaries under `tests/unit/` and `tests/integration/`.
 
 Persistent mutable artifacts belong under `data/` and must not be imported by library modules. Agent-specific learned skills belong in `.agents/skills/<skill-name>/` and must be self-contained. Imported skill code must not be copied into `src/`.
 
@@ -74,7 +74,7 @@ Response: The project needs a practical MJS DSL rather than a hand-written parse
 
 ### Question #5: Why reject values that JSON serialization could silently omit?
 
-Response: Silent omission would let the reviewed author form differ from the canonical circuit that is qualified. Rejecting functions, accessors, unsupported scalars, cycles, and non-finite numbers makes normalization lossless and keeps the signed graph identical to the author's declarative value.
+Response: Silent omission would let the reviewed author form differ from the canonical circuit that is published. Rejecting functions, accessors, unsupported scalars, cycles, and non-finite numbers makes normalization lossless and keeps the stored graph identical to the author's declarative value.
 
 # Conclusion
 

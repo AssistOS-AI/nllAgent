@@ -18,14 +18,14 @@
     <div class="breadcrumbs"><a href="index.html">Documentation</a> / How they connect / CNL planning</div>
     <p class="kicker">The plan is the product; prose realization is optional</p>
     <h1>From a high-level idea to a CNL generation plan</h1>
-    <p class="lead">Give nllAgent an idea and a qualified domain release. LongTextJS makes the idea addressable. Planning circuits apply the released theory and emit a concrete, ordered CNL specification for the document that should be written. A person or model can realize that plan later.</p>
+    <p class="lead">Give nllAgent an idea and a published domain release. LongTextJS makes the idea addressable. Planning circuits apply the published theory and emit a concrete, ordered CNL specification for the document that should be written. A person or model can realize that plan later.</p>
 
     <div class="callout"><strong>CNL is not the rulebook in natural language.</strong> Rules remain in CircuitJS. The CNL artifact is produced after those rules are applied to one idea. It says what this particular document should contain, in what order, and with what realization guidance.</div>
 
     <pre class="mermaid">
 flowchart TB
   IDEA[High-level idea] --> LTX[LongTextJS<br/>source + observations]
-  LTX --> PLAN[Planning CircuitJS<br/>qualified rules applied]
+  LTX --> PLAN[Planning CircuitJS<br/>published rules applied]
   PLAN --> CNL[CNLGenerationPlan<br/>primary output]
   CNL -. optional LLM or human realization .-> VALIDATE[Candidate through<br/>LongTextJS + validation circuits]
     </pre>
@@ -49,17 +49,17 @@ flowchart TB
     <pre><code># CNL/Plan-1 generation specification
 
 ## Source idea
-Write two Romanian narrative paragraphs about Mara returning to an empty
+Write two English narrative paragraphs about Alice returning to an empty
 railway station at dusk. End with one dialogue line from an employee.
 
 ## Document design
 - Type: short literary scene in Markdown
-- Language: Romanian
+- Language: English
 - Audience: adult literary readers
 
 ## Content sequence
 1. establish-scene
-   Establish Mara, the empty station, dusk, and the restrained atmosphere.
+   Establish Alice, the empty station, dusk, and the restrained atmosphere.
 2. develop-action
    Develop the action through concrete perception and movement.
 3. close-scene
@@ -67,8 +67,8 @@ railway station at dusk. End with one dialogue line from an employee.
 
 ## Realization guidance
 - Preserve every explicit fact from the source idea.
-- Avoid “de fapt” in narrative paragraphs.
-- Use “parcă” at most twice in one narrative paragraph.
+- Avoid “in fact” in narrative paragraphs.
+- Use “perhaps” at most twice in one narrative paragraph.
 
 ## Plan verification
 - ED-001: realizationGuidance:2
@@ -86,14 +86,14 @@ railway station at dusk. End with one dialogue line from an employee.
         <tr><td>Compatibility profiles, benchmarks, release lineage, and provenance</td><td>The optional realize–validate–revise loop is runtime orchestration, not validation logic.</td></tr>
       </tbody>
     </table></div>
-    <p>Validation circuits do not embed CNL constraints, and the CLI has no embedded or hybrid mode. Learning agents may compile both graph families from the same rule cards, but qualification tests them as explicit artifacts. A reusable bidirectional domain operator may be called by both.</p>
+    <p>Validation circuits do not embed CNL constraints, and the CLI has no embedded or hybrid mode. Learning agents may compile both graph families from the same rule cards, while manual publication checks them as explicit artifacts. A reusable bidirectional domain operator may be called by both.</p>
 
     <h2 id="literature">Literary planning</h2>
     <p>An editorial release may know focalization, continuity, dialogue scope, chronology, weak constructions, and project style. Given a scene idea, its planning circuit can create steps for setup, point-of-view establishment, causal action, continuity-sensitive object transitions, disclosure timing, and closure. The CNL guidance incorporates the consequences of applicable style rules. The LLM is not expected to recover an entire style guide from a long prompt, and distant rules are not left “in the middle” of a context window.</p>
 
     <h2 id="normative">Legal and normative planning</h2>
-    <p>A normative release may encode identified laws, regulations, contracts, authority priority, definitions, obligations, deadlines, exceptions, and evidence policies. Given “prepare the notification for incident 17,” planning circuits can produce an ordered specification for identity and jurisdiction, material facts, applicable timing, qualified exceptions, actions, evidence, attachments, and explicit unknowns. The law stays in CircuitJS; the CNL plan describes the document for this incident.</p>
-    <p>If realization is requested, the resulting notice is validated again. nllAgent can therefore catch a wrong date, unsupported assertion, missing evidence statement, or misapplied exception. The guarantee is limited to the qualified release and available evidence; it is not universal legal advice.</p>
+    <p>A normative release may encode identified laws, regulations, contracts, authority priority, definitions, obligations, deadlines, exceptions, and evidence policies. Given “prepare the notification for incident 17,” planning circuits can produce an ordered specification for identity and jurisdiction, material facts, applicable timing, applicable exceptions, actions, evidence, attachments, and explicit unknowns. The law stays in CircuitJS; the CNL plan describes the document for this incident.</p>
+    <p>If realization is requested, the resulting notice is validated again. nllAgent can therefore catch a wrong date, unsupported assertion, missing evidence statement, or misapplied exception. The guarantee is limited to the published release and available evidence; it is not universal legal advice.</p>
 
     <h2 id="technical">Technical and scientific planning</h2>
     <p>The same path can plan specifications, procedures, protocols, and reports. LongTextJS can materialize components, quantities, units, versions, claims, datasets, and prerequisites. Planning circuits turn those into ordered sections and procedure steps. Optional realization writes prose around the plan; validation circuits then recheck terminology, units, dependencies, claim scope, and evidence.</p>
@@ -101,7 +101,7 @@ railway station at dusk. End with one dialogue line from an employee.
     <h2 id="cli">Run the included plan-only example</h2>
     <pre><code>node bin/nllagent.mjs plan \
   --agent editorial-demo \
-  --release 4.0.0 \
+  --release 0.1.0 \
   --input data/editorial-demo/examples/planning/idea.md \
   --output /tmp/editorial-plan.cnl.md \
   --translator none</code></pre>
@@ -140,7 +140,7 @@ railway station at dusk. End with one dialogue line from an employee.
       <li>It does not certify literary quality, legal correctness beyond the release, or a future realization.</li>
       <li>Optional realization is never accepted because a model says it followed the plan; validation circuits decide.</li>
       <li>Plan-only execution remains valuable when no LLM is available or policy forbids model calls.</li>
-      <li>The current release gate qualifies the planning mechanism, not empirical live-model prose quality.</li>
+      <li>The current pre-publication checks cover the planning mechanism, not empirical live-model prose quality.</li>
     </ul>
 
     <nav class="page-nav" aria-label="Generation planning reading path">

@@ -174,7 +174,7 @@ async function executeCnlPlanningRun(options) {
     ? await loadRelease(agent, options.releaseVersion) : await loadActiveRelease(agent);
   const command = `nllagent plan --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)}`;
   const run = await createPlanningRun(agent, options.inputPath, idea, release, command, {
-    node: process.version, package: 'natural-language-linter-agent@1.0.0',
+    node: process.version, package: 'natural-language-linter-agent@0.1.0',
     realizationRequested: Boolean(options.realizeOutputPath)
   });
   const cache = options.cache || new FileArtifactCache(containedPath(agent.root, 'cache'));

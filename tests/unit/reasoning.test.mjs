@@ -8,13 +8,13 @@ import {
 
 test('fixed point derives transitive facts with provenance', () => {
   const result = fixedPoint({
-    facts: [{ predicate: 'parent', args: ['Ana', 'Mara'] }, { predicate: 'parent', args: ['Mara', 'Ioan'] }],
+    facts: [{ predicate: 'parent', args: ['Alice', 'Bob'] }, { predicate: 'parent', args: ['Bob', 'Carol'] }],
     rules: [
       { id: 'ancestor-base', when: [{ predicate: 'parent', args: ['?x', '?y'] }], then: { predicate: 'ancestor', args: ['?x', '?y'] } },
       { id: 'ancestor-step', when: [{ predicate: 'parent', args: ['?x', '?y'] }, { predicate: 'ancestor', args: ['?y', '?z'] }], then: { predicate: 'ancestor', args: ['?x', '?z'] } }
     ]
   });
-  assert.ok(result.facts.some((fact) => fact.predicate === 'ancestor' && fact.args.join('/') === 'Ana/Ioan'));
+  assert.ok(result.facts.some((fact) => fact.predicate === 'ancestor' && fact.args.join('/') === 'Alice/Carol'));
   assert.equal(result.reachedFixedPoint, true);
 });
 

@@ -14,7 +14,7 @@ The repository is complete only when its library, CLI, agent workspace, learning
 
 ## Test layers
 
-Contract tests validate canonical data, CNL audit and plan schemas, path containment, status transitions, release digests, port types, operator linking, verification dominance, rule-to-plan witnesses, and issue shapes. Unit tests cover pure transformations and each standard operator or replay verifier. Integration tests execute CLI commands against temporary agents. End-to-end tests create an agent, qualify a deterministic release, audit Markdown, compare canonical and rendered reports, create an incompatible issue, run benchmark qualification, and execute long-range continuity from model-produced observations.
+Contract tests validate canonical data, CNL audit and plan schemas, path containment, status transitions, release digests, port types, operator linking, verification dominance, rule-to-plan witnesses, and issue shapes. Unit tests cover pure transformations and each standard operator or replay verifier. Integration tests execute CLI commands against temporary agents. End-to-end tests create an agent, manually publish a deterministic release, audit Markdown, compare canonical and rendered reports, create an incompatible issue, run benchmarks, and execute long-range continuity from model-produced observations.
 
 Boundary tests cover traversal, generated MJS capability rejection including IIFEs and nested function values, instruction-like content isolation, immutable release modification, unknown operators, forged closed-world coverage, forged lexical and state witnesses, replay-request identity, cache isolation, partial semantic materialization, protected learning-context edits, and resource budgets. Mutation tests target circuit and LongTextJS semantics. Performance tests use long synthetic Markdown and enforce bounded memory and time budgets appropriate to the fixture.
 
@@ -26,7 +26,7 @@ The primary audit acceptance scenario must demonstrate that one Markdown input p
 
 ## Learning acceptance
 
-The learning command must be tested with an injected fake Coding Agent adapter or process runner. The test verifies declared capability restrictions, explicit skill names, staging working directory, schema-bound output capture, whitelist promotion, rejection of protected staging writes, and refusal to activate a release implicitly.
+The learning command must be tested with an injected fake Coding Agent adapter or process runner. The test verifies declared capability restrictions, explicit skill names, staging working directory, schema-bound output capture, whitelist promotion, rejection of protected staging writes, and refusal to publish a release implicitly.
 
 ## Documentation
 
@@ -38,7 +38,7 @@ Runtime metrics include phase latency, materialization counts, cache hits, cover
 
 ## Clean build and release readiness
 
-A clean checkout must install or run without generated run, issue, lock, or learning state committed under `data/`. A source-controlled qualified demonstration agent is permitted because it is an executable fixture, not generated local state. The test suite, documentation checks, file-size checks, example agent benchmark, and package export checks must pass. Optional Achilles and Coding Agent integrations must have explicit diagnostics when absent.
+A clean checkout must install or run without generated run, issue, lock, or learning state committed under `data/`. A source-controlled published demonstration agent is permitted because it is an executable fixture, not generated local state. The test suite, documentation checks, file-size checks, example agent benchmark, and package export checks must pass. Optional Achilles and Coding Agent integrations must have explicit diagnostics when absent.
 
 Completion requires no undocumented placeholder behavior on the primary CLI path, no silently skipped mandatory gate, no untracked serious contradiction, and no docs claim contradicted by the implementation. Research extensions may remain uninstalled only when the corresponding compatibility gap is explicit and tested.
 
@@ -46,11 +46,11 @@ Completion requires no undocumented placeholder behavior on the primary CLI path
 
 ### Question #1: Does passing the example benchmark prove general semantic correctness?
 
-Response: No. It proves the implementation and the example release satisfy their declared cases. Each real agent requires its own representative qualification and compatibility profile.
+Response: No. It proves the implementation and the example release satisfy their declared cases. Each real agent requires its own representative evaluation and compatibility profile.
 
 ### Question #2: Why are external LLM tests opt-in?
 
-Response: Provider output, credentials, cost, and availability are nondeterministic. Default correctness tests exercise the integration contract through an `LLMAgent`-compatible stub; separate evaluations qualify live profiles.
+Response: Provider output, credentials, cost, and availability are nondeterministic. Default correctness tests exercise the integration contract through an `LLMAgent`-compatible stub; separate evaluations assess live profiles.
 
 ### Question #3: What does “functional” mean for extension points without installed solvers?
 
@@ -58,15 +58,15 @@ Response: The registries, type contracts, scheduler, witness path, and fail-clos
 
 ### Question #4: Why commit `data/editorial-demo` when mutable data is normally ignored?
 
-Response: It is the canonical acceptance fixture containing authority, candidate lineage, a digest-bound qualified release, and natural microcases. Its run, issue, learning, and lock subtrees remain ignored and tests copy the fixture to temporary roots before mutation.
+Response: It is the canonical acceptance fixture containing authority, candidate lineage, a digest-bound published release, and natural microcases. Its run, issue, learning, and lock subtrees remain ignored and tests copy the fixture to temporary roots before mutation.
 
 ### Question #5: Which realistic semantic paths are mandatory offline?
 
 Response: At minimum, exact Unicode anchoring, a translator-produced leave/use/retrieve event sequence across distant paragraphs, recovery of a continuity gap, semantic benchmark equivalence plus counterexample perspectives, quality-gap versus blocking-gap compatibility, and replay verification for temporal, state, unit, interval, fixpoint, and argumentation operators.
 
-### Question #6: What does the offline suite deliberately not qualify?
+### Question #6: What does the offline suite deliberately not evaluate?
 
-Response: It does not qualify current live-provider behavior, a generated circuit mutation score, or human policy adjudication. Those require explicit opt-in evaluation artifacts and must appear as executed checks in the release report before being claimed.
+Response: It does not evaluate current live-provider behavior, calculate a generated circuit mutation score, or perform human policy adjudication. Those require explicit opt-in artifacts and must appear as executed checks in the publication record before being claimed.
 
 ### Question #7: What is the minimum end-to-end planning acceptance test?
 

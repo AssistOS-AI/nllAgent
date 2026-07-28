@@ -21,7 +21,7 @@
     <p class="lead">The CLI looks file-oriented—select an agent, supply Markdown, receive a report—but every command acts on a persistent, versioned workspace. Understanding that workspace is the key to running, debugging, teaching, and upgrading a linter safely.</p>
 
     <h2 id="first-run">Start with the executable example</h2>
-    <p>The repository’s <code>editorial-demo</code> agent is already qualified and active. Run its benchmark before analyzing a document so you see both halves of the operational contract:</p>
+    <p>The repository’s <code>editorial-demo</code> agent already has the published MVP release <code>0.1.0</code> active. Run its benchmark before analyzing a document so you see both halves of the operational contract:</p>
     <pre><code>node bin/nllagent.mjs benchmark --agent editorial-demo
 
 node bin/nllagent.mjs run \
@@ -43,8 +43,8 @@ flowchart TB
     <p>Every command that changes or executes domain behavior names an agent. An agent is not an LLM session. It is a persistent linter project with its own authority, extraction profiles, circuits, benchmark suites, candidates, release lineage, runs, issues, and feedback.</p>
     <pre><code>node bin/nllagent.mjs agent init \
   --agent editorial \
-  --description "Editorial review for Romanian prose" \
-  --language ro
+  --description "Editorial review for English prose" \
+  --language en
 
 node bin/nllagent.mjs agent list
 node bin/nllagent.mjs agent inspect --agent editorial --json</code></pre>
@@ -65,8 +65,8 @@ flowchart TB
       <tbody>
         <tr><td>Manifest and authority</td><td>Intended use, language, project metadata, rulebook material, and rule cards.</td><td>Operators and audited learning promotion.</td></tr>
         <tr><td><code>schemas/</code>, <code>extraction/</code>, <code>circuits/</code>, <code>benchmark/</code></td><td>Agent authoring surface used to assemble a candidate.</td><td>Humans or the Coding Agent inside the learning workflow.</td></tr>
-        <tr><td><code>candidates/</code></td><td>Versioned packages proposed for qualification.</td><td>Learning may build; production never reads.</td></tr>
-        <tr><td><code>releases/</code> and active pointer</td><td>Immutable qualified snapshots and the version selected by default.</td><td>Trusted qualification writes releases; only explicit activation changes the pointer.</td></tr>
+        <tr><td><code>candidates/</code></td><td>Versioned packages proposed for publication.</td><td>Learning may build; production never reads.</td></tr>
+        <tr><td><code>releases/</code> and active pointer</td><td>Immutable published snapshots and the version selected by default.</td><td>Only the explicit manual publication command writes a release and changes the pointer.</td></tr>
         <tr><td><code>runs/</code>, <code>issues/</code>, feedback records</td><td>Production evidence, failures, and reviewer corrections.</td><td>Runtime and explicit feedback commands; historical records are not silently rewritten.</td></tr>
         <tr><td><code>planning-runs/</code></td><td>Ideas, CNL plans, planning traces, and optional realization attempts with nested validation evidence.</td><td>Planning runtime; the plan and every optional candidate remain tied to one immutable release.</td></tr>
         <tr><td><code>learning-runs/</code></td><td>Disposable Coding Agent staging snapshots, event streams, diagnostics, and audit results.</td><td>Learning runner under its whitelist policy.</td></tr>
@@ -80,8 +80,8 @@ flowchart TB
   --output &lt;report.md&gt; \
   [--release &lt;version&gt;] \
   [--translator auto|achilles|codex|none]</code></pre>
-    <p>Without <code>--release</code>, the command uses the agent’s active release. Selecting a version explicitly is useful for comparison and replay, but it still must be a qualified release. Input is currently Markdown; the copied source and its digest become the lexical authority of the run. The output file is written for both successful and controlled stopped outcomes.</p>
-    <p>The command rejects unknown flags, conflicting translation switches, surplus positional arguments, unsafe agent names, missing input, and missing or unqualified releases before treating the invocation as a valid production run. Once a run exists, runtime diagnostics are persisted alongside its partial artifacts.</p>
+    <p>Without <code>--release</code>, the command uses the agent’s active release. Selecting a version explicitly is useful for comparison and replay, but it still must be a published release. Input is currently Markdown; the copied source and its digest become the lexical authority of the run. The output file is written for both successful and controlled stopped outcomes.</p>
+    <p>The command rejects unknown flags, conflicting translation switches, surplus positional arguments, unsafe agent names, missing input, and missing or unpublished releases before treating the invocation as a valid production run. Once a run exists, runtime diagnostics are persisted alongside its partial artifacts.</p>
 
     <h2 id="plan-command">Compile an idea into a CNL generation specification</h2>
     <pre><code>nllagent plan \
@@ -108,7 +108,7 @@ nllagent run ... --translator none
       <thead><tr><th>Selection</th><th>Behavior</th><th>When to use it</th></tr></thead>
       <tbody>
         <tr><td><code>auto</code></td><td>Prefers configured AchillesAgentLib; otherwise uses the shipped reference Coding Agent translation adapter.</td><td>Normal operation when semantic observations may be required.</td></tr>
-        <tr><td><code>achilles</code></td><td>Requires a resolvable and configured AchillesAgentLib <code>LLMAgent</code>; translation-class work prefers Spark when exposed.</td><td>Environments that qualify and operate an Achilles model profile.</td></tr>
+        <tr><td><code>achilles</code></td><td>Requires a resolvable and configured AchillesAgentLib <code>LLMAgent</code>; translation-class work prefers Spark when exposed.</td><td>Environments that evaluate and operate an Achilles model profile.</td></tr>
         <tr><td><code>codex</code></td><td>Selects the current OpenAI Codex reference implementation of the generic Coding Agent backend.</td><td>Explicit fallback testing or installations intentionally using that adapter.</td></tr>
         <tr><td><code>none</code></td><td>Disables semantic calls. Deterministic structural and lexical rules still run; missing semantic requirements become compatibility gaps.</td><td>Offline deterministic agents, diagnostics, or fail-closed operation without a model.</td></tr>
       </tbody>
@@ -119,25 +119,19 @@ nllagent run ... --translator none
     <p>The requested Markdown file is the reviewer view of canonical <code>cnl-audit.json</code>: status, release, coverage limits, findings, evidence, and remediation. The run directory contains the source package, canonical LongTextJS, compatibility and coverage reports, circuit plan, execution trace, findings, conflicts, verifier results, model captures, CNL audit, and rendered report. A Coding Agent translation fallback additionally creates small <code>translation/call-NNNN/</code> folders with request, schema, result, events, and diagnostics.</p>
     <p>Start with the report. If a finding is disputed, inspect its anchor and verifier record. If no finding was produced, inspect compatibility and coverage before looking at circuit execution. If semantic extraction failed, inspect model captures and the individual translation call. <a href="artifacts.html#debugging">Artifacts and statuses</a> provides this debugging path in detail.</p>
 
-    <h2 id="benchmark-release">Benchmark, qualify, and activate</h2>
+    <h2 id="benchmark-release">Benchmark and publish manually</h2>
     <pre><code>nllagent benchmark --agent editorial
 nllagent benchmark --agent editorial --release 1.0.0 --json
 
-nllagent release qualify --agent editorial --candidate 1.1.0
-nllagent release activate --agent editorial --release 1.1.0</code></pre>
-    <p><code>benchmark</code> runs the active or selected release against the agent’s declared natural suites. <code>release qualify</code> does more: it validates the candidate manifest, circuit grammar, registry links, observation contracts, producer alignment, benchmark snapshot, and candidate immutability before creating a release. <code>release activate</code> checks the qualified snapshot again and atomically changes the active pointer. Qualification and activation are separate so an operator can inspect the benchmark results and semantic diff first.</p>
+nllagent release publish --agent editorial --candidate 0.1.0</code></pre>
+    <p><code>benchmark</code> runs the active or selected release against the agent’s declared natural suites. <code>release publish</code> is the explicit maintainer action: it validates the candidate manifest, circuit grammar, registry links, observation contracts, producer alignment, benchmark snapshot, and candidate immutability; creates the closed release; validates it again; and atomically updates the active pointer. Learning never invokes this command.</p>
 
     <h2 id="learning-command">Open a controlled learning job</h2>
     <pre><code>nllagent learn \
   --agent editorial \
-  --rules ./rulebook
-
-nllagent learn \
-  --agent editorial \
-  --rules ./rulebook \
-  --qualify</code></pre>
-    <p>The first form asks the configured Coding Agent adapter to build or repair agent-local authoring artifacts in staging. The second also permits the trusted parent process to attempt qualification after the Coding Agent exits and the filesystem audit succeeds. Neither form activates a release. The current executable override is <code>--codex-bin &lt;path&gt;</code> because OpenAI Codex is the shipped reference adapter; this vendor detail is confined to that adapter.</p>
-    <p>Learning is appropriate when rules, examples, or issues should change the reusable theory. It is not a recovery flag for a production run. A blocked document remains blocked under its original release; after a new release is independently qualified and activated, the operator may run the document again as a new run. See <a href="learning.html#learning-command">Learning workflow</a>.</p>
+  --rules ./rulebook</code></pre>
+    <p>This asks the configured Coding Agent adapter to build or repair agent-local authoring artifacts in staging. The audited result may produce a candidate, but it cannot publish or activate one. The current executable override is <code>--codex-bin &lt;path&gt;</code> because OpenAI Codex is the shipped reference adapter; this vendor detail is confined to that adapter.</p>
+    <p>Learning is appropriate when rules, examples, or issues should change the reusable theory. It is not a recovery flag for a production run. A blocked document remains blocked under its original release; after a maintainer reviews and manually publishes a new candidate, the operator may run the document again as a new run. See <a href="learning.html#learning-command">Learning workflow</a>.</p>
 
     <h2 id="feedback">Record evidence, not hidden exceptions</h2>
     <pre><code>nllagent issue list --agent editorial
@@ -147,7 +141,7 @@ nllagent feedback add \
   --agent editorial \
   --run &lt;run-id&gt; \
   --type observation-correction \
-  --message "The speaker in paragraph 12 is Mara."</code></pre>
+  --message "The speaker in paragraph 12 is Alice."</code></pre>
     <p>Issues are runtime-generated statements about compatibility, materialization, verification, benchmark, or execution failure. Feedback is reviewer evidence attached to a run. Neither automatically changes a rule. A later learning job snapshots authorized records and converts useful examples into candidate changes and regression cases.</p>
 
     <h2 id="terminal-statuses">Exit codes are part of automation</h2>
@@ -172,7 +166,7 @@ nllagent feedback add \
       <li>Read the report’s terminal status, active circuits, and declared limits.</li>
       <li>For stopped runs, inspect compatibility and coverage before circuit traces.</li>
       <li>For rejected candidates, inspect verifier results and witness data.</li>
-      <li>For changed behavior after an upgrade, compare explicit release versions and the qualification semantic diff.</li>
+      <li>For changed behavior after an upgrade, compare explicit release versions and the publication semantic diff.</li>
       <li>Record a scoped issue or feedback item when the discrepancy should inform learning.</li>
     </ol>
 

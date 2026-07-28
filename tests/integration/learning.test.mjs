@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, mkdir, mkdtemp, readdir, symlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
@@ -33,7 +33,8 @@ test('learning invokes Codex with fixed sandbox arguments and permits only agent
   assert.equal(invocation.args[invocation.args.indexOf('-C') + 1], invocation.options.cwd);
   const prompt = invocation.args.at(-1);
   assert.match(prompt, /nll-scope-project/u);
-  assert.match(prompt, /Never modify qualified releases/u);
+  assert.match(prompt, /Never modify published releases/u);
+  assert.match(prompt, /Publishing is a separate manual development command/u);
   await access(join(dataRoot, 'learn-demo', 'proposals', 'codex-note.md'));
 });
 
@@ -87,32 +88,6 @@ test('learning validates the Codex final result before promoting authoring chang
   };
   await assert.rejects(() => runLearning({
     repoRoot: resolve('.'), dataRoot, agentName: 'invalid-final-demo', rulesRoot,
-    codexBin: '/fake/codex', registries: createStandardRegistries(), env: {}, processRunner
-  }), (error) => error.code === 'learning-failed');
-  await assert.rejects(access(join(agent.root, 'proposals', 'must-not-promote.md')));
-});
-
-test('learning validates a qualification request before promoting it', async () => {
-  const repoRoot = await mkdtemp(join(tmpdir(), 'nllagent-learning-invalid-request-'));
-  const dataRoot = join(repoRoot, 'data');
-  const rulesRoot = join(repoRoot, 'rules');
-  const agent = await initializeAgent(dataRoot, 'invalid-request-demo');
-  await mkdir(rulesRoot, { recursive: true });
-  await writeFile(join(rulesRoot, 'rules.md'), '# Rule\n\nFlag “x”.\n');
-  const processRunner = async (_executable, args, options) => {
-    await writeFile(join(options.cwd, 'proposals', 'must-not-promote.md'), '# Unsafe promotion\n');
-    const [learningId] = await readdir(join(options.cwd, 'learning-runs'));
-    await writeFile(
-      join(options.cwd, 'learning-runs', learningId, 'qualification-request.json'),
-      JSON.stringify({ candidate: '../escape' })
-    );
-    await writeFile(args[args.indexOf('-o') + 1], JSON.stringify({
-      status: 'completed', summary: 'done', candidateVersions: [], issues: []
-    }));
-    return { code: 0, signal: null, stdout: '', stderr: '' };
-  };
-  await assert.rejects(() => runLearning({
-    repoRoot: resolve('.'), dataRoot, agentName: 'invalid-request-demo', rulesRoot,
     codexBin: '/fake/codex', registries: createStandardRegistries(), env: {}, processRunner
   }), (error) => error.code === 'learning-failed');
   await assert.rejects(access(join(agent.root, 'proposals', 'must-not-promote.md')));

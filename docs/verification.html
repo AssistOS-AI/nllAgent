@@ -31,7 +31,7 @@ flowchart TB
     <p class="diagram-caption"><strong>The production transaction.</strong> Judgment begins only after the document program satisfies the theory’s input contracts. Both success and refusal are persisted outcomes.</p>
 
     <h2 id="inputs">The two fixed inputs</h2>
-    <p>A normal command names an agent and input file. The workspace’s active pointer selects a qualified release unless the command specifies an exact release. Before analysis, the runtime validates the Markdown file and named agent, reads the input, verifies the release, creates a run directory, copies <code>input.md</code>, and records the source and release digests in <code>run.json</code>.</p>
+    <p>A normal command names an agent and input file. The workspace’s active pointer selects a published release unless the command specifies an exact release. Before analysis, the runtime validates the Markdown file and named agent, reads the input, verifies the release, creates a run directory, copies <code>input.md</code>, and records the source and release digests in <code>run.json</code>.</p>
     <pre><code>nllagent run \
   --agent editorial-demo \
   --input manuscript.md \
@@ -52,7 +52,7 @@ flowchart TB
     </ol>
 
     <h2 id="example">Concrete path: the released weak-phrase rule</h2>
-    <p>The input contains “De fapt” in an ordinary paragraph. The released circuit needs <code>document.paragraph@1</code> with <code>extracted</code> status and closed-world coverage. The deterministic Markdown compiler supplies both, so no semantic backend is needed for that port. Compatibility marks the circuit ready.</p>
+    <p>The input contains “In fact” in an ordinary paragraph. The published circuit needs <code>document.paragraph@1</code> with <code>extracted</code> status and closed-world coverage. The deterministic Markdown compiler supplies both, so no semantic backend is needed for that port. Compatibility marks the circuit ready.</p>
     <p>The lexical operator scans all supplied paragraph observations, applies the released term, locale, whole-word, case, scope, and dialogue-prefix policy, and constructs a candidate with its exact anchor. <code>text.exact-match@1</code> rereads the source span. If it accepts, the finding includes <code>ED-001</code>, the source-rule reference, passage, verdict, severity, explanation, remediation, limitation, and verifier result. If the same phrase occurs in a dash-prefixed dialogue paragraph, the released scope convention excludes it before publication.</p>
 
     <h2 id="semantic-path">Concrete semantic variant: object continuity</h2>

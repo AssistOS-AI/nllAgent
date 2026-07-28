@@ -25,11 +25,11 @@
       <div>
         <p class="quick-label">The source</p>
         <h2 id="quick-problem-title">A tiny literary fragment</h2>
-        <blockquote>Mara a intrat în cameră. <mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+        <blockquote>Alice entered the room. <mark>In fact</mark>, the window was open.</blockquote>
       </div>
       <div>
         <p class="quick-label">Rule ED-001</p>
-        <p><strong>Flag “de fapt” in a narrative paragraph.</strong><br>Do not flag it in a dialogue paragraph that
+        <p><strong>Flag “in fact” in a narrative paragraph.</strong><br>Do not flag it in a dialogue paragraph that
           begins with an em dash or en dash.</p>
       </div>
     </section>
@@ -53,9 +53,9 @@
         <h2>Freeze the exact source</h2>
         <p>nllAgent stores the Markdown snapshot and its digest. From this point on, an observation can point back to
           exact characters. The text is data; instructions inside it cannot change the rule.</p>
-        <pre><code># Fragment
+        <pre><code># Excerpt
 
-Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
+Alice entered the room. In fact, the window was open.</code></pre>
       </div>
       <aside class="quick-answer"><strong>Question answered</strong><br>What exact source are we judging?</aside>
     </section>
@@ -71,7 +71,7 @@ Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
   "id": "observation:block:paragraph-2",
   "type": "document.paragraph@1",
   "status": "extracted",
-  "payload": { "text": "Mara ... De fapt, fereastra ..." },
+  "payload": { "text": "Alice ... In fact, the window ..." },
   "anchor": "anchor:paragraph-2"
 }</code></pre>
       </div>
@@ -84,7 +84,7 @@ Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
         <p class="quick-label">Theory side</p>
         <h2>CircuitJS receives only paragraphs</h2>
         <p>The circuit's input port accepts extracted <code>document.paragraph@1</code> observations. Its graph then has
-          only three runtime nodes. The rule configuration is frozen in the qualified release.</p>
+          only three runtime nodes. The rule configuration is frozen in the published release.</p>
         <div class="mini-circuit" aria-label="Three CircuitJS nodes">
           <div><small>call</small><strong>matches</strong><span>Find whole phrase<br>except dialogue</span></div>
           <b aria-hidden="true">→</b>
@@ -102,7 +102,7 @@ Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
         <p class="quick-label">Runtime boundary</p>
         <h2>A match is only a candidate</h2>
         <div class="quick-before-after">
-          <div><p class="quick-label">Operator output</p><code>FindingCandidate</code><p>Term <strong>“De fapt”</strong>,
+          <div><p class="quick-label">Operator output</p><code>FindingCandidate</code><p>Term <strong>“In fact”</strong>,
             anchor, rule ED-001, and an exact-text witness.</p></div>
           <div><p class="quick-label">Verifier output</p><code>accepted: true</code><p>The verifier uses the anchor to
             slice the frozen source and confirms the exact term at that location.</p></div>
@@ -123,7 +123,7 @@ Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
         <div class="quick-result">
           <span>editorial-warning</span>
           <strong>ED-001 · weak phrase in narration</strong>
-          <blockquote>De fapt</blockquote>
+          <blockquote>In fact</blockquote>
           <p>Check whether the contrast is necessary; remove or replace the phrase when it adds no meaning.</p>
           <small>Guarantee: mechanically-certified exact-text witness · Limitation: dialogue uses the released prefix convention.</small>
         </div>
@@ -135,12 +135,12 @@ Mara a intrat în cameră. De fapt, fereastra era deschisă.</code></pre>
     <div class="quick-contrast">
       <div>
         <p class="quick-label">Narration</p>
-        <blockquote><mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+        <blockquote><mark>In fact</mark>, the window was open.</blockquote>
         <span class="quick-status quick-status--finding">1 candidate → 1 verified finding</span>
       </div>
       <div>
         <p class="quick-label">Dialogue</p>
-        <blockquote>— <mark>De fapt</mark>, fereastra era deschisă.</blockquote>
+        <blockquote>— <mark>In fact</mark>, the window was open.</blockquote>
         <span class="quick-status quick-status--clean">0 candidates → no finding for ED-001</span>
       </div>
     </div>
@@ -175,7 +175,7 @@ cat /tmp/editorial-report.md</code></pre>
       <a href="concepts.html">Learn the foundations</a>
     </nav>
 
-    <footer>This example mirrors the qualified <code>editorial-demo</code> circuit and benchmark. The production
+    <footer>This example mirrors the published <code>editorial-demo</code> circuit and benchmark. The production
       compiler, release, verifier record, and run artifacts—not this page—remain the execution authority.</footer>
   </main>
 </div>

@@ -8,7 +8,7 @@ summary: Defines graph scheduling, relational execution, fixpoints, truth mainte
 
 # Introduction
 
-The CircuitJS runtime executes qualified graphs against LongTextJS materializations. Control must remain deterministic even when individual operators use nondeterministic models or external solvers.
+The CircuitJS runtime executes published graphs against LongTextJS materializations. Control must remain deterministic even when individual operators use nondeterministic models or external solvers.
 
 # Core Content
 
@@ -74,9 +74,9 @@ Response: Every operator that contributes an unverifiable candidate to a publish
 
 Response: Only if their declared capability and the release policy permit a specific controlled artifact output. Production circuits never receive general filesystem write access.
 
-### Question #4: Does registering a generic reasoning operator qualify every use of it?
+### Question #4: Does registering a generic reasoning operator validate every use of it?
 
-Response: No. The implementation contract and unit tests qualify the operator mechanism. Each agent release must still establish its input semantics, observation producer, witness use, benchmark cases, and intended guarantee.
+Response: No. The implementation contract and unit tests validate the operator mechanism. Each agent release must still establish its input semantics, observation producer, witness use, benchmark cases, and intended guarantee.
 
 ### Question #5: Why does a deterministic node cache include the whole semantic program?
 

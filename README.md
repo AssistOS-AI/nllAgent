@@ -4,15 +4,15 @@ NaturalLanguageLinterAgent (`nllAgent`) is a Node.js 22+ ESM library and CLI wit
 
 The product has two deliberately separate systems:
 
-- Production audit reads an immutable qualified release. It compiles the document into LongTextJS, executes validation circuits, verifies findings, and persists `cnl-audit.json` (`CNL/Audit-1`) plus its `report.md` view. A configured AchillesAgentLib `LLMAgent` is preferred for semantic observations; a constrained Coding Agent adapter is the automatic fallback when Achilles is unavailable or unconfigured.
+- Production audit reads an immutable published release. It compiles the document into LongTextJS, executes validation circuits, verifies findings, and persists `cnl-audit.json` (`CNL/Audit-1`) plus its `report.md` view. A configured AchillesAgentLib `LLMAgent` is preferred for semantic observations; a constrained Coding Agent adapter is the automatic fallback when Achilles is unavailable or unconfigured.
 - Production specification compiles a high-level idea through LongTextJS and dedicated planning circuits into `cnl-plan.json` (`CNL/Plan-1`). The verifier requires a rule-to-plan witness for every applied rule. Optional realization proposes and revises Markdown, while unchanged audit circuits remain the final oracle.
-- Learning gives a Coding Agent a disposable staging workspace containing rule sources, selected issues, examples, and five focused learning skills. Host-side audit promotes only whitelisted authoring artifacts. Independent qualification creates an immutable release, and activation remains a separate operator command.
+- Learning gives a Coding Agent a disposable staging workspace containing rule sources, selected issues, examples, and five focused learning skills. Host-side audit promotes only whitelisted authoring artifacts. Learning can create candidates but cannot publish them. A maintainer explicitly publishes and activates one candidate with a manual development command.
 
-`Coding Agent` is an architectural role. OpenAI Codex is the current reference adapter and explains the compatibility names `--translator codex`, `--codex-bin`, and `NLL_CODEX_BIN`; LongTextJS, CircuitJS, benchmarks, releases, and qualification do not depend on Codex as a product.
+`Coding Agent` is an architectural role. OpenAI Codex is the current reference adapter and explains the compatibility names `--translator codex`, `--codex-bin`, and `NLL_CODEX_BIN`; LongTextJS, CircuitJS, benchmarks, releases, and publication checks do not depend on Codex as a product.
 
 ## Try the executable agent
 
-The repository includes `data/editorial-demo`, with authority material, restricted CircuitJS circuits, ten natural benchmark cases, qualified releases, and an active release pointer.
+The repository includes `data/editorial-demo`, with authority material, restricted CircuitJS circuits, ten natural benchmark cases, one published MVP baseline (`0.1.0`), and an active release pointer.
 
 ```bash
 node bin/nllagent.mjs benchmark --agent editorial-demo
@@ -23,7 +23,7 @@ node bin/nllagent.mjs run \
   --output /tmp/editorial-report.md
 
 node bin/nllagent.mjs plan \
-  --agent editorial-demo --release 4.0.0 \
+  --agent editorial-demo --release 0.1.0 \
   --input data/editorial-demo/examples/planning/idea.md \
   --output /tmp/editorial-plan.cnl.md \
   --translator none
@@ -47,11 +47,10 @@ nllagent model inspect --json
 
 nllagent issue list --agent editorial
 nllagent feedback add --agent editorial --run <run-id> \
-  --type observation-correction --message "The actor is Mara."
+  --type observation-correction --message "The actor is Alice."
 
 nllagent learn --agent editorial --rules ./rulebook
-nllagent release qualify --agent editorial --candidate 1.0.0
-nllagent release activate --agent editorial --release 1.0.0
+nllagent release publish --agent editorial --candidate 0.1.0
 ```
 
 Each named agent owns separate authority, schemas, extraction profiles, circuits, benchmark suites, candidates, releases, runs, issues, and feedback. Several Coding Agents can therefore build different theories and benchmarks through the same runtime without sharing an active release or domain ontology.
@@ -106,8 +105,8 @@ Open [`docs/index.html`](docs/index.html) for the tutorial documentation. The ma
 7. [`docs/generation.html`](docs/generation.html) — one idea-to-CNL planning run and its optional
    realization branch.
 8. [`docs/learning-architecture.html`](docs/learning-architecture.html) — one learning,
-   qualification, and activation cycle.
+   candidate preparation and manual publication cycle.
 
 The sidebar keeps the LongTextJS document side and CircuitJS theory side visibly separate. Operational details continue in [`docs/cli.html`](docs/cli.html), [`docs/learning.html`](docs/learning.html), and [`docs/benchmark.html`](docs/benchmark.html).
 
-The contiguous DS set under [`docs/specs/`](docs/specs/) is authoritative; use [`docs/specsLoader.html?spec=matrix.md`](docs/specsLoader.html?spec=matrix.md) to browse it. [`serious_issues.md`](serious_issues.md) records concrete gaps that the documentation and qualification reports must not overclaim.
+The contiguous DS set under [`docs/specs/`](docs/specs/) is authoritative; use [`docs/specsLoader.html?spec=matrix.md`](docs/specsLoader.html?spec=matrix.md) to browse it. [`serious_issues.md`](serious_issues.md) records concrete gaps that the documentation and publication records must not overclaim.

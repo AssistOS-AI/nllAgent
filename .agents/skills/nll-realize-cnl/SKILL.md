@@ -7,7 +7,7 @@ description: Realize or minimally revise Markdown from a circuit-produced CNLGen
 
 ## Contract
 
-Treat the supplied `CNLGenerationPlan` as the complete, ordered specification for one document. It was already derived from the source idea by qualified CircuitJS planning circuits. Do not reinterpret the authority corpus, invent additional rules, or convert the plan into another DSL.
+Treat the supplied `CNLGenerationPlan` as the complete, ordered specification for one document. It was already derived from the source idea by published CircuitJS planning circuits. Do not reinterpret the authority corpus, invent additional rules, or convert the plan into another DSL.
 
 Return only JSON compatible with the requested schema:
 

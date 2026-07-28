@@ -1,6 +1,6 @@
 ---
 name: nll-build-benchmark
-description: Build and strengthen NaturalLanguageLinterAgent Markdown microcases, structured expected layers, contrastive cases, coverage maps, and mutation proposals for a candidate theory. Use during controlled learning and qualification preparation, not during production linting.
+description: Build and strengthen NaturalLanguageLinterAgent Markdown microcases, structured expected layers, contrastive cases, coverage maps, and mutation proposals for a candidate theory. Use during controlled learning and candidate preparation, not during production linting.
 ---
 
 # Build the Natural Linter Benchmark
@@ -20,7 +20,7 @@ Read `docs/specs/DS006` and `DS007` if present, plus `docs/specs/DS012-benchmark
 5. Add `expected.json` with structured observation and circuit layers. Keep source observations separate from expected findings. Use `reportComparison: structured` for stable behavior tests and `evaluation.mode: llm` when semantic report comparison is material.
 6. Produce a coverage matrix over rules, exceptions, observation types, document profiles, guarantees, and terminal states.
 7. Propose CircuitJS and LongTextJS mutations: lost negation, merged identities, false closed-world coverage, removed exceptions, inverted comparisons, changed scope, bypassed verification, and unbounded search.
-8. Run available local checks and request qualification for candidates under `candidates/`; qualification runs all agent-local suites through the same runtime.
+8. Run available local checks for candidates under `candidates/`; the later manual publication command reruns all agent-local suites through the same runtime.
 
 ## Independence and authority
 

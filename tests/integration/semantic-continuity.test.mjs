@@ -41,7 +41,7 @@ async function continuityRelease(root) {
     }
   });
   await writeJson(join(root, 'compatibility.json'), {
-    id: 'narrative-ro@1', schemaVersion: 1, formats: ['text/markdown'], languages: ['ro'], producers: ['narrative-object-events@1']
+    id: 'narrative-en@1', schemaVersion: 1, formats: ['text/markdown'], languages: ['en'], producers: ['narrative-object-events@1']
   });
   return {
     root,
@@ -57,9 +57,9 @@ async function continuityRelease(root) {
 function extractionAgent() {
   return {
     async executePrompt(prompt) {
-      if (prompt.includes('lăsă telefonul')) return { observations: [{ quote: 'lăsă telefonul', payload: { objectId: 'phone:mara', action: 'leave', order: 1 }, confidence: 0.96, alternatives: [], reason: 'Explicit leave event.' }] };
-      if (prompt.includes('recuperă telefonul')) return { observations: [{ quote: 'recuperă telefonul', payload: { objectId: 'phone:mara', action: 'retrieve', order: 2 }, confidence: 0.94, alternatives: [], reason: 'Explicit recovery event.' }] };
-      if (prompt.includes('folosi telefonul')) return { observations: [{ quote: 'folosi telefonul', payload: { objectId: 'phone:mara', action: 'use', order: 3 }, confidence: 0.95, alternatives: [], reason: 'Explicit use event.' }] };
+      if (prompt.includes('left the phone')) return { observations: [{ quote: 'left the phone', payload: { objectId: 'phone:alice', action: 'leave', order: 1 }, confidence: 0.96, alternatives: [], reason: 'Explicit leave event.' }] };
+      if (prompt.includes('retrieved the phone')) return { observations: [{ quote: 'retrieved the phone', payload: { objectId: 'phone:alice', action: 'retrieve', order: 2 }, confidence: 0.94, alternatives: [], reason: 'Explicit recovery event.' }] };
+      if (prompt.includes('used the phone')) return { observations: [{ quote: 'used the phone', payload: { objectId: 'phone:alice', action: 'use', order: 3 }, confidence: 0.95, alternatives: [], reason: 'Explicit use event.' }] };
       return { observations: [] };
     }
   };
@@ -73,10 +73,10 @@ test('LLMAgent translation plus CircuitJS detects and then closes a long-range c
 
   const gap = await analyzeText({
     agentName: 'semantic-test',
-    text: 'Mara lăsă telefonul în mașină.\n\nȘapte capitole mai târziu, folosi telefonul în hotel.\n',
+    text: 'Alice left the phone in the car.\n\nSeven chapters later, she used the phone in the hotel.\n',
     release,
     registries,
-    language: 'ro'
+    language: 'en'
   });
   assert.equal(gap.status, 'reported');
   assert.equal(gap.findings.length, 1);
@@ -86,10 +86,10 @@ test('LLMAgent translation plus CircuitJS detects and then closes a long-range c
 
   const recovered = await analyzeText({
     agentName: 'semantic-test',
-    text: 'Mara lăsă telefonul în mașină.\n\nMara recuperă telefonul înainte de plecare.\n\nLa hotel, folosi telefonul.\n',
+    text: 'Alice left the phone in the car.\n\nAlice retrieved the phone before leaving.\n\nAt the hotel, she used the phone.\n',
     release,
     registries,
-    language: 'ro'
+    language: 'en'
   });
   assert.equal(recovered.status, 'reported');
   assert.equal(recovered.findings.length, 0);
@@ -104,7 +104,7 @@ function capture() {
 test('CLI auto mode creates LongTextJS through the Codex fallback when Achilles is unconfigured', async () => {
   const root = await mkdtemp(join(tmpdir(), 'nllagent-cli-codex-fallback-'));
   const dataRoot = join(root, 'data');
-  const agent = await initializeAgent(dataRoot, 'codex-continuity', { language: 'ro' });
+  const agent = await initializeAgent(dataRoot, 'codex-continuity', { language: 'en' });
   const releaseRoot = join(agent.root, 'releases', '1.0.0');
   const release = await continuityRelease(releaseRoot);
   const filePaths = [
@@ -117,15 +117,15 @@ test('CLI auto mode creates LongTextJS through the Codex fallback when Achilles 
     files.push({ path, digest: sha256Bytes(await readFile(join(releaseRoot, path))) });
   }
   const manifest = {
-    kind: 'NaturalLanguageLinterRelease', version: '1.0.0', status: 'qualified',
+    kind: 'NaturalLanguageLinterRelease', version: '1.0.0', status: 'published',
     description: 'CLI Codex translation acceptance release.',
     ...release.manifest,
     files,
-    qualifiedBy: 'integration-fixture@1'
+    publishedBy: 'integration-fixture@1'
   };
   await writeJson(join(releaseRoot, 'release.json'), manifest);
-  await writeJson(join(releaseRoot, 'qualification.json'), {
-    kind: 'QualificationResult', schemaVersion: 1, status: 'qualified',
+  await writeJson(join(releaseRoot, 'publication.json'), {
+    kind: 'ReleasePublicationResult', schemaVersion: 1, status: 'published',
     release: '1.0.0', manifestDigest: digestJson(manifest), fixture: true
   });
   await writeJson(join(agent.root, 'active-release.json'), {
@@ -135,21 +135,21 @@ test('CLI auto mode creates LongTextJS through the Codex fallback when Achilles 
 
   const input = join(root, 'input.md');
   const output = join(root, 'report.md');
-  await writeFile(input, 'Mara lăsă telefonul în mașină.\n\nȘapte capitole mai târziu, folosi telefonul la hotel.\n');
+  await writeFile(input, 'Alice left the phone in the car.\n\nSeven chapters later, she used the phone at the hotel.\n');
   let codexCalls = 0;
   const processRunner = async (_command, args) => {
     codexCalls += 1;
     const prompt = args.at(-1);
-    const observations = prompt.includes('lăsă telefonul')
+    const observations = prompt.includes('left the phone')
       ? [{
-          quote: 'lăsă telefonul',
-          payload: { objectId: 'phone:mara', action: 'leave', order: 1 },
+          quote: 'left the phone',
+          payload: { objectId: 'phone:alice', action: 'leave', order: 1 },
           confidence: 0.95, alternatives: [], reason: 'Explicit leave event.'
         }]
-      : prompt.includes('folosi telefonul')
+      : prompt.includes('used the phone')
         ? [{
-            quote: 'folosi telefonul',
-            payload: { objectId: 'phone:mara', action: 'use', order: 2 },
+            quote: 'used the phone',
+            payload: { objectId: 'phone:alice', action: 'use', order: 2 },
             confidence: 0.94, alternatives: [], reason: 'Explicit use event.'
           }]
         : [];

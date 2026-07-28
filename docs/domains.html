@@ -18,7 +18,7 @@
     <div class="breadcrumbs"><a href="index.html">Documentation</a> / Domain packages</div>
     <p class="kicker">General infrastructure without a universal ontology</p>
     <h1>Editorial, normative, and technical theories</h1>
-    <p class="lead">nllAgent becomes useful in a domain by qualifying a package of observations, rules, operators, verifiers, examples, compatibility limits, and explanations. The core provides common execution discipline; it does not pretend that a scene, a legal obligation, and a scientific measurement share the same meaning.</p>
+    <p class="lead">nllAgent becomes useful in a domain through a published package of observations, rules, operators, verifiers, examples, compatibility limits, and explanations. The core provides common execution discipline; it does not pretend that a scene, a legal obligation, and a scientific measurement share the same meaning.</p>
 
     <h2 id="generalization">How the platform generalizes</h2>
     <p>A universal set of fields such as <code>Entity</code>, <code>Fact</code>, and <code>Constraint</code> looks simple until all meaningful semantics move into opaque payloads and prompts. nllAgent keeps a smaller common kernel: sources, anchors, versioned types, scope, time, alternatives, epistemic status, provenance, coverage, ports, budgets, witnesses, and publication rules. Domains extend the nominal vocabularies and compose the reasoning regimes they actually need.</p>
@@ -30,7 +30,7 @@ flowchart TB
   AUTH --> THEORY[Circuits + witnesses]
   OBS --> TEST[Natural benchmark + compatibility]
   THEORY --> TEST
-  TEST --> REL[Qualified domain release]
+  TEST --> REL[Published domain release]
     </pre>
     <p class="diagram-caption"><strong>A domain is a linked package.</strong> Authority determines both what the document compiler must observe and how the theory may judge. Natural cases and compatibility probes prove that both sides use the same operational meaning.</p>
 
@@ -44,7 +44,7 @@ flowchart TB
         <tr><td>CircuitJS theory</td><td>Encode reusable selection, state, exception, priority, search, verification, and finding behavior.</td><td>The rule changes between runs or extraction is contaminated by the desired verdict.</td></tr>
         <tr><td>Operators and verifiers</td><td>Provide approved algorithms and replay checks for domain computations.</td><td>A complex claim has no inspectable witness or guarantee boundary.</td></tr>
         <tr><td>Natural benchmark</td><td>Define positives, close negatives, exceptions, ambiguity, coverage, adversarial inputs, and long composition.</td><td>A plausible but wrong theory passes convenient examples.</td></tr>
-        <tr><td>Compatibility profile</td><td>Declare languages, formats, structures, auxiliary context, qualified producers, and limits.</td><td>An unfamiliar document receives a misleading approximate verdict.</td></tr>
+        <tr><td>Compatibility profile</td><td>Declare languages, formats, structures, auxiliary context, approved producers, and limits.</td><td>An unfamiliar document receives a misleading approximate verdict.</td></tr>
         <tr><td>Explanation and migration policy</td><td>Constrain user claims and define how versions change.</td><td>Reports overstate evidence or releases silently reinterpret old observations.</td></tr>
       </tbody>
     </table></div>
@@ -98,7 +98,7 @@ flowchart TB
     <p>Scientific claim/evidence review can identify a mismatch between population, method, result, and conclusion or flag causal language unsupported by the declared design. The runtime may certify unit conversions, formula replay, or an explicit graph property. It does not claim to certify arbitrary scientific truth or to turn a model-extracted causal interpretation into a theorem.</p>
 
     <h2 id="transfer">Compatibility must be proven before reuse</h2>
-    <p>Similar names are not sufficient. A narrative scene is not automatically a dramatic scene; an informal message is not automatically an official notification; an experiment is not automatically a simulation run. An adapter must state its preconditions, field mapping, lost information, coverage effect, and maximum guarantee. Qualification needs natural positive, negative, ambiguous, and coverage cases demonstrating the shared operational meaning.</p>
+    <p>Similar names are not sufficient. A narrative scene is not automatically a dramatic scene; an informal message is not automatically an official notification; an experiment is not automatically a simulation run. An adapter must state its preconditions, field mapping, lost information, coverage effect, and maximum guarantee. Publication checks need natural positive, negative, ambiguous, and coverage cases demonstrating the shared operational meaning.</p>
     <p>When a new document cannot satisfy the package, preflight should stop the dependent circuits and create a learning need. Expanding the compatibility profile is a release change with new benchmarks, not a prompt tweak during the run.</p>
 
     <h2 id="build-domain">Build a new specialized agent</h2>
@@ -110,10 +110,10 @@ flowchart TB
       <li>Choose CircuitJS patterns—relational, state, temporal, fixpoint, argumentation, search, solver, or rubric—and design each witness before implementation.</li>
       <li>Use existing trusted operators where their semantics fit. Propose a reviewed operator and verifier when they do not; never hide new execution in unrestricted circuit code.</li>
       <li>Declare supported language, format, structure, auxiliary registries, coverage policy, cost, and known limits in the compatibility profile.</li>
-      <li>Build a candidate with the <a href="learning.html">learning workflow</a>, qualify it against <a href="benchmark.html">natural benchmarks</a>, inspect semantic diff and limitations, then activate explicitly.</li>
+      <li>Build a candidate with the <a href="learning.html">learning workflow</a>, run <a href="benchmark.html">natural benchmarks</a>, inspect its limitations, and then publish it explicitly when it is ready.</li>
     </ol>
 
-    <div class="callout warning"><strong>Implemented core versus extension contract.</strong> The repository currently ships Markdown ingestion, lexical editorial examples, semantic observation translation, a continuity operator, and several deterministic reasoning operators. Rich legal, scientific, multilingual, multimodal, external-solver, causal, and formal-proof packages are supported by the extension architecture but are not all bundled as qualified production agents. Unsupported evidence remains a compatibility gap.</div>
+    <div class="callout warning"><strong>Implemented core versus extension contract.</strong> The repository currently ships Markdown ingestion, lexical editorial examples, semantic observation translation, a continuity operator, and several deterministic reasoning operators. Rich legal, scientific, multilingual, multimodal, external-solver, causal, and formal-proof packages are supported by the extension architecture but are not all bundled as published production agents. Unsupported evidence remains a compatibility gap.</div>
 
     <footer>Normative extension contract: <a href="specsLoader.html?spec=DS016-domains-extensions.md">DS016</a>. Theory and learning contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> through <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
   </main>

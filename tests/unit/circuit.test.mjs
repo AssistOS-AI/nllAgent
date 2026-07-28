@@ -14,7 +14,7 @@ function validCircuit() {
     inputs: { paragraphs: { type: 'document.paragraph@1', coverage: 'closed-world' } },
     nodes: [
       { id: 'matches', primitive: 'call', operator: 'text.lexical-occurrences@1', inputs: {
-        observations: { $port: 'paragraphs' }, rules: [{ id: 'T-1', term: 'parcă', severity: 'error' }]
+        observations: { $port: 'paragraphs' }, rules: [{ id: 'T-1', term: 'perhaps', severity: 'error' }]
       } },
       { id: 'checked', primitive: 'verify', verifier: 'text.exact-match@1', inputs: { candidates: { $node: 'matches' } } },
       { id: 'out', primitive: 'emit', inputs: { verified: { $node: 'checked' } } }
@@ -50,16 +50,16 @@ test('Circuit compiler rejects dead declarations and validates nominal versions'
 });
 
 test('Circuit runtime emits a mechanically verified source finding', async () => {
-  const program = compileMarkdown('Ea parcă ezită.\n');
+  const program = compileMarkdown('She perhaps hesitates.\n');
   const result = await executeCircuit(compileCircuit(validCircuit(), registries), program, registries);
   assert.equal(result.outputs.findings.length, 1);
   assert.equal(result.outputs.findings[0].kind, 'Finding');
   assert.equal(result.outputs.findings[0].guarantee, 'mechanically-certified');
-  assert.equal(result.outputs.findings[0].mainAnchor.quote, 'parcă');
+  assert.equal(result.outputs.findings[0].mainAnchor.quote, 'perhaps');
 });
 
 test('runtime port binding enforces accepted statuses and cardinality', () => {
-  const program = compileMarkdown('Un paragraf.');
+  const program = compileMarkdown('One paragraph.');
   const circuit = validCircuit();
   circuit.inputs.paragraphs.statuses = ['proposed'];
   circuit.inputs.paragraphs.cardinality = 'at-least-one';
@@ -67,7 +67,7 @@ test('runtime port binding enforces accepted statuses and cardinality', () => {
 });
 
 test('deterministic verification preserves a proposed semantic premise ceiling', async () => {
-  const program = compileMarkdown('Ea parcă ezită.');
+  const program = compileMarkdown('She perhaps hesitates.');
   const paragraph = program.observations.find((item) => item.type === 'document.paragraph@1');
   paragraph.status = 'proposed';
   const result = await executeCircuit(compileCircuit(validCircuit(), registries), program, registries);
