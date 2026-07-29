@@ -20,11 +20,20 @@ Reproducibility depends on stable artifact identities rather than conversation h
 
 The release produces two run-owned CNL profiles. `CNLAuditReport` (`CNL/Audit-1`) binds an existing source digest to terminal status, compatibility, coverage, verified audit observations, findings, conflicts, limitations, and any issue. `CNLGenerationPlan` (`CNL/Plan-1`) binds an idea digest to document design, ordered content, realization guidance, provenance, and verified rule-to-plan applications. Markdown renderings are deterministic views and do not replace these canonical objects.
 
+The selected foundation pack is an immutable platform input beside the agent release, not an undeclared file inside it. Its exact id, version, dialect, and digest belong in the run record, LongTextJS ontology-pack selection, CNL audit, and `foundation.json`. Reproduction requires both identities. Updating foundation semantics does not rewrite historical agent releases or reports.
+
 ## Canonical data
 
 Persistent semantic artifacts must be JSON-compatible values serialized with recursively sorted object keys, preserved array order, UTF-8 encoding, and a final newline. Hash identifiers must use SHA-256 over canonical bytes and include the `sha256:` prefix. Timestamps, latency, retry duration, process identifiers, and local absolute paths must not enter semantic hashes.
 
 Every schema, extractor profile, circuit, operator reference, verifier reference, compatibility profile, explanation policy, benchmark manifest, and release manifest must carry a stable identifier and version. Production references must resolve to exact versions and digests. Ranges and `latest` are authoring conveniences only and must be locked before publication.
+
+When a circuit uses a host-installed runtime extension, its release manifest must include that extension's exact id and
+source digest in `runtimeExtensions`. Publication derives the extensions actually referenced by compiled operator and
+verifier nodes, rejects a missing, mismatched, duplicate, or unused lock, and records the check. Runtime compilation
+requires the installed descriptor to match. Run metadata records the descriptor, and deterministic cache identity uses
+the implementation digest as well as the registry id. The executable file is host code rather than agent release data;
+reproduction therefore requires the matching installed artifact.
 
 ## Release package
 
@@ -44,6 +53,9 @@ A newly authored release manifest has kind `NaturalLanguageLinterRelease`. A rel
 - the statically derived observation contracts and producer-consumer alignment report;
 - known limitations and publication record;
 - reproduction recipe.
+- exact runtime-extension ids and digests for any non-standard operator or verifier code used by the circuits.
+
+When a release uses a declarative authoring profile beyond direct CircuitJS, it must additionally lock the normalized profile values, derived observation and query contracts, generated canonical graph, source map, static diagnostics, exact compiler and registry semantics, and differential evidence required by that profile. The experimental query-first subset persists its compiler-produced bundle as `query-first-artifacts.json`, and benchmark execution rejects reference-to-graph drift. An optional physical optimization plan is runtime metadata, not release meaning. An unsupported profile cannot appear in a publishable candidate merely as an unvalidated dialect label.
 
 The release directory becomes immutable after manual publication. The publication command must verify every declared file digest, validate all critical observation consumers against structural, extraction, or adapter producers, and prove that both candidate files and agent benchmark files remained stable while tests ran. It copies the tested candidate and benchmark cases into a temporary release directory, rechecks both copied snapshots, adds trusted check artifacts, and atomically renames it into the immutable version path. A failed copy or build removes only that temporary directory and cannot leave a partial version. The derived contracts, alignment matrix, benchmark results, and `publication.json` record are copied into the release even when the author did not provide separate files. Loading checks both directions: every declared file must exist with the published digest, and every regular file other than `release.json` and `publication.json` must appear in the manifest. After loading the new release successfully, the same command atomically writes the active pointer containing the release identifier and manifest digest.
 
@@ -82,6 +94,16 @@ Response: A release may contain `planningCircuits`. Publication freezes and hash
 ### Question #6: Does the MVP need an invented release history?
 
 Response: No. New candidates use `NaturalLanguageLinterRelease`, and the repository starts with the real `0.1.0` baseline. Later releases exist only when a maintainer publishes an actual candidate. Version numbers communicate real package identity, not fictional maturity.
+
+### Question #7: Which identity is authoritative for a lowered declarative circuit?
+
+Response: The normalized declarative query and decision values plus the canonical generated CircuitJS graph are both locked. The declarative digest identifies reviewed intent, while the graph digest identifies the executable artifact. Publication requires their source map and lowering evidence; an optimizer-specific plan does not redefine either identity.
+
+### Question #8: Why lock a runtime extension if its operator id is already versioned?
+
+Response: A registry id states semantic intent but does not prove which local bytes implement it. The source digest
+prevents a different function body from satisfying the same published id or reusing a deterministic cache entry. The
+lock does not make the extension untrusted code safe; it makes trusted code identity explicit and replayable.
 
 # Conclusion
 

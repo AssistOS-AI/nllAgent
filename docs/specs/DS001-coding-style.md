@@ -16,13 +16,29 @@ This specification is the coding-style authority for the repository. It governs 
 
 Production code must target Node.js 22 or newer and use ESM `.mjs` modules. Modules must have no operational side effects at import time. Import-time work is limited to constant construction and function or class definitions. File I/O, process spawning, model initialization, registry mutation, and environment validation must occur through explicit functions.
 
-Generated or learned CircuitJS and LongTextJS artifacts must normalize to JSON-compatible plain data. Canonical persisted LongTextJS uses JSON. Circuit authors may use restricted `.circuit.mjs` containing exactly one direct `export default circuit({...})` expression and the injected `circuit`, `port`, and `node` helpers. The dedicated loader masks strings and comments for capability analysis; rejects imports, indirection, functions, classes, control flow, asynchronous execution, templates, filesystem/network/process globals, dynamic code generation, prototype mechanisms, and non-plain results; then evaluates the expression in a short-lived `node:vm` context with string and WebAssembly code generation disabled. Conversion to plain data is lossless and rejects accessors, cycles, unsupported scalar types, non-finite numbers, and symbol keys rather than dropping them through JSON serialization. No other subsystem may evaluate generated source. Production must not dynamically import agent circuit modules or resolve implicit `latest` dependencies.
+Generated or learned CircuitJS and LongTextJS artifacts must normalize to JSON-compatible plain data. Canonical persisted LongTextJS uses JSON. Circuit authors may use restricted `.circuit.mjs` containing exactly one direct `export default circuit({...})` or `export default queryFirstCircuit({...})` expression and only the injected constructors accepted for that form. The dedicated loader masks strings and comments for capability analysis; rejects imports, indirection, functions, classes, control flow, asynchronous execution, templates, filesystem/network/process globals, dynamic code generation, prototype mechanisms, and non-plain results; then evaluates the expression in a short-lived `node:vm` context with string and WebAssembly code generation disabled. Conversion to plain data is lossless and rejects accessors, cycles, unsupported scalar types, non-finite numbers, and symbol keys rather than dropping them through JSON serialization. No other subsystem may evaluate generated source. Production must not dynamically import agent circuit modules or resolve implicit `latest` dependencies.
+
+Declarative query, expression, decision-table, pattern, and aggregate values introduced by a supported CircuitJS profile follow the same rule. They are finite plain-data ASTs, not callbacks or embedded source. A proposed profile must not expand the injected MJS capability set until its normalized schema, canonicalization, static checks, and publication path are implemented. Builder convenience is subordinate to one inspectable normalized value.
+
+A trusted runtime extension is a different code class. A host application may explicitly load one regular, non-symlink,
+self-contained `.mjs` file through `loadRuntimeExtension()` and install it into registries before circuit compilation. The
+module may contain real JavaScript functions because it is reviewed host code, not an agent-authored circuit or source
+artifact. The loader rejects module imports and re-exports so the recorded entry digest identifies the complete extension
+source. Installation requires explicit operator or verifier schemas, determinism, effects, cost, limits, failures, checked
+properties, and execution functions. The wrapper passes frozen plain-data copies and rejects non-plain output. The module
+runs with host authority and therefore must have no import-time side effects; it is not a sandbox for untrusted code.
 
 ## Layout
 
-Reusable implementation belongs in `src/`, grouped by bounded responsibility: core utilities, LongTextJS compilation, CircuitJS compilation and execution, storage, releases, reporting, benchmark and publication checks, learning orchestration, model integration, security, and CLI parsing. Thin entrypoints belong in `bin/` or `src/cli/`. Tests mirror those boundaries under `tests/unit/` and `tests/integration/`.
+Reusable implementation belongs in `src/`, grouped by bounded responsibility: core utilities, LongTextJS compilation, the versioned platform foundation, CircuitJS compilation and execution, storage, releases, reporting, benchmark and publication checks, learning orchestration, model integration, security, and CLI parsing. Foundation ontology, circuits, and replay semantics belong in `src/foundation/`; they must not be duplicated into agent releases. Thin entrypoints belong in `bin/` or `src/cli/`. Tests mirror those boundaries under `tests/unit/` and `tests/integration/`.
 
 Persistent mutable artifacts belong under `data/` and must not be imported by library modules. Agent-specific learned skills belong in `.agents/skills/<skill-name>/` and must be self-contained. Imported skill code must not be copied into `src/`.
+
+## Documentation structure
+
+Documentation must use the reader-facing layer appropriate to its purpose. DS files define stable contracts and resolved rationale. Tutorials teach one complete task through source text, author DSL, commands, and observable results. Concept pages explain boundaries and consequences. Reference pages enumerate schemas, primitives, options, or artifacts for lookup. Intermediate JSON and generated plans belong in a tutorial only when inspection of that layer is the lesson.
+
+Each document states the question it answers and its non-scope, introduces motivation before mechanism, and links to one authoritative deeper explanation instead of repeating it. Lists are reserved for genuine choices or independent items; tables are reserved for repeated exact mappings. Documentation must not imply that proposed behavior, benchmark fixtures, model output, or derived indexes are implemented guarantees.
 
 ## Functions and data
 
@@ -75,6 +91,17 @@ Response: The project needs a practical MJS DSL rather than a hand-written parse
 ### Question #5: Why reject values that JSON serialization could silently omit?
 
 Response: Silent omission would let the reviewed author form differ from the canonical circuit that is published. Rejecting functions, accessors, unsupported scalars, cycles, and non-finite numbers makes normalization lossless and keeps the stored graph identical to the author's declarative value.
+
+### Question #6: Should a new declarative profile add JavaScript callbacks for concise queries?
+
+Response: No. Concision does not justify hiding field dependencies, type assumptions, effects, cost, or coverage obligations inside executable closures. Query and decision syntax must normalize to plain data that the compiler can inspect before runtime.
+
+### Question #7: How can a programmer add an algorithm if circuit modules cannot contain functions?
+
+Response: The programmer implements an exact operator and, where publication depends on it, a replay verifier in a
+trusted runtime-extension module. The host loads and registers that module explicitly. A CircuitJS node then names the
+versioned registry entry and passes plain data to it. This keeps algorithm code testable as ordinary JavaScript without
+giving an untrusted document, learned circuit, or query callback code authority.
 
 # Conclusion
 

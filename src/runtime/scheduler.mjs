@@ -55,7 +55,10 @@ async function executeCircuit(compiled, program, registries, options = {}) {
       : node.verifier ? registries.verifiers.get(node.verifier) : null;
     const cacheMaterial = {
       kind: 'CircuitNodeCacheKey', circuit: compiled.digest, node: node.id,
-      implementation: node.operator || node.verifier || `core.${node.primitive}@1`,
+      implementation: implementation ? {
+        id: node.operator || node.verifier,
+        digest: implementation.implementationDigest || null
+      } : `core.${node.primitive}@1`,
       programDigest, operationalContextDigest: digestJson(options.operationalContext || null), inputDigest
     };
     const cached = implementation?.deterministic !== false && options.cache
@@ -81,6 +84,7 @@ async function executeCircuit(compiled, program, registries, options = {}) {
       node: node.id, primitive: node.primitive,
       ...(node.operator ? { operator: node.operator } : {}),
       ...(node.verifier ? { verifier: node.verifier } : {}),
+      ...(node.logical ? { logical: node.logical } : {}),
       inputDigest, outputDigest: digestJson(output), cacheHit: cached !== null,
       durationMs: Math.round((performance.now() - nodeStarted) * 1000) / 1000
     });

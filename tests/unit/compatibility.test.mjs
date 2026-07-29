@@ -83,3 +83,24 @@ test('compatibility considers every producer for the same observation type', () 
   assert.equal(report.status, 'compatible');
   assert.equal(report.circuits[0].obligations[0].evidence.producers.length, 2);
 });
+
+test('closed-world coverage must belong to the current source revision', () => {
+  const registries = createStandardRegistries();
+  const circuit = compileConsumer('document.complete-paragraphs', 'paragraphs', {
+    type: 'document.paragraph@1', critical: true,
+    statuses: ['extracted'], coverage: 'closed-world'
+  }, registries);
+  const wrongSource = compileMarkdown('Paragraph.\n');
+  wrongSource.coverage[0].source = 'source:another-document';
+  const wrongRevision = compileMarkdown('Paragraph.\n');
+  wrongRevision.coverage[0].revision = 'sha256:wrong-revision';
+
+  assert.equal(
+    evaluateCompatibility(wrongSource, [circuit], { formats: ['text/markdown'] }).status,
+    'incompatible'
+  );
+  assert.equal(
+    evaluateCompatibility(wrongRevision, [circuit], { formats: ['text/markdown'] }).status,
+    'incompatible'
+  );
+});

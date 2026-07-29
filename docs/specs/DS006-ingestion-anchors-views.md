@@ -26,7 +26,9 @@ Ingestion must reject invalid UTF-8 unless an explicit replacement policy is sel
 
 ## Segmentation
 
-The structural compiler must derive line, heading, paragraph, sentence, list-item, quote, and code-block views for Markdown. Sentence segmentation may be heuristic and must declare its profile. Semantic boundaries such as narrative scenes or regulatory articles belong to versioned extraction profiles, not the universal Markdown adapter.
+The structural compiler must derive line, heading, paragraph, sentence, list-item, quote, and code-block views for Markdown. Sentence segmentation is heuristic and splits terminal punctuation while preserving a period between ASCII digits as part of one decimal token. It must retain exact source anchors and declare its profile. Semantic boundaries such as narrative scenes or regulatory articles belong to versioned extraction profiles, not the universal Markdown adapter.
+
+The structural baseline is the format adapter's ontology, not a semantic reading of the prose. A sentence observation asserts only an addressable heuristic span. After structure, the separately versioned DS021 foundation may recognize its controlled assertion families; open-world coverage and explicit limits prevent that pass from masquerading as general entity, action, discourse, factuality, psychological, or scientific interpretation. Rich meanings still require exact schemas and approved release producers.
 
 Chunking is an execution optimization only. Anchors and block identifiers remain global. Overlap windows must map back to canonical offsets and deduplicate observations by anchored identity. No circuit may treat a chunk boundary as semantic unless the source structure declares it.
 
@@ -37,6 +39,8 @@ Anchor creation must verify that the quote exactly matches canonical text at the
 ## Views and indexes
 
 Views must be reconstructible from their selection expression and source revision. Core indexes include lexical token and pattern indexes, block and heading indexes, mention indexes, temporal indexes, claim indexes, and dependency indexes. Indexes are derived caches and may be rebuilt; they are never the source of record.
+
+The experimental logical relation adapter exposes source, task, blocks, anchors, schemas, views, scopes, worlds, mentions, entities, identity candidates, observations, capabilities, coverage, gaps, and diagnostics to the query evaluator. This does not change ingestion ownership: the adapter reads the compiled program, while only ingestion and approved materializers create canonical source-side objects. Future indexes must return the same ordered identities and dependencies as the implemented reference scan.
 
 ## Incremental compilation
 
@@ -63,6 +67,14 @@ Response: NUL and configured oversized-line violations create critical source ga
 ### Question #5: Why store both an exact range and contextual selectors?
 
 Response: The exact range proves the quote against the current source revision. Structural path and bounded context support controlled relocation after edits, but a relocated anchor remains a candidate and cannot silently inherit the old certificate.
+
+### Question #6: Is a query index part of a source package?
+
+Response: No. It is a rebuildable execution artifact keyed by the canonical program and engine version. Source packages, anchors, observations, and coverage remain valid without it, and disagreement forces the runtime back to the reference scan.
+
+### Question #7: Why is the foundation separate from the format adapter?
+
+Response: Markdown structure and logical source assertions have different change and evidence contracts. The adapter owns syntax and anchors; the foundation owns a small versioned semantic grammar; releases own richer domain interpretation. The split permits `--foundation off`, preserves provenance, and prevents a format-parser change from silently redefining common-sense semantics.
 
 # Conclusion
 

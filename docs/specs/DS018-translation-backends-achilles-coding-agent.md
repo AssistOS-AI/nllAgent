@@ -12,6 +12,8 @@ The production CLI must support semantic extraction and optional CNL plan realiz
 
 This specification separates the semantic translation boundary from both orchestration and theory execution. LongTextJS extraction profiles ask for observations. A selected backend satisfies those requests. CircuitJS consumes the resulting observations without knowing whether `LLMAgent` or a Coding Agent produced them. Compatibility, coverage, witness verification, reporting, caching, and issue creation remain common.
 
+The deterministic foundation materializer runs as a separate compiler stage and requires no translation backend. Model-assisted translation begins only for richer observation types demanded by the selected release; it neither replaces nor silently expands the foundation ontology.
+
 # Core Content
 
 ## Role-specific runtime skills

@@ -22,10 +22,23 @@
 
     <h2 id="why-operators">Why circuits call a registry</h2>
     <p>Different rules need genuinely different algorithms. Phrase linting needs exact source scanning. Continuity needs ordered events and state transitions. Normative deadlines need temporal calculation and explicit exception policy. Technical consistency may need unit conversion or constraint comparison. Flattening all of these into a single generic “reason” operation would hide the real semantics and make independent verification impossible.</p>
-    <p>A circuit therefore refers to an exact versioned operator identifier. The trusted registry binds that identifier to an implementation contract: input and output shapes, determinism, effects, capabilities, resource limits, cost, sandbox policy, and witness requirements. Static compilation fails when an operator or verifier is absent, unknown, or not permitted by the release.</p>
+    <p>A circuit therefore refers to an exact versioned operator identifier. DS009 requires the trusted registry to bind that identifier to input and output shapes, determinism, effects, capabilities, resource limits, cost, sandbox policy, and witness requirements. The current registry enforces identity, implementation presence, determinism, and effects, while the richer machine-typed contract remains a concrete prerequisite in <a href="../serious_issues.md">serious issue 4</a>. Static compilation already fails when an identifier is absent; it does not yet prove every primitive-specific input or witness shape.</p>
+
+    <h2 id="simplest-form">Choose the simplest correct representation</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Semantic shape</th><th>Use</th><th>Avoid</th></tr></thead>
+      <tbody>
+        <tr><td>One reviewed algorithm and policy object</td><td>One <code>call</code>, one <code>verify</code>, one <code>emit</code>.</td><td>Rebuilding the algorithm with generic query nodes.</td></tr>
+        <tr><td>Repeated typed alternatives and exceptions over one relation</td><td>A supported named query plus evidence-aware decision table.</td><td>Duplicated wiring or implicit file-order precedence.</td></tr>
+        <tr><td>Complete group threshold</td><td>Query plus registered aggregate and member witness.</td><td>A naked total without membership and coverage.</td></tr>
+        <tr><td>Bounded ordered events</td><td>Ordered query plus registered pattern/state operator.</td><td>A large table that hides state or missing intervening events.</td></tr>
+        <tr><td>Fixpoint, argumentation, solver, search, complex state</td><td>Direct graph and exact registered operator.</td><td>Forcing mathematical algorithms into a superficial table.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The query/table row describes the <a href="query-first.html">implemented experimental DS020 subset</a>. Publication accepts that subset only after normal graph checks and a reference-versus-lowered benchmark comparison. Aggregates and ordered patterns in the next two rows still require exact registered operators or direct graphs. The current editorial example is already in the first and simplest row.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   PORT[Typed observations] --> OP[Registered operator]
   OP --> VER{Candidate witness verified?}
   VER -->|accept| PUB[Publish bounded finding]
@@ -48,6 +61,11 @@ flowchart TB
     <div class="table-wrap"><table>
       <thead><tr><th>Operator</th><th>What it computes</th><th>What its verifier rechecks</th></tr></thead>
       <tbody>
+        <tr><td><code>foundation.state-conflicts@1</code></td><td>Finds opposite-polarity or declared exclusive states in one bounded subject, world, time frame, and explicit time context.</td><td>Rereads assertion types, context, polarity or exclusivity, source revision, and exact anchors.</td></tr>
+        <tr><td><code>foundation.temporal-cycles@1</code></td><td>Finds cycles among explicit strict <code>before</code> relations.</td><td>Replays every cycle edge and exact source anchor.</td></tr>
+        <tr><td><code>foundation.arithmetic-conflicts@1</code></td><td>Replays finite decimal equality with exact rational arithmetic and detects division by zero.</td><td>Rereads operands, operation, result, source revision, and exact anchor.</td></tr>
+        <tr><td><code>foundation.physical-conflicts@1</code></td><td>Checks the published unit vocabularies, elementary ranges, and conflicting exact equal-unit quantities.</td><td>Recomputes unit and bound policy or the exact disagreement from canonical quantity observations.</td></tr>
+        <tr><td><code>foundation.emotional-conflicts@1</code></td><td>Checks explicit emotion polarity, disjoint inanimate typing, and literal emotion assigned to an explicitly inanimate subject.</td><td>Rereads the exact emotion/type context and source anchors; it performs no diagnosis.</td></tr>
         <tr><td><code>text.lexical-occurrences@1</code></td><td>Literal occurrences under case, word-boundary, paragraph-type, and excluded-prefix policy.</td><td><code>text.exact-match@1</code> rereads each canonical source range.</td></tr>
         <tr><td><code>text.frequency-threshold@1</code></td><td>Counts exact term spans inside each configured scope and reports threshold candidates.</td><td>Rereads every occurrence and recomputes the configured maximum.</td></tr>
         <tr><td><code>narrative.object-continuity@1</code></td><td>Tracks leave, retrieve, transfer, replace, and use events by object identity.</td><td>Replays source event order and checks that no recovery transition exists in the witnessed interval.</td></tr>
@@ -102,10 +120,56 @@ flowchart TB
       <li>Add natural benchmark cases showing that real document observations reach the operator with the intended semantics.</li>
       <li>Update the relevant DS, registry documentation, security capabilities, and candidate release. Registration alone does not validate a domain use.</li>
     </ol>
+    <p>The implemented host API is <code>loadRuntimeExtension()</code> plus
+      <code>installRuntimeExtension()</code>, or the combined <code>loadAndInstallRuntimeExtension()</code>. It accepts one
+      reviewed, self-contained, regular <code>.mjs</code> file. The extension declares executable operator/verifier
+      functions and complete metadata; installation records its source digest. Inputs and context are frozen plain-data
+      copies, output must be plain data, cache identity includes the digest, and releases that use it lock the same
+      descriptor.</p>
+    <p>Run <code>node examples/runtime-extension/run.mjs</code> to execute the included paragraph-length operator and
+      replay verifier. <a href="circuits-in-practice.html#javascript">Circuits in practice</a> shows its function, graph,
+      inputs, candidate, verifier, and output together. The extension is trusted in-process code; it is not selected by
+      a document, learned circuit, or ordinary CLI option.</p>
+
+    <h3 id="extension-api">Runtime-extension API and fields</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Surface</th><th>Required arguments or fields</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>loadRuntimeExtension(path, options)</code></td><td><code>path</code> is a regular non-symlink
+          <code>.mjs</code>; optional <code>options.baseDir</code> resolves a relative path.</td><td>Reads UTF-8, requires
+          one self-contained module without imports/re-exports, calculates SHA-256, imports the trusted file, and
+          returns a validated loaded descriptor. It does not mutate registries.</td></tr>
+        <tr><td><code>installRuntimeExtension(registries, extension, descriptor)</code></td><td>Operator and verifier
+          registries, a definition or loaded extension, and for an in-memory definition an exact descriptor
+          <code>{ id, digest, entry? }</code>.</td><td>Preflights duplicate ids, wraps execution, registers every entry,
+          and appends the public descriptor to <code>registries.extensions</code>.</td></tr>
+        <tr><td><code>loadAndInstallRuntimeExtension(registries, path, options)</code></td><td>The same registries, path,
+          and optional base directory.</td><td>Performs the previous two operations in sequence.</td></tr>
+        <tr><td>Extension definition</td><td><code>kind: 'NllRuntimeExtension'</code>, semantic-versioned
+          <code>id</code>, <code>description</code>, <code>operators</code>, <code>verifiers</code>.</td><td>One versioned
+          executable unit. At least one registry entry is required.</td></tr>
+        <tr><td>Operator definition</td><td><code>id</code>, <code>description</code>, <code>primitives</code>,
+          <code>inputSchema</code>, <code>outputSchema</code>, <code>deterministic</code>, <code>effects</code>,
+          <code>capabilities</code>, <code>cost</code>, <code>limits</code>, <code>failureCodes</code>, and
+          <code>execute</code>. Ordering, coverage, guarantee, and witness metadata are optional until used.</td><td>The
+          exact JavaScript implementation behind a compatible non-verify node.</td></tr>
+        <tr><td>Verifier definition</td><td><code>id</code>, <code>description</code>, <code>candidateSchema</code>,
+          <code>witnessSchema</code>, <code>checkedProperties</code>, <code>outcomes</code>,
+          <code>guaranteeContribution</code>, <code>limits</code>, <code>execute</code>.</td><td>The exact checker behind
+          a <code>verify</code> node.</td></tr>
+        <tr><td><code>execute(inputs, context)</code></td><td><code>inputs</code> is the resolved named node input;
+          <code>context</code> contains <code>program</code>, <code>circuit</code>, <code>node</code>, and
+          <code>operationalContext</code>.</td><td>Both arguments are frozen plain-data copies. The returned promise or
+          value must normalize to finite JSON-compatible plain data.</td></tr>
+        <tr><td>Release lock</td><td><code>runtimeExtensions: [{ id, digest }]</code> for every referenced custom
+          entry.</td><td>Publication rejects missing, mismatched, duplicate, or unused locks; runtime rejects a digest
+          mismatch.</td></tr>
+      </tbody>
+    </table></div>
 
     <h2 id="next">Where to go next</h2>
     <p>Read <a href="circuitjs.html">The CircuitJS theory program</a> for graph authoring, <a href="benchmark.html">Benchmarks and publication checks</a> for testing operator use through natural text, <a href="artifacts.html#run-directory">Artifacts</a> for plans and verifier records, and <a href="security.html#runtime-capabilities">Runtime boundaries</a> for capability control.</p>
-    <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, and <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>.</footer>
+    <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.</footer>
   </main>
 </div>
 </body>

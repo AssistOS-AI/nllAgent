@@ -20,6 +20,8 @@ The default deployment uses filesystem-backed stores inside each agent workspace
 
 `runs/<id>/cnl-audit.json` is the canonical `CNLAuditReport` for a direct validation transaction. It binds terminal state, compatibility, coverage, audit observations, findings, conflicts, limitations, and issue to the source and release. `report.md` is a deterministic view of this object. Nested realization validation directories use the same audit contract.
 
+Each validation artifact set also contains `foundation.json`, whose descriptor binds the platform pack or explicit `off` selection. The same descriptor is embedded in the run record and audit product. Foundation identity participates in semantic reproduction and cache separation even though it is not copied into the agent release.
+
 ## Store boundaries
 
 The implementation must expose source, materialization, circuit catalog, operator registry, verifier registry, release, run, trace, finding, benchmark, feedback, issue, and artifact store interfaces. The filesystem implementation may co-locate them physically but must preserve logical ownership and immutability rules.
@@ -41,6 +43,8 @@ Explanation views expose only the minimal subgraph necessary for a finding. Audi
 ## Caching and invalidation
 
 Cache keys must include canonical input digest, schema and producer version, model profile, demand, view, operational context, and semantic configuration. Runtime node caches additionally bind the complete LongTextJS program, circuit and node, operator version, and resolved inputs. A dependency graph maps blocks to observations, observations to derived states, states to circuit outputs, and outputs to findings and reports. Source edits, rule changes, identity corrections, and context updates invalidate only dependent objects when the graph is complete; otherwise full recomputation is mandatory.
+
+Query caches and indexes, when implemented, bind the complete LongTextJS program digest, normalized query digest, query dialect and engine version, exact registered function versions, world policy, and relevant operational context. They retain dependency and coverage envelopes and are always safe to discard. The current release manager persists the normalized author value, generated canonical graph, both digests, QueryContracts, query/table source maps, and successful static-analysis record in `query-first-artifacts.json`; selected future physical indexes, join algorithms, counters, and timings belong to runtime operational data.
 
 ## Retention and redaction
 
@@ -77,6 +81,10 @@ Response: No. A verifier may inspect anchors, task policy, coverage, or an inter
 ### Question #6: Why are planning runs separate from validation runs?
 
 Response: A planning run has an input idea and a primary CNL specification even when no document is realized. Storing it under `planning-runs/<id>/` preserves that lineage without pretending the idea or plan is an audit source. Optional realization attempts retain nested `CNLAuditReport` artifacts so evidence remains comparable.
+
+### Question #7: Can a materialized query view be retained as evidence?
+
+Response: It may be retained for replay and diagnostics, but its evidentiary force comes only from the canonical objects and registry semantics in its dependency envelope. Removing the cache must not change the result, and retaining it cannot strengthen coverage or guarantee.
 
 # Conclusion
 

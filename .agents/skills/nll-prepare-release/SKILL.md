@@ -9,7 +9,7 @@ Treat candidate preparation as development work, not as publication. This skill 
 
 ## Required reading
 
-Read `docs/specs/DS004-artifacts-releases.md`, `DS012-benchmarks-release-gate.md`, `DS013-learning-coding-agent-skills.md`, `DS015-security-governance.md`, the candidate manifest, the available benchmark report, and the declared limitations.
+Read `docs/specs/DS004-artifacts-releases.md`, `DS012-benchmarks-release-gate.md`, `DS013-learning-coding-agent-skills.md`, `DS015-security-governance.md`, `DS020-query-first-circuit-authoring.md`, and `DS021-foundation-ontology-validation.md`, the candidate manifest, the available benchmark report, and the declared limitations.
 
 ## Preparation checklist
 
@@ -20,6 +20,9 @@ Read `docs/specs/DS004-artifacts-releases.md`, `DS012-benchmarks-release-gate.md
 5. Confirm that every `.circuit.mjs` passes the restricted loader and requests no undeclared effects or unbounded capability.
 6. Describe changed outcomes, types, coverage, compatibility, guarantees, and likely reanalysis impact.
 7. Record known limitations and the exact candidate version in the learning result.
+8. Reject a candidate that claims an unsupported query-first dialect. When the host advertises support, require normalized query/table artifacts, QueryContracts, source maps, static diagnostics, generated graph digests, and the differential evidence mandated by that profile.
+9. Reject a candidate that collides with a foundation circuit identifier, overstates a foundation observation's
+   open-world meaning, or silently depends on core while claiming foundation-off compatibility.
 
 ## Authority boundary
 

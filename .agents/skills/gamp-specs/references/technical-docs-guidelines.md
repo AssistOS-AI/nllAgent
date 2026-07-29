@@ -24,8 +24,16 @@ Write for human readers. Explain what exists, why it exists, and how it behaves 
 - Reuse the project's stable vocabulary when canonical architecture texts or reports already define the topic.
 - Keep code identifiers, filenames, module names, and exact technical terms unchanged.
 - Do not present machine-specific absolute filesystem paths, usernames, home directories, or workstation-local folder layouts as if they were part of the project. Refer to repository-relative paths or project concepts unless an absolute path is itself a real, documented interface requirement.
+- Separate current behavior from proposed design at the first relevant heading. Link proposed behavior to its governing specification and state the concrete implementation and validation gates that remain.
+- For a CLI reference, enumerate the parser's full command-option matrix, defaults, conflicts, path resolution, persistent effects, artifacts, output modes, environment precedence, and exit codes. Verify it against parser and help source rather than inferred examples.
+- For a declarative language or persistent data model, document every public constructor or primitive, the fields it consumes, the value or structure it produces, the algorithm or orchestration responsibility it names, and whether the current runtime implements that contract directly or through a registry.
 
 ## Editorial Standard
+
+- Give every page one reader promise: who it is for, which question it answers, how the answer changes the reader's work, and what is intentionally outside its scope.
+- Keep the zoom appropriate to the page. Tutorials lead with user source, author DSL, commands, and observable results; intermediate JSON, compiler plans, and traces appear only when inspecting those layers is the lesson. Concept pages explain boundaries; reference pages enumerate exact contracts.
+- Structure the narrative as motivation, mechanism, consequence, and limitation. Preserve important ideas in one canonical location and link to them elsewhere instead of repeating parallel explanations.
+- Prefer a causal paragraph over a decorative list. Use lists for genuine choices or independent steps and tables for repeated exact mappings. Remove filler, repeated caveats, orphan headings, and conclusions that merely restate the introduction.
 
 - Avoid prose that reads like prompt scaffolding, product marketing, or generated filler.
 - Avoid meta text about how to read the page.

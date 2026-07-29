@@ -2,6 +2,7 @@ export * from './benchmark/index.mjs';
 export * from './circuit/index.mjs';
 export * from './longtext/index.mjs';
 export * from './generation/index.mjs';
+export * from './foundation/index.mjs';
 export * from './learning/index.mjs';
 export * from './model/index.mjs';
 export * from './release/index.mjs';

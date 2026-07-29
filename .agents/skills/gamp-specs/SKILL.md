@@ -15,7 +15,7 @@ Use `references/docs-structure.md` for layout and file placement, `references/te
 
 ### 1. Discover Source Material
 
-- Read `AGENTS.md`, `README.md`, and any existing `docs/` content.
+- Read `AGENTS.md`, `README.md`, any existing `docs/` content, and `serious_issues.md` when present.
 - Read the source code in the same manner you normally do when asked to analyze a project: scan the tree, inspect entry points, follow key dependencies, and review the current skill folders.
 - Verify every substantive technical claim against the implementation before documenting it.
 - Extract required narrative, constraints, and terminology from those sources.
@@ -40,6 +40,7 @@ Use `references/docs-structure.md` for layout and file placement, `references/te
 - Put `Response` or `Options` inside the numbered question subchapter and keep unresolved multi-option questions unimplemented until one path is selected.
 - When code changes alter behavior, interfaces, architecture, workflows, or constraints, update both the HTML documentation and the DS specifications to match the implementation.
 - Record architectural interpretations, high-risk assumptions, conflict resolutions, and unresolved alternatives directly inside the affected DS files under numbered `Decisions & Questions` entries.
+- Keep implemented, accepted, and proposed contracts visibly distinct. A proposed dialect, compiler layer, or runtime path must identify its missing implementation gates and must not be shown as a current executable feature.
 - Keep repository example code inside the relevant skill folders rather than introducing a shared root `src/` tree that copied skills would not carry with them.
 
 ### 3. Rebuild HTML Documentation
@@ -56,6 +57,9 @@ Use `references/docs-structure.md` for layout and file placement, `references/te
 - Choose one primary navigation model for the HTML documentation shell: a sidebar or a header navigation bar. Do not use both as parallel primary navigation systems in the same documentation set unless one is clearly secondary and non-redundant.
 - Treat the project as a standalone system in the HTML documentation. Do not expose machine-specific absolute paths, home directories, usernames, or other workstation-local filesystem details unless the repository itself requires them as part of the documented contract.
 - Ensure the HTML documentation reflects the current source code and remains aligned with the DS specifications.
+- Give each page one reader promise and one appropriate level of zoom. Tutorials show author-visible source, DSL, commands, and results; concepts explain boundaries; references enumerate exact contracts. Move intermediate JSON and traces out of beginner tutorials unless inspecting them is the stated lesson.
+- When the project exposes a CLI, maintain one complete man-page-style HTML reference covering every command, argument, default, conflict, path rule, side effect, output, and exit code accepted by the current parser.
+- When the project exposes declarative languages or persistent data formats, maintain a human-reviewable data dictionary and primitive reference. Explain every construction's fields, result shape, algorithmic responsibility, evidence or dependency behavior, and current implementation boundary.
 - Provide an index page that explains how the system fits together, where the coding style is defined, and how tests are organized. Add one page per skill only when the repository itself is the skill catalog.
 
 ### 4. Create or Update `AGENTS.md`
@@ -93,6 +97,8 @@ Use `references/docs-structure.md` for layout and file placement, `references/te
 - Run the documentation link verifier after documentation work so shared navigation, specs-loader links, and partial includes stay valid.
 - When the HTML documentation uses relative asset paths, `fetch()`-loaded partials, or other browser-resolved resources, run `node scripts/verify_static_site.js <docs-dir>` against the generated `docs/` folder. Add `--path` checks for project-specific resources when needed.
 - Verify that each affected DS file carries the needed numbered `Decisions & Questions` entries for important rationale, tradeoffs, and unresolved issues.
+- Verify CLI reference claims against the parser and help implementation, and verify declarative primitive claims against the compiler, scheduler, and registries.
+- Verify that proposed architecture pages are labeled proposed at the first use, link to their governing DS, and cannot be mistaken for executable tutorials.
 
 ### 7. Quality Checks
 
@@ -112,6 +118,7 @@ Use `references/docs-structure.md` for layout and file placement, `references/te
 - Confirm the HTML documentation and specs are synchronized with the implementation, with specs kept authoritative if wording diverges.
 - Confirm downstream-consumer documentation rules are explicit: imported skills stay documented inside `skills/`, not in the host project's `/docs` DS set.
 - Confirm numbered `Decisions & Questions` entries exist wherever rationale or unresolved choices matter, and confirm no guidance still requires a separate decision-log file.
+- Confirm unresolved implementation blockers are recorded in `serious_issues.md` rather than softened into documentation prose or presented as completed guarantees.
 
 ## Resources
 

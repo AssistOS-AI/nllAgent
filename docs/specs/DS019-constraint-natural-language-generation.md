@@ -154,10 +154,13 @@ The primary command is:
 
 ```text
 nllagent plan --agent <name> --input <idea.md> --output <plan.cnl.md>
-  [--release <version>] [--translator auto|achilles|codex|none]
+  [--release <version>] [--foundation core|off]
+  [--translator auto|achilles|codex|none]
 ```
 
 Plan-only execution does not require an LLM when the planning circuit consumes deterministic LongTextJS observations. `planned` and `planned-with-limits` exit 0. Missing critical compatibility exits 3, incomplete required coverage exits 4, exhausted budgets exit 5, and unresolved certified conflict exits 6.
+
+The default is `--foundation core`. Planning records that selection with the idea; if realization is requested, the same selection governs validation of every candidate. `--foundation off` is appropriate when the intended document uses a deliberately different world model.
 
 Optional final realization is enabled explicitly:
 

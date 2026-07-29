@@ -24,11 +24,22 @@ An operator record must declare name, version, role, input and output schemas, d
 
 Pure standard operators may execute in process. Model, network, solver, or untrusted native operators must run through controlled adapters and may be isolated in worker threads or child processes. A circuit receives only declared capabilities. Operator failures must be structured and must not leak secrets into traces.
 
-The standard deterministic registry includes literal lexical matching, relational filter/project/join/aggregate, finite positive fixpoint, state timelines with explicit effects and retraction, elapsed-time deadlines with declared outage handling, typed unit conversion, aligned interval-conflict detection, shortest path with a separate optimality verifier, and grounded argumentation. These operators cover the runtime regimes without claiming domain-specific natural-language extraction. Missing domain producers or solver adapters remain compatibility failures.
+The standard deterministic registry includes literal lexical matching, relational filter/project/join/aggregate, DS021 foundation state, temporal, exact-arithmetic, physical-quantity, and emotion/type checks, finite positive fixpoint, state timelines with explicit effects and retraction, elapsed-time deadlines with declared outage handling, typed unit conversion, aligned interval-conflict detection, shortest path with a separate optimality verifier, and grounded argumentation. These operators cover runtime regimes without claiming unrestricted natural-language extraction. Missing domain producers or solver adapters remain compatibility failures.
+
+Registry metadata must be machine-checkable rather than descriptive prose alone. Every operator declares its permitted CircuitJS primitives, versioned input and output schemas, witness or dependency behavior, determinism, effects, capabilities, cost class and bound, failure codes, ordering behavior, coverage behavior, guarantee ceiling, and test-vector identity. Every verifier declares candidate and witness schemas, checked properties, completeness access, possible outcomes, guarantee contribution, and limits. The registry and compiler now enforce permitted primitive names, and the experimental query/table entries expose additional schema, cost, coverage, ordering, witness, and checked-property metadata. Equivalent rich metadata is still incomplete for older general operators and remains a tracked issue.
+
+The public runtime API also accepts an explicitly installed `NllRuntimeExtension`. Its self-contained ESM entry is
+content-addressed before execution. Operator inputs and the context exposed to extension code are cloned, normalized,
+and frozen; results are normalized and rejected unless they are finite JSON-compatible plain data. Registry descriptions
+record extension identity and implementation digest. The scheduler includes that digest in deterministic cache keys,
+and release compilation checks it against `runtimeExtensions`. Extension code executes in process with host authority;
+only reviewed host applications may load it, and effect metadata is not a security sandbox.
 
 ## Relational regime
 
 Relational nodes operate over ordered plain-data collections and propagate row-level provenance. Grouping and aggregation must preserve the contributing input identifiers. Window operations must declare document, temporal, or numeric ordering. Anti-joins require coverage tokens whose domain exactly matches the excluded collection.
+
+DS020's experimental query adapter treats the canonical LongTextJS program as a finite set of read-only logical relations. The implemented realization is a deterministic scan with nested-loop joins and explicit row budgets. Query rows retain canonical dependencies and coverage state; benchmarks compare the direct reference evaluation with lowered CircuitJS at query, decision, and verified-result layers. Indexes, join tables, native execution, and materialized views remain future discardable optimizations.
 
 ## Derivation and truth maintenance
 
@@ -89,6 +100,22 @@ Response: Registered operators build and verify an idea-specific CNL generation 
 ### Question #7: Does an empty node output mean the circuit failed?
 
 Response: No. An empty collection can be the correct result of a compatible, covered operator, such as a lexical rule excluded in dialogue. It differs from verifier rejection, incompatibility, incomplete coverage, budget exhaustion, and runtime fault. Reports and tutorials must preserve those distinctions.
+
+### Question #8: Why must the registry constrain which primitive may invoke an operator?
+
+Response: The primitive communicates semantics to static analysis and human reviewers. Allowing the same untyped implementation to masquerade as `antiJoin`, `search`, or `verify` would make coverage, termination, and witness checks optional conventions. Exact primitive compatibility turns those names into enforceable contracts.
+
+### Question #9: May a query index change which evidence is considered?
+
+Response: No. It may change only the access algorithm. The complete program and normalized query define the rows and dependencies. Any index disagreement is physical-plan drift and requires discard, reference execution, and a regression case.
+
+### Question #10: What exactly does a custom operator receive and return?
+
+Response: It receives the named plain-data object obtained after resolving every `port()` and `node()` reference. Its
+second argument contains read-only plain-data snapshots of the current LongTextJS program, compiled circuit, node, and
+declared operational context. It returns plain data that becomes that node's immutable output. A thrown exception,
+mutation attempt, non-plain result, missing budget, or verifier rejection remains a structured failure rather than an
+implicit finding.
 
 # Conclusion
 

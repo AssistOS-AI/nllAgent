@@ -9,8 +9,17 @@ class Registry {
   register(entry) {
     invariant(entry && typeof entry.id === 'string', 'invalid-registry-entry', `${this.kind} entry requires an id.`);
     invariant(typeof entry.execute === 'function', 'invalid-registry-entry', `${entry.id} requires execute().`);
+    if (this.kind === 'operator') {
+      invariant(entry.primitives === undefined || (Array.isArray(entry.primitives)
+        && entry.primitives.length > 0 && entry.primitives.every((primitive) => typeof primitive === 'string')),
+      'invalid-registry-entry', `${entry.id} primitives must be a non-empty string array.`);
+    }
     if (this.entries.has(entry.id)) throw new NllError('duplicate-registry-entry', `${entry.id} is already registered.`);
-    this.entries.set(entry.id, Object.freeze({ effects: [], deterministic: true, ...entry }));
+    this.entries.set(entry.id, Object.freeze({
+      effects: [], deterministic: true,
+      ...(this.kind === 'operator' ? { primitives: ['call'] } : {}),
+      ...entry
+    }));
     return this;
   }
 

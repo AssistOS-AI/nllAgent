@@ -2,7 +2,7 @@ import { Script, createContext } from 'node:vm';
 import { extname } from 'node:path';
 import { readJson, readUtf8Strict } from '../core/io.mjs';
 import { NllError } from '../core/errors.mjs';
-import { circuit, node, port } from './dsl.mjs';
+import { circuit, node, port, queryFirstCircuit } from './dsl.mjs';
 
 const FORBIDDEN_SOURCE = [
   ['module imports', /\b(?:import|require)\b/u],
@@ -16,7 +16,7 @@ const FORBIDDEN_SOURCE = [
   ['imperative control flow', /\b(?:if|else|switch|case|for|while|do|try|catch|throw|return|with|delete)\b/u]
 ];
 
-const ALLOWED_CALLS = new Set(['circuit', 'node', 'port']);
+const ALLOWED_CALLS = new Set(['circuit', 'node', 'port', 'queryFirstCircuit']);
 
 function lexicalView(source, options = {}) {
   let state = 'code';
@@ -94,16 +94,16 @@ function moduleExpression(source, path) {
   if (!match) {
     throw new NllError(
       'invalid-circuit-module',
-      'A CircuitJS .mjs file must contain one `export default circuit({...})` expression.',
+      'A CircuitJS .mjs file must contain one direct circuit({...}) or queryFirstCircuit({...}) export.',
       { path }
     );
   }
   const expression = match[1].replace(/;\s*$/u, '');
   const expressionView = lexicalView(expression, { maskStrings: true }).trim();
-  if (!/^circuit\s*\([\s\S]*\)$/u.test(expressionView)) {
+  if (!/^(?:circuit|queryFirstCircuit)\s*\([\s\S]*\)$/u.test(expressionView)) {
     throw new NllError(
       'circuit-module-capability-denied',
-      `Circuit module ${path} must be one direct circuit({...}) constructor call.`,
+      `Circuit module ${path} must be one direct circuit({...}) or queryFirstCircuit({...}) constructor call.`,
       { path, capability: 'arbitrary-expression' }
     );
   }
@@ -150,7 +150,7 @@ function evaluateCircuitModule(source, options = {}) {
   const path = options.path || '<circuit.mjs>';
   const expression = moduleExpression(source, path);
   const sandbox = Object.create(null);
-  Object.assign(sandbox, { circuit, node, port });
+  Object.assign(sandbox, { circuit, node, port, queryFirstCircuit });
   const context = createContext(sandbox, {
     name: `CircuitJS:${path}`,
     codeGeneration: { strings: false, wasm: false }

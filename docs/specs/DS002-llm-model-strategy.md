@@ -10,6 +10,8 @@ summary: Defines backend-neutral extraction and optional CNL realization roles, 
 
 Language models support semantic extraction, rubric-based judgment, benchmark critique, counterexample generation, and explanation wording. Their output is evidence or a bounded judgment, not an implicit source of rule authority.
 
+This specification governs model roles, routing, capture, replay, and guarantee ceilings. It does not select a permanent vendor model, define LongTextJS observation schemas, or authorize models to replace the default deterministic foundation, CircuitJS planning, replay verification, or manual publication.
+
 # Core Content
 
 ## Optional realization and revision roles

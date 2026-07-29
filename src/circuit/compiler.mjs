@@ -1,5 +1,6 @@
 import { deepFreeze, digestJson, normalizeJson } from '../core/canonical.mjs';
 import { NllError, invariant } from '../core/errors.mjs';
+import { lowerQueryFirstCircuit } from './query-first/compiler.mjs';
 
 const PRIMITIVES = new Set([
   'select', 'filter', 'project', 'join', 'antiJoin', 'group', 'window', 'aggregate',
@@ -43,7 +44,12 @@ function referencedPorts(value, output = new Set()) {
 }
 
 function compileCircuit(source, registries) {
-  const circuit = normalizeJson(source);
+  const normalizedSource = normalizeJson(source);
+  const queryFirst = normalizedSource.kind === 'CircuitJSQueryFirst'
+    ? lowerQueryFirstCircuit(normalizedSource, registries) : null;
+  const circuit = queryFirst?.circuit || normalizedSource;
+  invariant(queryFirst || circuit.authoringProfile !== 'circuitjs-query-first@1',
+    'invalid-circuit', 'Direct CircuitJS cannot claim the query-first authoring profile.');
   invariant(circuit.kind === 'CircuitJS', 'invalid-circuit', 'Circuit kind must be CircuitJS.');
   invariant(typeof circuit.id === 'string' && circuit.id, 'invalid-circuit', 'Circuit requires an id.');
   invariant(typeof circuit.version === 'string' && circuit.version, 'invalid-circuit', 'Circuit requires a version.');
@@ -76,6 +82,10 @@ function compileCircuit(source, registries) {
     }
     const implementation = node.operator ? registries.operators.get(node.operator)
       : node.verifier ? registries.verifiers.get(node.verifier) : null;
+    if (node.operator && implementation?.primitives) {
+      invariant(implementation.primitives.includes(node.primitive), 'invalid-circuit',
+        `Operator ${node.operator} is not permitted for primitive ${node.primitive}.`, { node: node.id });
+    }
     if (node.effects) {
       invariant(Array.isArray(node.effects), 'invalid-circuit', `Node ${node.id} effects must be an array.`);
       const allowedEffects = new Set(implementation?.effects || []);
@@ -145,7 +155,14 @@ function compileCircuit(source, registries) {
     circuit,
     order,
     digest: digestJson(circuit),
-    observationContract: deriveObservationContract(circuit)
+    observationContract: deriveObservationContract(circuit),
+    ...(queryFirst ? {
+      author: queryFirst.author,
+      authorDigest: queryFirst.authorDigest,
+      queryContract: queryFirst.queryContract,
+      sourceMap: queryFirst.sourceMap,
+      generatedGraphDigest: queryFirst.generatedGraphDigest
+    } : {})
   });
 }
 

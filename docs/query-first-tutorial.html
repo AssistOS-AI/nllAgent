@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Query-First Tutorial — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / <a href="query-first.html">Query-first</a> / Tutorial</div>
+    <p class="kicker">Author intent first · ordinary graph underneath</p>
+    <h1>Write a relational rule without hand-wiring its graph</h1>
+    <p class="lead">This tutorial is for circuit authors. It shows the restricted DSL they write, the checks the
+      compiler performs, and the behavior a reviewer can expect. Generated execution plans belong in the query-first
+      reference because they are compiler artifacts, not the author interface.</p>
+
+    <div class="callout warning"><strong>Experimental, bounded profile.</strong> The implementation supports typed
+      scans, filters, projections, deterministic order, inner/semi/exact anti-join, three-valued expressions, and
+      <code>collect</code>, <code>unique</code>, and <code>priority</code> tables. Aggregates, ordered patterns, arbitrary
+      callbacks, and native indexes are not implemented.</div>
+
+    <h2 id="rule">1. Start from a reviewable verbal rule</h2>
+    <blockquote>For every extracted paragraph, flag the whole word “TODO.” Match without case sensitivity. Keep the
+      source paragraph as evidence and verify the result against its exact anchor.</blockquote>
+    <p>A direct three-node operator wrapper is still simpler for this isolated lexical rule. We use it here only
+      because the result is easy to inspect; query-first becomes valuable when several rows share the same document
+      domain, joins, status policy, or precedence.</p>
+
+    <h2 id="author">2. Author one query and one decision table</h2>
+    <pre><code>export default queryFirstCircuit({
+  kind: 'CircuitJSQueryFirst',
+  dialect: 'circuitjs-query-first@1',
+  id: 'editorial.query-first-phrase',
+  version: '1.0.0',
+  sourceRuleReferences: ['authority/style-guide.md#qf-001'],
+
+  queries: {
+    paragraphs: {
+      kind: 'LongTextQuery',
+      schemaVersion: 1,
+      id: 'q:paragraphs',
+      from: {
+        relation: 'observations',
+        as: 'p',
+        type: 'document.paragraph@1',
+        statuses: ['extracted']
+      },
+      where: {
+        op: 'eq',
+        left: { field: 'p.payload.structuralRole' },
+        right: { literal: 'paragraph' }
+      },
+      select: {
+        paragraph: { ref: 'p' },
+        text: { field: 'p.payload.text' },
+        order: { field: 'p.payload.order' }
+      },
+      orderBy: [
+        { expr: { field: 'p.payload.order' }, direction: 'asc' },
+        { expr: { field: 'p.id' }, direction: 'asc' }
+      ],
+      budgets: { rowsRead: 100, intermediateRows: 100 }
+    }
+  },
+
+  decisionTables: [{
+    kind: 'DecisionTable',
+    schemaVersion: 1,
+    id: 'table:phrases',
+    input: 'q:paragraphs',
+    hitPolicy: 'collect',
+    unknownPolicy: 'report-undetermined',
+    verifyWith: 'query.decision-replay@1',
+    rows: [{
+      id: 'QF-001',
+      priority: 10,
+      authority: ['authority/style-guide.md#qf-001'],
+      when: {
+        op: 'wholeWord',
+        left: { field: 'p.payload.text' },
+        right: { literal: 'TODO' },
+        caseSensitive: false,
+        locale: 'und'
+      },
+      then: {
+        rule: 'QF-001',
+        verdict: 'violation',
+        severity: 'warning',
+        subject: { field: 'p.id' },
+        scope: { field: 'p.scope' },
+        mainAnchor: { anchorFrom: 'p' },
+        explanation: 'The paragraph contains an unresolved TODO marker.',
+        remediation: 'Resolve the task and remove the marker.'
+      }
+    }]
+  }],
+
+  budgets: { nodes: 20, wallTimeMs: 5000 }
+});</code></pre>
+    <p>The verbosity is concentrated where a reviewer needs it: exact observation type and status, field paths,
+      ordering, authority, hit policy, unknown policy, candidate shape, and verifier. Node identifiers and wiring are
+      generated.</p>
+
+    <h2 id="compile">3. Let compilation reject structural mistakes</h2>
+    <p>The loader first proves that the file is one restricted constructor with plain data only. The query compiler
+      then resolves bindings and fields, checks scalar types, requires total order where needed, derives row and
+      intermediate budgets, checks table policy, creates a QueryContract, and selects exact registered runtime
+      implementations. A typo such as <code>p.payload.texxt</code> fails before publication.</p>
+    <pre class="mermaid">
+flowchart LR
+  A[queryFirstCircuit author value] --> S[Schema, binding,<br/>coverage and table checks]
+  S --> G[Generated ordinary CircuitJS]
+  G --> Q[Query + decision execution]
+  Q --> V[Replay verifier + emit]
+    </pre>
+    <p class="diagram-caption"><strong>Author intent lowers to the existing safe path.</strong> The generated source map preserves query, table, row, and authority identities. Physical node names may change;
+      those logical identities remain the explanation boundary.</p>
+
+    <h2 id="execute">4. Follow one match and one close negative</h2>
+    <p>For “TODO: cite the source,” the query selects one paragraph and keeps dependencies on its observation and
+      anchor. Row QF-001 evaluates <code>TRUE</code>, constructs a candidate, and asks the replay verifier to rerun the
+      query, condition, candidate template, dependencies, and anchor. An accepted record reaches <code>emit</code>.</p>
+    <p>For “The todolist is complete,” the whole-word condition is <code>FALSE</code>, so no candidate exists. If a required field is
+      unavailable, the condition is <code>UNKNOWN</code>, not false. The table records an undetermined decision or blocks
+      according to <code>unknownPolicy</code>.</p>
+
+    <h2 id="absence">5. Treat absence as a coverage question</h2>
+    <p>An anti-join may construct “no matching row exists” only when it names a verified closed-world coverage domain
+      for the exact source revision, type, scope, channel, producer, method, exclusions, and accepted statuses. If the
+      source contains no match but coverage is open or failed, the query returns <code>UNKNOWN</code>. A row limit is a
+      computational bound and can never prove absence.</p>
+
+    <h2 id="policies">6. Make overlap behavior explicit</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Policy</th><th>Use it when</th><th>Failure to resolve</th></tr></thead>
+      <tbody>
+        <tr><td><code>collect</code></td><td>Every matching row represents a legitimate candidate.</td><td>Stable row
+          priority and input order determine output order.</td></tr>
+        <tr><td><code>unique</code></td><td>At most one row may apply.</td><td>Two matches are a
+          <code>decision-overlap</code> error.</td></tr>
+        <tr><td><code>priority</code></td><td>More specific authority overrides a broader row.</td><td>Equal winning
+          priorities are a <code>decision-priority-tie</code>.</td></tr>
+      </tbody>
+    </table></div>
+    <p>File order never acts as hidden precedence.</p>
+
+    <h2 id="choose-form">7. Use the smallest correct form</h2>
+    <p>Prefer an exact operator wrapper when a reviewed algorithm already exists. Prefer query-first when the rule is
+      naturally a typed selection, join, or decision family. Keep a direct graph or registered operator for state,
+      recursion, solvers, search, complex temporal reasoning, or anything the bounded profile rejects. Compact syntax
+      is not a reason to conceal a mathematical algorithm.</p>
+    <p>A query row cannot contain a JavaScript callback. If a query prepares data for a custom algorithm, use a direct
+      CircuitJS node backed by a <a href="circuits-in-practice.html#javascript">trusted runtime extension</a>. The current
+      experimental profile has no generic <code>operatorRule</code> form.</p>
+
+    <h2 id="evidence">8. Know what publication proves</h2>
+    <p>Tests run the author query/table evaluator and the generated graph, then compare query results, decision records,
+      and verified candidates. Published experimental releases retain the normalized author value, generated graph,
+      QueryContract, source map, digests, and differential result in <code>query-first-artifacts.json</code>. This proves
+      equivalence for the implemented path and tested cases; it does not imply a native optimizer exists.</p>
+
+    <nav class="page-nav" aria-label="Query-first tutorial reading path">
+      <strong>Continue by concern</strong>
+      <a href="query-first.html">Read the implemented language reference</a>
+      <a href="circuitjs.html#primitive-semantics">Review every CircuitJS primitive</a>
+      <a href="longtextjs.html#data-dictionary">Review canonical document data</a>
+      <a href="benchmark.html#query-first-cases">Review differential evidence</a>
+    </nav>
+
+    <footer>Experimental contract: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.
+      Tests: <code>tests/unit/query-first.test.mjs</code> and <code>tests/integration/release.test.mjs</code>.</footer>
+  </main>
+</div>
+</body>
+</html>

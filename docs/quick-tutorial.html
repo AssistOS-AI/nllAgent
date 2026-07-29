@@ -16,167 +16,150 @@
   <aside data-include="partials/nav.html"></aside>
   <main>
     <div class="breadcrumbs"><a href="index.html">Documentation</a> / Quick Tutorial</div>
-    <p class="kicker">Five minutes · one real rule · one complete run</p>
-    <h1>See one circuit from text to audit</h1>
-    <p class="lead">We will check one sentence with one rule from the included <code>editorial-demo</code> release.
-      Ignore the rest of the platform for now. Follow the value that moves through the five boxes.</p>
+    <p class="kicker">One source · one built-in rule · one verified warning</p>
+    <h1>See the default consistency check run</h1>
+    <p class="lead">This page gives a first-time reader the shortest complete path through nllAgent. It shows the
+      source, the verbal rule, the actual CircuitJS author form, the command, and the CNL audit it produces.</p>
 
-    <section class="quick-problem" aria-labelledby="quick-problem-title">
-      <div>
-        <p class="quick-label">The source</p>
-        <h2 id="quick-problem-title">A tiny literary fragment</h2>
-        <blockquote>Alice entered the room. <mark>In fact</mark>, the window was open.</blockquote>
-      </div>
-      <div>
-        <p class="quick-label">Rule ED-001</p>
-        <p><strong>Flag “in fact” in a narrative paragraph.</strong><br>Do not flag it in a dialogue paragraph that
-          begins with an em dash or en dash.</p>
-      </div>
-    </section>
+    <h2 id="source">1. Write an ordinary Markdown source</h2>
+    <pre><code># Shift note
 
-    <div class="quick-map" aria-label="The five stages of the example">
-      <a href="#step-1"><span>1</span>Source</a>
-      <i aria-hidden="true">→</i>
-      <a href="#step-2"><span>2</span>LongTextJS</a>
-      <i aria-hidden="true">→</i>
-      <a href="#step-3"><span>3</span>CircuitJS</a>
-      <i aria-hidden="true">→</i>
-      <a href="#step-4"><span>4</span>Verifier</a>
-      <i aria-hidden="true">→</i>
-      <a href="#step-5"><span>5</span>CNL audit</a>
-    </div>
+The north door is open at noon.
+The north door is not open at noon.</code></pre>
+    <p>No agent-specific rulebook mentions doors. The default <code>foundation-core@1.1.0</code> pack is active for
+      every ordinary audit unless the caller disables it.</p>
 
-    <section class="quick-step" id="step-1">
-      <div class="quick-step__number">1</div>
-      <div>
-        <p class="quick-label">Input</p>
-        <h2>Freeze the exact source</h2>
-        <p>nllAgent stores the Markdown snapshot and its digest. From this point on, an observation can point back to
-          exact characters. The text is data; instructions inside it cannot change the rule.</p>
-        <pre><code># Excerpt
+    <h2 id="rules">2. Know the exact verbal rules being applied</h2>
+    <p>The built-in logical circuit uses a deliberately narrow rule:</p>
+    <blockquote>If two explicit controlled-English state assertions have the same subject, world, time frame, and
+      explicit time, warn when the same predicate is both affirmed and denied. Also warn for a small declared set of
+      mutually exclusive affirmative states.</blockquote>
+    <p>Four other built-in circuits cover explicit <code>before</code> cycles, exact arithmetic, bounded physical
+      quantities, and literal emotion/type consistency. They find nothing in this example. The selected
+      <code>editorial-demo</code> release also runs ED-001 and ED-002, but neither matches. A report names every active
+      circuit so an empty result is never mistaken for an absent check.</p>
 
-Alice entered the room. In fact, the window was open.</code></pre>
-      </div>
-      <aside class="quick-answer"><strong>Question answered</strong><br>What exact source are we judging?</aside>
-    </section>
+    <h2 id="longtext">3. LongTextJS makes the source queryable</h2>
+    <p>The compiler freezes the source, creates exact blocks, sentences, and anchors, then the foundation materializer
+      recognizes two <code>foundation.state-assertion@1</code> records. Each retains the sentence anchor, normalized
+      subject and predicate, polarity, present/past frame, explicit time, source world, producer, and status. These are
+      source assertions—not certificates that the door really exists or is open.</p>
+    <pre class="mermaid">
+flowchart LR
+  S["Exact Markdown"] --> P["document.sentence@1"]
+  P --> A1["affirmed: door / open / noon"]
+  P --> A2["denied: door / open / noon"]
+  A1 --> Q["foundation state relation"]
+  A2 --> Q
+    </pre>
+    <p class="diagram-caption"><strong>The compiler creates premises, not a verdict.</strong> The scan declares <em>open-world</em> coverage because it completely applies the documented grammar but does not
+      pretend to extract every implicit fact, relation, action, emotion, or reported belief. Inspect
+      <code>runs/&lt;id&gt;/longtext.json</code> only when you need that implementation-level evidence; the full data
+      dictionary belongs in <a href="longtextjs.html#data-dictionary">the LongTextJS reference</a>.</p>
 
-    <section class="quick-step" id="step-2">
-      <div class="quick-step__number">2</div>
-      <div>
-        <p class="quick-label">Document side</p>
-        <h2>LongTextJS gives the paragraph an address</h2>
-        <p>The Markdown compiler does not decide that the rule was broken. It records a typed paragraph, its exact
-          source range, its channel, and the fact that all paragraphs were structurally scanned.</p>
-        <pre><code>{
-  "id": "observation:block:paragraph-2",
-  "type": "document.paragraph@1",
-  "status": "extracted",
-  "payload": { "text": "Alice ... In fact, the window ..." },
-  "anchor": "anchor:paragraph-2"
-}</code></pre>
-      </div>
-      <aside class="quick-answer"><strong>Question answered</strong><br>What did we observe, and where?</aside>
-    </section>
+    <h2 id="circuit">4. CircuitJS expresses the reusable check</h2>
+    <p>This is valid author-level DSL for the default logical circuit. The platform-owned implementation constructs
+      the same graph as plain data in <code>src/foundation/core-circuits.mjs</code>; the runtime owns the operator
+      algorithm, while the graph declares typed input, verification, and publication.</p>
+    <pre><code>export default circuit({
+  kind: 'CircuitJS',
+  id: 'foundation.logical-consistency',
+  version: '1.0.0',
+  sourceRuleReferences: ['builtin:foundation-core@1#bounded-non-contradiction'],
+  inputs: {
+    assertions: {
+      type: 'foundation.state-assertion@1',
+      cardinality: 'many',
+      statuses: ['extracted'],
+      coverage: 'open-world',
+      critical: true
+    }
+  },
+  nodes: [{
+    id: 'candidates',
+    primitive: 'call',
+    operator: 'foundation.state-conflicts@1',
+    inputs: { assertions: port('assertions') }
+  }, {
+    id: 'verified',
+    primitive: 'verify',
+    verifier: 'foundation.state-conflicts@1',
+    inputs: { candidates: node('candidates') }
+  }, {
+    id: 'findings',
+    primitive: 'emit',
+    inputs: { verified: node('verified') }
+  }],
+  outputs: { findings: node('findings') }
+});</code></pre>
+    <p>The operator compares bounded contexts and constructs a witness containing both observation identities. The
+      verifier independently rereads their types, context, polarity, source revision, and exact anchors. Only an
+      accepted candidate reaches <code>emit</code>.</p>
 
-    <section class="quick-step" id="step-3">
-      <div class="quick-step__number">3</div>
-      <div>
-        <p class="quick-label">Theory side</p>
-        <h2>CircuitJS receives only paragraphs</h2>
-        <p>The circuit's input port accepts extracted <code>document.paragraph@1</code> observations. Its graph then has
-          only three runtime nodes. The rule configuration is frozen in the published release.</p>
-        <div class="mini-circuit" aria-label="Three CircuitJS nodes">
-          <div><small>call</small><strong>matches</strong><span>Find whole phrase<br>except dialogue</span></div>
-          <b aria-hidden="true">→</b>
-          <div><small>verify</small><strong>verified</strong><span>Re-read exact<br>source witness</span></div>
-          <b aria-hidden="true">→</b>
-          <div><small>emit</small><strong>findings</strong><span>Publish accepted<br>records only</span></div>
-        </div>
-      </div>
-      <aside class="quick-answer"><strong>Question answered</strong><br>Which reusable method judges the paragraph?</aside>
-    </section>
-
-    <section class="quick-step" id="step-4">
-      <div class="quick-step__number">4</div>
-      <div>
-        <p class="quick-label">Runtime boundary</p>
-        <h2>A match is only a candidate</h2>
-        <div class="quick-before-after">
-          <div><p class="quick-label">Operator output</p><code>FindingCandidate</code><p>Term <strong>“In fact”</strong>,
-            anchor, rule ED-001, and an exact-text witness.</p></div>
-          <div><p class="quick-label">Verifier output</p><code>accepted: true</code><p>The verifier uses the anchor to
-            slice the frozen source and confirms the exact term at that location.</p></div>
-        </div>
-        <p>If the range were forged or the source no longer matched, verification would reject the candidate.
-          <code>emit</code> never receives an unverified candidate.</p>
-      </div>
-      <aside class="quick-answer"><strong>Question answered</strong><br>Why may this result be published?</aside>
-    </section>
-
-    <section class="quick-step" id="step-5">
-      <div class="quick-step__number">5</div>
-      <div>
-        <p class="quick-label">Controlled output</p>
-        <h2>The finding becomes one CNL audit observation</h2>
-        <p>The runtime assembles the emitted finding, release identity, compatibility, coverage, limitation, and source
-          evidence into canonical <code>CNLAuditReport</code>. Markdown is only its human-readable view.</p>
-        <div class="quick-result">
-          <span>editorial-warning</span>
-          <strong>ED-001 · weak phrase in narration</strong>
-          <blockquote>In fact</blockquote>
-          <p>Check whether the contrast is necessary; remove or replace the phrase when it adds no meaning.</p>
-          <small>Guarantee: mechanically-certified exact-text witness · Limitation: dialogue uses the released prefix convention.</small>
-        </div>
-      </div>
-      <aside class="quick-answer"><strong>Question answered</strong><br>What can the user inspect and contest?</aside>
-    </section>
-
-    <h2 id="counterexample">Now change only the context</h2>
-    <div class="quick-contrast">
-      <div>
-        <p class="quick-label">Narration</p>
-        <blockquote><mark>In fact</mark>, the window was open.</blockquote>
-        <span class="quick-status quick-status--finding">1 candidate → 1 verified finding</span>
-      </div>
-      <div>
-        <p class="quick-label">Dialogue</p>
-        <blockquote>— <mark>In fact</mark>, the window was open.</blockquote>
-        <span class="quick-status quick-status--clean">0 candidates → no finding for ED-001</span>
-      </div>
-    </div>
-    <p>The words did not change. LongTextJS recorded the paragraph prefix, and the released operator applied the
-      dialogue exception before producing candidates. “No finding” here means only that ED-001 found no eligible
-      occurrence; it is not a universal claim that the whole document is good.</p>
-
-    <h2 id="remember">The whole idea in three sentences</h2>
-    <ol class="step-list">
-      <li><strong>LongTextJS describes one source instance:</strong> exact text, typed observations, addresses, coverage,
-        and gaps.</li>
-      <li><strong>CircuitJS describes one reusable theory:</strong> accepted inputs, transformations, exceptions,
-        verifier, and publication path.</li>
-      <li><strong>CNL is the controlled result:</strong> an audit of an existing source, or—through a separate planning
-        circuit—a verified specification for a future source.</li>
-    </ol>
-
-    <h2 id="run-it">Run this exact example</h2>
+    <h2 id="run">5. Run it and inspect the CNL audit</h2>
     <pre><code>node bin/nllagent.mjs run \
   --agent editorial-demo \
-  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
-  --output /tmp/editorial-report.md
+  --input data/editorial-demo/examples/foundation/common-sense.md \
+  --output /tmp/foundation-report.md \
+  --translator none
 
-cat /tmp/editorial-report.md</code></pre>
+cat /tmp/foundation-report.md</code></pre>
+    <p><code>report.md</code> is the deterministic Markdown view of the canonical <code>CNL/Audit-1</code> result. For
+      this exact source, it contains:</p>
+    <pre><code># CNL/Audit-1 audit report
+
+- Agent: `editorial-demo`
+- Release: `0.1.0`
+- Foundation: `foundation-core@1.1.0`
+- Terminal status: `reported`
+- Compatibility: `compatible`
+- Active circuits: `foundation.logical-consistency`,
+  `foundation.temporal-consistency`, `foundation.arithmetic-consistency`,
+  `foundation.physical-consistency`, `foundation.emotional-consistency`, `editorial.weak-phrase`,
+  `editorial.perhaps-frequency`
+- Blocked circuits: None
+
+## Findings
+
+### 1. FOUNDATION-LOGIC-001
+
+- Verdict: `potential-logical-inconsistency`
+- Circuit: `foundation.logical-consistency@1.0.0`
+- Severity: `warning`
+- Guarantee: `mechanically-certified`
+- Subject / scope: `The north door` / `view:whole`
+- Verifier: `foundation.state-conflicts@1` (`accept`)
+- Certificate: `FoundationStateConflictCertificate`
+- Rule basis: builtin:foundation-core@1#bounded-non-contradiction
+
+&gt; The north door is not open at noon.
+
+The north door has incompatible state assertions at noon.
+
+Remediation: Clarify the time, world, subject identity, or intended state.
+
+Limitations: Only the documented controlled-English state form was evaluated.</code></pre>
+    <p>The full report also records the immutable source digest, exact Unicode location, support anchors, and coverage.
+      The important result is not merely that a warning appeared: compatibility allowed all seven circuits to run, the
+      logical circuit constructed a bounded witness, its independent verifier accepted that witness, and the audit
+      states the limitation of the claim. The run preserves the complete evidence in its artifact directory.</p>
+
+    <p class="callout"><strong>Different world model?</strong> The foundation can be disabled explicitly with
+      <code>--foundation off</code>. That option and its consequences belong in the
+      <a href="foundation.html#disable">foundation reference</a>, not in this first execution path.</p>
 
     <nav class="page-nav" aria-label="Quick Tutorial next steps">
       <strong>Choose the next level</strong>
-      <a href="circuit-tutorial.html">Open the detailed interactive tutorial</a>
-      <a href="longtextjs.html">Learn the document side</a>
-      <a href="circuitjs.html">Learn the theory side</a>
-      <a href="generation.html">See idea → CNL specification</a>
-      <a href="concepts.html">Learn the foundations</a>
+      <a href="foundation.html">Understand the default foundation and its limits</a>
+      <a href="foundation.html#demo">Run the mathematics, physics, and emotion example</a>
+      <a href="circuit-tutorial.html">Trace every runtime value</a>
+      <a href="longtextjs.html">Inspect the canonical document program</a>
+      <a href="circuitjs.html">Learn the complete author DSL</a>
+      <a href="query-first-tutorial.html">Author a relational rule with the query-first DSL</a>
     </nav>
 
-    <footer>This example mirrors the published <code>editorial-demo</code> circuit and benchmark. The production
-      compiler, release, verifier record, and run artifacts—not this page—remain the execution authority.</footer>
+    <footer>The executable contract is <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.
+      This page teaches the public path; code, tests, and persisted artifacts remain the execution evidence.</footer>
   </main>
 </div>
 </body>

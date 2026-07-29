@@ -16,7 +16,7 @@ Learning compiles Markdown rules, examples, reviewer feedback, and accumulated i
 
 `nllagent learn --agent <name> --rules <folder>` must validate the agent and rule folder, snapshot Markdown rules, selected open issues, requested benchmark suites, the active release manifest, relevant DS contracts, serious-issue register, and operator/verifier catalogs into a learning-run record. The original rule folder is always copied into the run before the Coding Agent starts.
 
-The learning job progresses through triage, authority mapping, scope confirmation, rule cards, vocabulary, observation contracts, circuit pattern selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, and summary. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
+The learning job progresses through triage, authority mapping, scope confirmation, rule cards, vocabulary, observation contracts, semantic-form selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, and summary. Form selection chooses the smallest correct representation: an existing operator wrapper, a supported query and decision table, an aggregate or ordered-pattern operator, or a direct graph for recursive, stateful, search, solver, or argumentation behavior. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
 
 ## Coding Agent adapter
 
@@ -42,9 +42,13 @@ Learning skills are self-contained Anthropic-style skill folders. The minimum se
 
 Each skill must use imperative instructions, concise progressive disclosure, `agents/openai.yaml` with implicit invocation disabled, local references where needed, and no imports from the host `src/`. Skills may call documented CLI commands, which are stable host interfaces.
 
+The compile, benchmark, issue-repair, and release-preparation skills must understand stable query, table, row, authority, witness, coverage, and verifier identities when a supported query-first profile is present. They may use only the experimental subset advertised by the host compiler and must fall back to direct CircuitJS for unsupported joins, aggregates, patterns, recursion, state, search, solvers, or argumentation. Compact syntax is never a reason to bypass neutral observation demand, closed-world coverage, differential evidence, or an exact verifier.
+
 ## Permitted changes
 
 The learning process may write only staged agent authoring artifacts, benchmark cases, candidate packages, proposals, and current learning-run artifacts. It may propose new operators or verifiers in a proposal folder, but cannot register them. Context copies, active release pointers, published release contents, platform verifier code, release thresholds, CLI policy, and repository DS contracts are non-promotable even if the Coding Agent alters their staging copies.
+
+`foundation-core` is platform-owned and follows the same protected boundary. Learning may consume its documented observations with their exact open-world semantics and may propose an extension with counterexamples and tests, but it cannot edit the pack, copy its circuit identifiers, or change its verifiers through an agent candidate. Scope, compilation, benchmark, and release-preparation skills must identify an agent circuit's dependency on the selected foundation and test any claimed foundation-off behavior explicitly. Contingent knowledge belongs in a separately governed `KnowledgePack`; repeating a claim in documents or feedback does not promote it to common sense.
 
 ## Issue learning
 
@@ -85,6 +89,14 @@ Response: It must accept an explicit staged workspace, task, skill catalog, time
 ### Question #7: How do learning agents add planning support?
 
 Response: They may propose dedicated planning circuits, idea-specific plan examples, rule-to-plan witnesses, observation profiles, planning operators, and idea-to-CNL benchmark cases in a candidate. They should derive planning and validation graphs from the same approved rule cards and reuse authority identities, schemas, and operators where their semantics coincide. They must not turn the rulebook into a CNL constraint list. They cannot edit the production realization skill, trusted CNL verifier, published releases, or active pointer.
+
+### Question #8: Why must a learning agent justify the selected circuit form?
+
+Response: The shortest serialization is not always the simplest semantics. A three-node exact operator wrapper may be clearer than a generic query, while a shared table may remove repeated wiring across dozens of local alternatives. Recording the rule shape and rejected forms lets maintainers review complexity before reviewing syntax.
+
+### Question #9: Can learning add a new universal fact to the default foundation?
+
+Response: No. It may create a repository-level proposal with authority, scope, counterexamples, and benchmark evidence. Platform maintainers decide whether the claim is a stable invariant, an optional dated knowledge item, or agent-specific theory.
 
 # Conclusion
 

@@ -14,4 +14,8 @@ function circuit(definition) {
   return definition;
 }
 
-export { circuit, node, port };
+function queryFirstCircuit(definition) {
+  return definition;
+}
+
+export { circuit, node, port, queryFirstCircuit };

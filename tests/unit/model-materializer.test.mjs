@@ -90,3 +90,28 @@ test('materialization keeps ambiguity and negation but rejects a hallucinated so
   assert.equal(program.gaps[0].kind, 'model-output');
   assert.match(program.gaps[0].failures.join(' '), /absent from the source block/u);
 });
+
+test('semantic profiles do not run until a circuit demands their exact output type', async () => {
+  let calls = 0;
+  const registries = createStandardRegistries({
+    modelGateway: {
+      async invoke() {
+        calls += 1;
+        return { result: { observations: [] }, capture: { gateway: 'unexpected@1' } };
+      }
+    }
+  });
+  const program = compileMarkdown('Alice entered the room.\n', { language: 'en' });
+  const result = await materializeModelProfiles(program, [{
+    id: 'narrative-events@1',
+    outputType: 'narrative.motion-event@1',
+    instruction: 'Extract grounded motion events.',
+    schema: { required: ['actorText', 'action'] }
+  }], new Set(['document.paragraph@1']), registries);
+
+  assert.equal(result.materialized, 0);
+  assert.equal(calls, 0);
+  assert.equal(program.observations.some((item) => item.type === 'narrative.motion-event@1'), false);
+  assert.equal(program.capabilities.some((item) => item.type === 'narrative.motion-event@1'), false);
+  assert.equal(program.coverage.some((item) => item.types?.includes('narrative.motion-event@1')), false);
+});

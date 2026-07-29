@@ -16,16 +16,24 @@
   <aside data-include="partials/nav.html"></aside>
   <main>
     <div class="breadcrumbs"><a href="index.html">Documentation</a> / Domain packages</div>
-    <p class="kicker">General infrastructure without a universal ontology</p>
+    <p class="kicker">A small shared foundation, explicit domain meaning</p>
     <h1>Editorial, normative, and technical theories</h1>
-    <p class="lead">nllAgent becomes useful in a domain through a published package of observations, rules, operators, verifiers, examples, compatibility limits, and explanations. The core provides common execution discipline; it does not pretend that a scene, a legal obligation, and a scientific measurement share the same meaning.</p>
+    <p class="lead">nllAgent shares a bounded foundation for explicit state, time, exact arithmetic, elementary
+      quantities, types, and literal emotions. Everything richer comes from a published domain package of observations,
+      rules, operators, verifiers, examples, compatibility limits, and explanations. This page explains that extension
+      boundary; it is not a catalogue of every possible ontology.</p>
 
     <h2 id="generalization">How the platform generalizes</h2>
     <p>A universal set of fields such as <code>Entity</code>, <code>Fact</code>, and <code>Constraint</code> looks simple until all meaningful semantics move into opaque payloads and prompts. nllAgent keeps a smaller common kernel: sources, anchors, versioned types, scope, time, alternatives, epistemic status, provenance, coverage, ports, budgets, witnesses, and publication rules. Domains extend the nominal vocabularies and compose the reasoning regimes they actually need.</p>
     <p>This design resembles a platform with specialized theories rather than one giant classifier. The same scheduler can coordinate lexical matching, state timelines, deadlines, constraints, graph search, or model judgments because every component declares typed inputs, effects, limits, and verification. It does not imply that any operator understands arbitrary natural language.</p>
 
+    <div class="callout"><strong>What is shared by default?</strong> <code>foundation-core@1.1.0</code> recognizes the
+      six documented assertion families and applies five bounded circuits. It supplies no diagnosis, rich physics,
+      unrestricted natural-language ontology, or current political, geographic, social, economic, or legal facts.
+      See <a href="foundation.html">Default foundation</a>.</div>
+
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   AUTH[Domain authority + examples] --> OBS[Observation schemas + producers]
   AUTH --> THEORY[Circuits + witnesses]
   OBS --> TEST[Natural benchmark + compatibility]
@@ -115,7 +123,7 @@ flowchart TB
 
     <div class="callout warning"><strong>Implemented core versus extension contract.</strong> The repository currently ships Markdown ingestion, lexical editorial examples, semantic observation translation, a continuity operator, and several deterministic reasoning operators. Rich legal, scientific, multilingual, multimodal, external-solver, causal, and formal-proof packages are supported by the extension architecture but are not all bundled as published production agents. Unsupported evidence remains a compatibility gap.</div>
 
-    <footer>Normative extension contract: <a href="specsLoader.html?spec=DS016-domains-extensions.md">DS016</a>. Theory and learning contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> through <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
+    <footer>Normative extension contracts: <a href="specsLoader.html?spec=DS016-domains-extensions.md">DS016</a> and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Theory and learning contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> through <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
   </main>
 </div>
 </body>

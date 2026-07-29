@@ -20,7 +20,9 @@
     <p class="kicker">From source text to verified output, one value at a time</p>
     <h1>How a CircuitJS program actually runs</h1>
     <p class="callout"><strong>First time here?</strong> Start with the <a href="quick-tutorial.html">five-minute Quick
-      Tutorial</a>. This page is the detailed follow-up with compilation, runtime values, semantic observations, and traces.</p>
+      Tutorial</a>, then use <a href="circuits-in-practice.html">Circuits, without the mystery</a> for the concrete
+      programmer model. This page is the detailed follow-up with compilation, runtime values, semantic observations,
+      and traces.</p>
     <p class="lead">This tutorial starts with no assumed compiler or logic background. By the end, you should be
       able to look at a LongTextJS observation, a CircuitJS graph, and a runtime trace and explain what value moves at
       every step, who is allowed to transform it, and why a candidate cannot silently become a finding or plan.</p>
@@ -55,6 +57,7 @@
       educational simulator, not the production runtime: it does not load a release, create cryptographic hashes, or
       make model calls. Its stages, value shapes, exclusion rule, verification checks, and publication boundary are
       derived from the actual MVP release 0.1.0 and scheduler implementation.</p>
+    <div class="callout"><strong>Direct graph versus experimental query-first authoring.</strong> This executable teaching path remains direct because <code>call → verify → emit</code> is already minimal. The compiler now accepts the bounded DS020 query/table subset for rule families where it removes real relational wiring. <a href="query-first-tutorial.html">Follow that path from author data through lowering, verification, and differential execution.</a></div>
 
     <section class="circuit-lab" aria-labelledby="tutorial-lab-title">
       <h3 id="tutorial-lab-title">Interactive circuit walkthrough</h3>
@@ -144,8 +147,14 @@ inputs: {
       The result is hashed and passed to the registered implementation. This is ordinary explicit dataflow—not hidden
       state shared between nodes.</p>
 
+    <p>A direct port performs only the stable interface filter: exact observation type plus accepted status, followed
+      by cardinality. A <code>many</code> port produces one array and may legitimately produce <code>[]</code>. Payload,
+      scope, channel, joins, and order are handled by a query or operator; they are not guessed by port binding. The
+      practical page shows <a href="circuits-in-practice.html#multiple">zero, one, and many records</a> with executable
+      JavaScript processing.</p>
+
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   PORT[LongTextJS → bound paragraphs port] --> CALL[call operator]
   CALL --> CAND[FindingCandidate + witness]
   CAND --> VERIFY[verify witness]
@@ -203,7 +212,7 @@ flowchart TB
       focalization circuit often needs observations such as <code>narrative.object-event@1</code> or
       <code>narrative.mental-access@1</code>. A model may propose them, but the same interface applies:</p>
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   TEXT[Anchored source → schema-bound extractor] --> PROPOSED[Proposed observation → typed port]
   PROPOSED --> STATE[Circuit reasoning → witness]
   STATE --> VERIFY[State or structural verifier]
@@ -241,6 +250,7 @@ flowchart TB
     </table></div>
 
     <h2 id="trace">9. How to read a real trace without guessing</h2>
+    <p>The digest values below are explicitly shortened for display; a persisted trace contains complete digests.</p>
     <pre><code>{
   "node": "verified",
   "primitive": "verify",
@@ -301,6 +311,7 @@ flowchart TB
     <nav class="page-nav" aria-label="Circuit tutorial reading path">
       <strong>Continue after the tutorial</strong>
       <a href="circuitjs.html">Read the authoring contract</a>
+      <a href="circuits-in-practice.html#javascript">Implement a custom JavaScript operator</a>
       <a href="operators.html">Study operator and verifier families</a>
       <a href="connection.html">Study compatibility and coverage</a>
       <a href="artifacts.html">Inspect persisted artifacts</a>

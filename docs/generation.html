@@ -23,7 +23,7 @@
     <div class="callout"><strong>CNL is not the rulebook in natural language.</strong> Rules remain in CircuitJS. The CNL artifact is produced after those rules are applied to one idea. It says what this particular document should contain, in what order, and with what realization guidance.</div>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   IDEA[High-level idea] --> LTX[LongTextJS<br/>source + observations]
   LTX --> PLAN[Planning CircuitJS<br/>published rules applied]
   PLAN --> CNL[CNLGenerationPlan<br/>primary output]
@@ -102,20 +102,22 @@ railway station at dusk. End with one dialogue line from an employee.
     <pre><code>node bin/nllagent.mjs plan \
   --agent editorial-demo \
   --release 0.1.0 \
+  --foundation core \
   --input data/editorial-demo/examples/planning/idea.md \
   --output /tmp/editorial-plan.cnl.md \
   --translator none</code></pre>
-    <p>No realization backend is needed. The command emits <code>planned</code> and stores the plan and its trace under <code>planning-runs/</code>.</p>
+    <p>No realization backend is needed. The command emits <code>planned</code> and stores the plan and its trace under <code>planning-runs/</code>. <code>core</code> is the default and is shown so the execution inputs remain visible; use <code>--foundation off</code> for a deliberately different world model.</p>
 
     <h2 id="optional-realization">Optionally realize and validate the plan</h2>
     <pre><code>node bin/nllagent.mjs plan \
   --agent editorial-demo \
   --input data/editorial-demo/examples/planning/idea.md \
   --output /tmp/editorial-plan.cnl.md \
+  --foundation core \
   --realize-output /tmp/editorial-draft.md \
   --max-revisions 2 \
   --translator auto</code></pre>
-    <p>The backend receives only the CNL plan and a schema-bound output contract through role <code>realization</code>. The candidate is untrusted Markdown. Ordinary validation circuits inspect it. Findings may drive role <code>revision</code> until the budget ends. Another application can omit these flags and realize the CNL externally.</p>
+    <p>The backend receives only the CNL plan and a schema-bound output contract through role <code>realization</code>. The candidate is untrusted Markdown. Ordinary validation circuits and the selected foundation inspect it. Findings may drive role <code>revision</code> until the budget ends. Another application can omit these flags and realize the CNL externally.</p>
 
     <h2 id="artifacts">Inspect the planning transaction</h2>
     <pre><code>data/editorial-demo/planning-runs/&lt;planning-id&gt;/

@@ -33,7 +33,7 @@
     <p>A new release does not rewrite an old run. Rerunning the same document under a newer theory creates a second run that can be compared with the first. This is what makes policy changes, extractor repairs, and new capabilities auditable rather than retroactive.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   AGENT[Named agent] --> REL[Published release]
   REL --> RUN[Document run]
   RUN --> EVID[Findings + reviewer feedback]
@@ -49,6 +49,7 @@ flowchart TB
         <tr><td><code>run.json</code></td><td>Which agent, release, source digest, command context, backend, state, finding count, and issue identifiers define this run?</td></tr>
         <tr><td><code>input.md</code></td><td>What exact UTF-8 Markdown did the runtime analyze?</td></tr>
         <tr><td><code>source-package.json</code></td><td>How was the source divided into canonical blocks and addressed?</td></tr>
+        <tr><td><code>foundation.json</code></td><td>Was the versioned platform foundation <code>core</code> or <code>off</code>, and which digest and limitations governed the run?</td></tr>
         <tr><td><code>longtext.json</code></td><td>Which observations, views, identities, capabilities, coverage statements, gaps, and task entered analysis?</td></tr>
         <tr><td><code>compatibility.json</code></td><td>Which circuit and port obligations were satisfied, limited, or blocked, and by which producer evidence?</td></tr>
         <tr><td><code>coverage.json</code></td><td>Which source, scope, type, and method domains were inspected, and which gaps remain?</td></tr>
@@ -100,7 +101,7 @@ flowchart TB
     <p><code>release publish</code> is an explicit maintainer action. It checks the candidate, builds the closed snapshot, loads that snapshot again, and then atomically updates the active pointer. Ordinary production resolves the pointer once at run start and does not switch releases mid-execution.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   SNAP[Candidate + benchmark snapshot] --> TEST[Manual publication checks]
   TEST -->|pass| PACK[Closed release file set]
   TEST -->|fail| REVISE[Candidate revision]
@@ -126,7 +127,7 @@ flowchart TB
       <li><strong>Record the correction at the failing layer.</strong> Use feedback for reviewer evidence or preserve the runtime issue for a later learning job.</li>
     </ol>
 
-    <footer>Normative artifact and provenance contracts: <a href="specsLoader.html?spec=DS003-cli-agent-workspace.md">DS003</a>, <a href="specsLoader.html?spec=DS004-artifacts-releases.md">DS004</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, and <a href="specsLoader.html?spec=DS014-storage-provenance-incremental.md">DS014</a>.</footer>
+    <footer>Normative artifact and provenance contracts: <a href="specsLoader.html?spec=DS003-cli-agent-workspace.md">DS003</a>, <a href="specsLoader.html?spec=DS004-artifacts-releases.md">DS004</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, <a href="specsLoader.html?spec=DS014-storage-provenance-incremental.md">DS014</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.</footer>
   </main>
 </div>
 </body>

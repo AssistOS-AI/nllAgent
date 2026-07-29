@@ -116,8 +116,14 @@ function verifyGroundedArguments({ candidates = [], candidate }) {
 }
 
 function registerLogicOperators(registry) {
-  registry.register({ id: 'logic.fixpoint@1', description: 'Finite positive Datalog-style fixed point.', execute: fixedPoint });
-  registry.register({ id: 'argumentation.grounded@1', description: 'Grounded extension of a finite Dung argument graph.', execute: groundedArguments });
+  registry.register({
+    id: 'logic.fixpoint@1', primitives: ['fixpoint', 'derive', 'call'],
+    description: 'Finite positive Datalog-style fixed point.', execute: fixedPoint
+  });
+  registry.register({
+    id: 'argumentation.grounded@1', primitives: ['call'],
+    description: 'Grounded extension of a finite Dung argument graph.', execute: groundedArguments
+  });
   return registry;
 }
 

@@ -17,10 +17,10 @@ Read selected issues, their run artifacts when authorized, the active release, `
 2. Classify the failure as ingestion, anchor, observation, identity, time, coverage, compatibility, circuit, operator, verifier, explanation, benchmark, or operational context.
 3. Reproduce it with the immutable release before proposing a repair. If it cannot be reproduced, record the missing evidence.
 4. Distill the smallest authorized natural Markdown case that retains the failure. Redact only through a declared transformation that preserves the tested property.
-5. State one repair hypothesis per candidate change. Prefer the lowest correct layer; do not add circuit exceptions for parser defects.
+5. State one repair hypothesis per candidate change. Prefer the lowest correct layer; do not add circuit exceptions for parser defects. Preserve the selected circuit form unless the issue demonstrates that another supported form is materially simpler or safer; record that form change and its semantic diff explicitly.
 6. Add the reproducer as a public regression case only when its expected behavior is authorized.
 7. Implement the repair in agent authoring or candidate artifacts, then run affected public cases and prior regressions.
-8. Analyze impact on compatibility, coverage, guarantees, cost, and other rule families. Preserve rejected and contested feedback as separate evidence.
+8. Analyze impact on compatibility, coverage, guarantees, cost, and other rule families. For query/table changes inspect demanded fields, statuses, joins, unknown flow, coverage signature, hit policy, priority, witness, and verifier independently. Preserve rejected and contested feedback as separate evidence.
 
 ## Authority controls
 

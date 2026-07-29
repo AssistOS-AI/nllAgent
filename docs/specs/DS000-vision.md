@@ -22,6 +22,8 @@ An editorial agent may validate style, focalization, dialogue exceptions, repeti
 
 Each of these is a separate specialized agent with an explicit intended use, authority set, vocabulary, compatibility profile, benchmark, circuits, and guarantee limits. The framework must not advertise one universal agent that silently substitutes generic model knowledge for a missing domain package. Normative output establishes only the conformance supported by the selected release and evidence; it is not an unbounded claim of legal truth.
 
+Every ordinary run also receives the versioned `foundation-core` overlay defined by DS021. It recognizes a deliberately small controlled-English set of state, type, temporal, exact-arithmetic, quantity, and literal-emotion assertions. Five circuits check only the published logical, strict-order, mathematical, elementary physical, and emotion/type invariants. This shared baseline avoids relearning elementary checks in every agent, but it is not a universal world model, psychological interpreter, or scientific reasoner. `--foundation off` selects an alternative-world run, and changing political, geographic, social, or economic facts require optional dated and sourced knowledge packs rather than timeless core axioms.
+
 ## Neuro-symbolic execution boundary
 
 Neural models may interpret ambiguous source language, propose schema-bound observations, judge rubric-bound semantic candidates, and optionally realize or revise text from CNL. Persistent symbolic artifacts must retain anchors, identity, time, state, rule priority, alternatives, coverage, control flow, plans, witnesses, and verifier results. A model may not serve simultaneously as the source of a rule, the only observer, the planner, the final judge, and the verifier of its own conclusion.
@@ -101,6 +103,10 @@ Response: No. Standards and research papers explain the origin and expected valu
 ### Question #8: Which product name is canonical?
 
 Response: `NaturalLanguageLinterAgent` is the full product name and `nllAgent` is the short repository, library, CLI, and operational name. Persistent kinds use the `NaturalLanguageLinter…` prefix. The MVP starts with one real published baseline, `0.1.0`; documentation and fixtures must not invent predecessor releases merely to imply history.
+
+### Question #9: Why is a foundation pack compatible with specialized agents?
+
+Response: It contributes versioned platform invariants and observations before the agent release runs; it does not supply missing domain authority or current facts. The run records both identities, and a caller can select `off` for a different world model.
 
 # Conclusion
 

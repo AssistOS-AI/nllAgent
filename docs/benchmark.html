@@ -25,7 +25,7 @@
     <p>nllAgent uses small natural microcases for precise properties and larger scenarios for composition. A microcase can be a paragraph, short scene, table fragment, or several distant excerpts joined by a context envelope. It preserves the minimum context needed for the rule while retaining source-like language.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   TEXT[Natural input.md] --> LAYER[Expected observation layer]
   LAYER --> THEORY[Expected circuit behavior]
   LAYER --> REPORT[Expected reviewer report]
@@ -109,7 +109,7 @@ flowchart TB
     </ol>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   RUN[Execute natural case] --> STRUCT[Structured assertions]
   RUN --> SEM[Semantic perspectives]
   STRUCT --> RESULT[Layered case result]
@@ -121,6 +121,14 @@ flowchart TB
     <h3>Semantic comparison is adversarial, not similarity scoring</h3>
     <p>When a case selects semantic comparison, the evaluator receives the expected layers, expected report, actual report, and a versioned rubric. One perspective tests material equivalence; another tries to construct a counterexample by identifying changed rules, scope, evidence, coverage, limitations, or guarantee. Disagreement fails or routes to review according to policy.</p>
     <p>The evaluator uses the same backend-neutral model boundary as translation. Configured AchillesAgentLib is preferred and translation-class evaluation uses Spark when exposed. A Coding Agent adapter can return the same evaluation schema. The evaluator’s decision is model evidence with captures, not a mechanical proof.</p>
+
+    <h2 id="query-first-cases">Experimental query-first cases and comparisons</h2>
+    <p>For implemented DS020 circuits, benchmark identity extends below the circuit and rule to named query, decision table, and row. Each relevant row needs a positive, close-negative, boundary, exception, ambiguity, overlap, priority-tie, open-world-empty, closed-world-empty, and present-row case. Future aggregate rows also need complete membership and threshold boundaries; future ordered patterns need identity, equal-order, intervening-event, and coverage cases.</p>
+    <p>The benchmark runner executes the reference query/table evaluator and the lowered ordinary graph over the same LongTextJS value. It compares canonical query rows, decision records, candidates, verification outcomes, and findings. A later independently implemented native/indexed path may add a third execution only after those two agree. Node names, cache hits, timings, and index choices are nonsemantic.</p>
+    <div class="callout warning"><strong>Current evidence boundary.</strong> The two paths deliberately share the documented query algebra, so their agreement catches lowering and wiring drift but is not independent proof of the algebra itself. Generated semantic mutants, a native executor, and randomized cross-engine comparison are not implemented and must not be claimed as release evidence.</div>
+
+    <h2 id="foundation-cases">Foundation cases belong to the platform suite</h2>
+    <p>The repository tests controlled-English positives and close negatives, pack identity, provenance, open-world coverage, polarity and exclusive-state conflicts, time-context separation, temporal cycles, forged witnesses, default CLI activation, and <code>--foundation off</code>. Agent suites add foundation cases only when domain theory consumes those observations or deliberately changes the world model; copying platform cases into every agent would create noise rather than independent evidence.</p>
 
     <h2 id="author-case">Author a useful new case</h2>
     <ol>
@@ -154,7 +162,7 @@ nllagent release publish --agent editorial --candidate 0.1.0</code></pre>
 
     <h2 id="next">Continue the lifecycle</h2>
     <p>Read <a href="learning.html#issue-to-release">Learning workflow</a> to see how feedback becomes a regression case, <a href="artifacts.html#release-directory">Artifacts</a> for the published release contents, <a href="translation.html#captures-replay">Translation</a> for semantic evaluator captures, and <a href="security.html#publication-trust">Runtime boundaries</a> for publication independence.</p>
-    <footer>Normative benchmark and release-gate contract: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a>.</footer>
+    <footer>Normative benchmark and release-gate contract: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a>. Shared foundation evidence: <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.</footer>
   </main>
 </div>
 </body>

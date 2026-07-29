@@ -13,10 +13,12 @@ import { evaluateCompatibility } from '../runtime/compatibility.mjs';
 import { persistAnalysis } from '../runtime/production-run.mjs';
 import { executeCircuit } from '../runtime/scheduler.mjs';
 import { createStandardRegistries } from '../runtime/standard-operators.mjs';
+import { validateRuntimeExtensionLocks } from '../runtime/extensions.mjs';
 import {
   createIssue, createPlanningRun, loadActiveRelease, loadAgent, loadRelease, updatePlanningRun
 } from '../storage/agent-store.mjs';
 import { FileArtifactCache } from '../storage/artifact-cache.mjs';
+import { foundationPackDescriptor } from '../foundation/core-ontology.mjs';
 import { finalizeCnlPlan, renderCnlPlan } from './cnl.mjs';
 
 const REALIZATION_OUTPUT_SCHEMA = Object.freeze({
@@ -45,10 +47,13 @@ async function loadPlanningCircuits(release, registries) {
       `Circuit ${compiled.circuit.id} is not a planning circuit.`);
     circuits.push(compiled);
   }
+  validateRuntimeExtensionLocks(release.manifest, circuits, registries);
   return circuits;
 }
 
-async function compileCnlGenerationPlan({ agentName, idea, language, release, registries, budgets = {}, cache }) {
+async function compileCnlGenerationPlan({
+  agentName, idea, language, release, registries, budgets = {}, cache, foundation = 'core'
+}) {
   const program = compileMarkdown(idea, {
     language, programId: `longtext:${agentName}:planning-idea`,
     task: {
@@ -56,7 +61,8 @@ async function compileCnlGenerationPlan({ agentName, idea, language, release, re
       absencePolicy: 'declared-coverage-only', desiredGuarantee: 'evidence-certified-or-better',
       budgets: { modelCalls: budgets.modelCalls ?? 0, dynamicRounds: 0 },
       reviewPolicy: { conflicts: 'stop' }, expectedOutput: 'CNLGenerationPlan@1'
-    }
+    },
+    foundation
   });
   const planningCircuits = await loadPlanningCircuits(release, registries);
   invariant(planningCircuits.length === 1, 'planning-circuit-cardinality',
@@ -150,7 +156,8 @@ async function realizeCnlPlan({ plan, rendered, gateway, agent, release, registr
     await atomicWrite(containedPath(attemptRoot, 'candidate.md'), candidate);
     analysis = await analyzeText({
       agentName: agent.manifest.name, text: candidate, release, registries,
-      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache
+      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache,
+      foundation: options.foundation || 'core'
     });
     await persistAnalysis({ root: containedPath(attemptRoot, 'validation') }, analysis);
     await atomicWrite(containedPath(attemptRoot, 'validation', 'report.md'), analysis.report);
@@ -172,10 +179,12 @@ async function executeCnlPlanningRun(options) {
   ]);
   const release = options.releaseVersion
     ? await loadRelease(agent, options.releaseVersion) : await loadActiveRelease(agent);
-  const command = `nllagent plan --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)}`;
+  const foundation = options.foundation || 'core';
+  const command = `nllagent plan --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)} --foundation ${foundation}`;
   const run = await createPlanningRun(agent, options.inputPath, idea, release, command, {
     node: process.version, package: 'natural-language-linter-agent@0.1.0',
-    realizationRequested: Boolean(options.realizeOutputPath)
+    realizationRequested: Boolean(options.realizeOutputPath),
+    foundation: foundationPackDescriptor(foundation)
   });
   const cache = options.cache || new FileArtifactCache(containedPath(agent.root, 'cache'));
   try {
@@ -191,12 +200,14 @@ async function executeCnlPlanningRun(options) {
       runtime: {
         ...run.record.runtime, modelBackend: backend.kind, modelGateway: backend.gateway?.id || null,
         operators: registries.operators.describe().map((entry) => entry.id),
-        verifiers: registries.verifiers.describe().map((entry) => entry.id)
+        verifiers: registries.verifiers.describe().map((entry) => entry.id),
+        extensions: registries.extensions || []
       }
     });
     const compiled = await compileCnlGenerationPlan({
       agentName: agent.manifest.name, idea, release, registries,
-      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache
+      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache,
+      foundation
     });
     await Promise.all([
       writeJson(containedPath(run.root, 'idea.longtext.json'), compiled.program),

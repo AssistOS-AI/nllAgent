@@ -57,6 +57,10 @@ Any failed check aborts publication. Success produces `publication.json`, semant
 
 Development testing may include removed exceptions, inverted comparisons, changed constants, weakened scope, lost negation, forced identity merge, false closed-world coverage, bypassed verify, changed priority, and unbounded search. Differential tests may compare candidate versions, alternative circuits, independent deterministic oracles, model profiles, and solver/verifier pairs. A natural case placed in `benchmark/mutations/` does not by itself prove that generated program mutations were executed or killed.
 
+A query-first implementation additionally needs row-addressed structural fixtures and executable differential tests. Every decision row should link positive, close-negative, boundary, exception, overlap, ambiguity, and open/closed coverage cases where applicable. The current benchmark path automatically compares reference query/table results with lowered graph query, decision, and verified records and fails on drift. Per-release semantic mutation execution and an independent native engine are not yet present. Any future native query execution must pass randomized comparison against both the reference scan evaluator and the lowered graph.
+
+The platform foundation has its own repository suite for parser boundaries, opposite and exclusive state conflicts, temporal cycles, context separation, verifier forgery, pack identity, and opt-out behavior. Agent benchmarks do not copy those cases merely to prove that the shared pack exists. They add cases only when an agent relies on foundation observations, changes their interpretation through domain rules, or needs an alternative-world policy. A future knowledge pack requires dated positive, stale, boundary, conflicting-source, jurisdiction, fictional-world, and unavailable-pack cases before publication.
+
 ## Metrics
 
 When metrics are available, they should be reported per rule, observation type, document profile, guarantee, and terminal state. Abstention and compatibility must remain separate from accuracy so a candidate cannot appear better merely by refusing more documents. The MVP publication command does not claim metrics it did not calculate.
@@ -94,6 +98,14 @@ Response: Publication compiles planning circuits, checks producer alignment and 
 ### Question #8: Is the benchmark kind merely presentation text?
 
 Response: No. `NaturalLanguageLinterBenchmarkCase` is validated before execution and is part of the snapshotted publication evidence. A misspelled authoring kind fails instead of being silently normalized.
+
+### Question #9: Does a source map or generated test scaffold satisfy query-first differential testing?
+
+Response: No. A source map establishes traceability and a scaffold states intended cases. Differential evidence requires executing independent paths over the same LongTextJS programs and comparing the semantic result layers. Mutation evidence requires executing material mutants and reporting which cases killed them.
+
+### Question #10: Must every agent relearn and retest the foundation pack?
+
+Response: No. Platform tests establish the shared semantics once. An agent tests only its reliance on, extension of, or deliberate departure from those semantics; its publication record still captures the exact selected pack identity.
 
 # Conclusion
 

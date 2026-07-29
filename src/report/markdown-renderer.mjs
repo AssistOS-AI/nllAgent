@@ -42,6 +42,8 @@ function renderReport(model) {
     '',
     `- Agent: \`${escapeInline(model.agent)}\``,
     `- Release: \`${escapeInline(model.release)}\``,
+    `- Foundation: \`${escapeInline(model.foundation?.mode === 'off'
+      ? 'off' : `${model.foundation?.id || 'unspecified'}@${model.foundation?.version || 'unknown'}`)}\``,
     `- Source digest: \`${escapeInline(model.sourceDigest)}\``,
     `- Terminal status: \`${escapeInline(model.status)}\``,
     `- Compatibility: \`${escapeInline(model.compatibility?.status || 'unknown')}\``,

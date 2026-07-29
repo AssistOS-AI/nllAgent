@@ -21,7 +21,7 @@
     <p class="lead">A learning job compiles rulebooks, calibration documents, review evidence, and production gaps into candidate LongTextJS producers, CircuitJS theories, and natural benchmark cases. It stops at a candidate. A maintainer decides when to run the separate manual publication command.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   INPUT[Rules + calibration + feedback] --> STAGE[Coding Agent builds candidate in staging]
   STAGE --> CAND[Audited candidate]
   CAND -. explicit maintainer command .-> PUB[Pre-publication checks]
@@ -55,6 +55,7 @@ flowchart TB
 
     <h2 id="artifacts">What the Coding Agent is expected to build</h2>
     <p>The open-ended work is not “write a better prompt.” A useful candidate contains coordinated artifacts on both sides of the contract:</p>
+    <div class="callout"><strong>The shared foundation is not agent-owned.</strong> A learning job may query its observations and propose a platform extension, but it cannot edit <code>foundation-core</code>, its circuits, or its verifiers through an agent candidate. A changing world fact belongs in a separately sourced knowledge pack, not in an agent's claim of universal common sense.</div>
     <div class="table-wrap"><table>
       <thead><tr><th>Artifact</th><th>Question it answers</th></tr></thead>
       <tbody>
@@ -101,7 +102,7 @@ flowchart TB
       <a href="security.html">Trust boundaries</a>
     </nav>
 
-    <footer>Normative learning contracts: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a> and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
+    <footer>Normative learning contracts: <a href="specsLoader.html?spec=DS012-benchmarks-release-gate.md">DS012</a> and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>. Platform foundation ownership: <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.</footer>
   </main>
 </div>
 </body>

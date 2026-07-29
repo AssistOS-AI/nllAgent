@@ -21,7 +21,7 @@
     <p class="lead">They do not connect because two fields happen to share a name. A compiled CircuitJS graph publishes an observation contract. Manual publication checks that approved LongTextJS producers can satisfy it. A production run checks that this document satisfied it now.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   THEORY[CircuitJS graph] --> CONTRACT[Derived observation contract]
   PRODUCERS[LongTextJS producers] --> GATE{Alignment + run compatibility}
   CONTRACT --> GATE
@@ -29,24 +29,35 @@ flowchart TB
     </pre>
     <p class="diagram-caption"><strong>One contract, two checks.</strong> Release alignment establishes a valid production path in general. Run compatibility establishes that the concrete source, observations, statuses, resources, and coverage satisfy that path.</p>
 
+    <div class="callout"><strong>Foundation circuits use the same joint.</strong> In <code>core</code> mode, the platform materializer contributes its own typed observations and capabilities, and the analyzer runs its ordinary port–operator–verifier circuits before the agent release. Their open-world token proves only the documented pattern scan, not exhaustive semantic knowledge. In <code>off</code> mode the overlay is absent by explicit selection.</div>
+
     <h2 id="contract">What the contract contains</h2>
-    <p>For each external input port that can affect an output, the contract records the nominal types, version, cardinality, accepted epistemic statuses, required coverage, criticality, scope relation, and guarantee requirements. The current weak-phrase circuit compiles to this contract:</p>
+    <p>For each external input port that can affect an output, the contract records the nominal types, version,
+      cardinality, accepted epistemic statuses, required coverage, criticality, scope relation, and guarantee
+      requirements. The default logical-consistency circuit compiles to this contract:</p>
     <pre><code>{
   "kind": "ObservationContract",
   "schemaVersion": 1,
-  "circuit": "editorial.weak-phrase@0.1.0",
+  "circuit": "foundation.logical-consistency@1.0.0",
   "ports": [{
-    "name": "paragraphs",
-    "types": ["document.paragraph@1"],
+    "name": "assertions",
+    "types": ["foundation.state-assertion@1"],
     "cardinality": "many",
     "statuses": ["extracted"],
-    "coverage": "closed-world",
+    "coverage": "open-world",
     "critical": true,
     "scopeRelation": null,
     "guarantee": null
   }]
 }</code></pre>
-    <p>This says more than “the circuit reads paragraphs.” It says that model-proposed paragraphs are not an acceptable substitute, that the full qualifying paragraph domain must be covered, and that failure to provide the port blocks this circuit.</p>
+
+    <h3 id="query-contract">Experimental QueryContract extension</h3>
+    <p>DS020 keeps this <code>ObservationContract</code> and the compiler now derives a <code>QueryContract</code> for fields that ordinary ports do not expose: exact fields read, LongTextJS relations, selected observation types and statuses, total order, exact coverage signature, criticality, and conservative row/intermediate budgets. It is an additive analysis artifact; generated observation ports remain the compatibility authority used by the ordinary graph.</p>
+    <p>The important difference is coverage precision. The implemented <code>antiJoin</code> cannot accept a token merely because it mentions the same nominal type: source revision, scope, channels, type, producer/method, exclusions, completeness mode, verification, an empty failure set, and producer status capability must match exactly. Broader subsumption, correlated <code>notExists</code>, domain-specific failure matching, and world-aware signatures remain future work. <a href="query-first-tutorial.html#absence">See the closed-world and unknown executions.</a></p>
+    <p>The ordinary contract says more than “the circuit reads states.” It accepts only extracted foundation
+      assertions and treats the port as critical, while its open-world coverage prevents the circuit from claiming
+      that every implicit state in the document was discovered. A query-authored domain rule can add exact fields,
+      order, and coverage obligations through its QueryContract without weakening this port contract.</p>
 
     <h2 id="four-moments">The connection is checked at four moments</h2>
     <ol class="step-list">
@@ -56,14 +67,19 @@ flowchart TB
       <li><strong>Execution verifies a witness.</strong> A ready circuit may compute candidates, but its finding contract still controls publication. The registered verifier checks the precise witness against source and released policy. Compatibility answers “may this theory run?”; verification answers “does this candidate support this claim?”</li>
     </ol>
 
-    <h2 id="worked-example">Worked example: “in fact” in narration</h2>
-    <p>The current <code>editorial-demo</code> makes the complete joint visible:</p>
+    <h2 id="worked-example">Worked example: two incompatible door states</h2>
+    <p>The Quick Tutorial example makes the complete joint visible:</p>
     <ol class="step-list">
-      <li>The Markdown compiler produces every paragraph as <code>document.paragraph@1</code> with <code>extracted</code> status, exact anchors, stable order, and verified closed-world structural coverage.</li>
-      <li>The CircuitJS port asks for exactly that type, status, and coverage. Pre-publication checks link it to <code>markdown-structural@1</code>.</li>
-      <li>During a run, compatibility confirms that the concrete <code>view:whole</code> has qualifying paragraph observations and no blocking structural gap.</li>
-      <li>The lexical operator searches those observations using the published English phrase rule and dialogue-prefix exclusion. It returns candidates with anchors and rule provenance.</li>
-      <li>The exact-match verifier reads the source range again. Only accepted candidates become findings. The report can therefore claim an exact occurrence in released scope, not a general aesthetic truth.</li>
+      <li>The Markdown compiler creates exact sentence observations and anchors for “The north door is open at noon”
+        and “The north door is not open at noon.”</li>
+      <li>The selected foundation materializer creates two extracted <code>foundation.state-assertion@1</code>
+        observations, with opposite polarity but the same normalized subject, state, time, frame, and source world.</li>
+      <li>The circuit port asks for exactly that type and status. Compatibility confirms the producer capability and
+        its explicit open-world pattern-scan coverage.</li>
+      <li>The state-conflict operator compares the bounded contexts and constructs a candidate containing both
+        observation identities and anchors.</li>
+      <li>The independent verifier rereads the observations, source revision, exact anchors, context, and polarity.
+        Only its accepted candidate becomes the CNL warning shown in the tutorial.</li>
     </ol>
 
     <h2 id="semantic-example">What changes for semantic observations</h2>
@@ -93,7 +109,7 @@ flowchart TB
       <a href="benchmark.html">Through natural alignment cases</a>
     </nav>
 
-    <footer>Normative connector contract: <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, supported by <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a> and <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>.</footer>
+    <footer>Normative connector contract: <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, supported by <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Experimental extension: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>
   </main>
 </div>
 </body>

@@ -193,11 +193,26 @@ function verifyTimeline({ candidates = [], initial = [], events = [] }) {
 }
 
 function registerReasoningOperators(registry) {
-  registry.register({ id: 'graph.shortest-path@1', description: 'Bellman-Ford shortest path with negative-cycle detection.', execute: shortestPath });
-  registry.register({ id: 'units.convert@1', description: 'Convert supported typed quantities through canonical SI units.', execute: convertQuantity });
-  registry.register({ id: 'constraints.interval-conflicts@1', description: 'Find disjoint constraints in aligned scopes.', execute: intervalConflicts });
-  registry.register({ id: 'temporal.deadline@1', description: 'Evaluate exact elapsed-time deadlines and outage policies.', execute: deadlineEvaluation });
-  registry.register({ id: 'state.timeline@1', description: 'Apply ordered explicit effects with inertia and retraction.', execute: timeline });
+  registry.register({
+    id: 'graph.shortest-path@1', primitives: ['search', 'call'],
+    description: 'Bellman-Ford shortest path with negative-cycle detection.', execute: shortestPath
+  });
+  registry.register({
+    id: 'units.convert@1', primitives: ['convert', 'call'],
+    description: 'Convert supported typed quantities through canonical SI units.', execute: convertQuantity
+  });
+  registry.register({
+    id: 'constraints.interval-conflicts@1', primitives: ['compare', 'call'],
+    description: 'Find disjoint constraints in aligned scopes.', execute: intervalConflicts
+  });
+  registry.register({
+    id: 'temporal.deadline@1', primitives: ['compare', 'call'],
+    description: 'Evaluate exact elapsed-time deadlines and outage policies.', execute: deadlineEvaluation
+  });
+  registry.register({
+    id: 'state.timeline@1', primitives: ['maintain', 'call'],
+    description: 'Apply ordered explicit effects with inertia and retraction.', execute: timeline
+  });
   return registry;
 }
 

@@ -38,7 +38,17 @@ nllagent release publish --agent <name> --candidate <version>
 nllagent model inspect
 ```
 
-`--data-root` may override `data/`. `--release` may select a published immutable release instead of the active pointer. `--json` may print a machine-readable command result. In audit mode, the requested Markdown report is rendered from canonical `cnl-audit.json`; in specification mode, the requested plan is rendered from canonical `cnl-plan.json`. `--translator auto|achilles|codex|none` controls semantic translation; `auto` prefers configured Achilles and otherwise uses the installed Coding Agent adapter. The parser validates the exact positional shape and option allowlist of each command; unknown options and surplus positionals are usage errors.
+`--data-root` may override `data/`. `--release` may select a published immutable release instead of the active pointer. `--foundation core|off` selects the versioned platform baseline for `run`, `plan`, and `benchmark`; `core` is the default. `--json` may print a machine-readable command result. In audit mode, the requested Markdown report is rendered from canonical `cnl-audit.json`; in specification mode, the requested plan is rendered from canonical `cnl-plan.json`. `--translator auto|achilles|codex|none` controls semantic translation; `auto` prefers configured Achilles and otherwise uses the installed Coding Agent adapter. The parser validates the exact positional shape and option allowlist of each command; unknown options and surplus positionals are usage errors.
+
+The CLI uses long options only, in the `--name value` form; it does not accept short options or `--name=value`. `--json`, `--no-llm`, and `--help` are boolean switches. Every other option consumes exactly one following token, which cannot begin with `--`. Duplicate options are usage errors rather than last-value-wins overrides. File and data-root paths are resolved from the process working directory. `--codex-bin` is passed unchanged to the isolated adapter call: a bare command uses process `PATH`, while a relative executable path is interpreted from that call's working directory. The complete per-command option matrix, defaults, conflicts, outputs, and exit codes must be maintained as the man-page section of `docs/cli.html` and kept synchronized with `src/cli/arguments.mjs` and `src/cli/help.mjs`.
+
+The ordinary CLI does not accept a path to executable runtime code. A programmer who owns the host process may use the
+library API to load a trusted runtime extension, install it into a registry pair, and inject those registries into a run.
+Documents, agent workspaces, candidates, and CLI arguments cannot select or load such code implicitly.
+
+Translation options apply only to commands that may execute semantic evaluation or materialization. `learn` always invokes the configured Coding Agent learning boundary and therefore accepts `--codex-bin` but not `--translator` or `--no-llm`. `plan --realize-output` conflicts with `--translator none` and `--no-llm`; plan-only operation may use either because deterministic planning does not require realization.
+
+Foundation selection is independent of translation. `off` removes the foundation materializer and circuits but does not alter the selected agent release. The exact descriptor is persisted in run metadata and `foundation.json`; reports show the selection so alternative-world execution cannot be mistaken for the default baseline.
 
 `release publish` is deliberately manual. The command validates the named candidate and benchmark snapshot, creates the immutable release, loads it again, and atomically writes the active pointer. Learning never invokes publication, and the MVP exposes no separate gate, activation command, or automatic-release option.
 
@@ -132,6 +142,17 @@ Response: `nllagent plan --agent <name> --input <idea.md> --output <plan.cnl.md>
 ### Question #8: Why do persistent kinds spell out NaturalLanguageLinter while commands use nllAgent?
 
 Response: Persistent kinds are durable schema identifiers and therefore use the unambiguous full `NaturalLanguageLinter…` family. `nllAgent` is the deliberately compact product and command name used in paths, examples, package surfaces, and ordinary prose.
+
+### Question #9: Why is the HTML CLI page a normative companion rather than a short tutorial?
+
+Response: Automation depends on exact option scope, defaults, conflicts, outputs, and exit codes. The executable help remains concise, while `docs/cli.html` serves as the complete current man page and is checked against the parser and integration tests whenever the command surface changes.
+
+### Question #10: Why is there no `--runtime-extension` option?
+
+Response: A runtime extension executes with host authority. Treating its path as an ordinary document command option
+would make a routine audit invocation also a code-loading interface. Host applications instead perform the explicit
+load, review, registry installation, and dependency injection through the ESM library API. The standard CLI remains on
+the standard reviewed registry.
 
 # Conclusion
 

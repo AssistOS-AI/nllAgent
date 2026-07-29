@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { access, stat } from 'node:fs/promises';
+import { access, readdir, stat } from 'node:fs/promises';
 import http from 'node:http';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -70,15 +70,19 @@ async function main() {
     const matrix = await browserDump(chrome, `${base}/specsLoader.html?spec=matrix.md`);
     requireText(matrix, ['id="content" class="content" data-rendered="true"'], 'Rendered HTTP matrix');
     requireText(matrix, [
-      'Specification Matrix', 'DS000', 'DS017', 'DS018', 'DS019', '<nav class="sidebar"',
+      'Specification Matrix', 'DS000', 'DS017', 'DS018', 'DS019', 'DS020', 'DS021', '<nav class="sidebar"',
       'specsLoader.html?spec=DS000-vision.md',
       'specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md',
-      'specsLoader.html?spec=DS019-constraint-natural-language-generation.md'
+      'specsLoader.html?spec=DS019-constraint-natural-language-generation.md',
+      'specsLoader.html?spec=DS020-query-first-circuit-authoring.md',
+      'specsLoader.html?spec=DS021-foundation-ontology-validation.md'
     ], 'HTTP matrix');
     const catalogLinks = matrix.match(/id="spec-catalog"[\s\S]*?<\/nav>/u)?.[0]
       .match(/specsLoader\.html\?spec=DS\d{3}-/gu) || [];
-    if (catalogLinks.length !== 20) {
-      throw new Error(`HTTP matrix catalog exposes ${catalogLinks.length} DS links instead of 20.`);
+    const specCount = (await readdir(resolve(root, 'specs')))
+      .filter((name) => /^DS\d{3}-.*\.md$/u.test(name)).length;
+    if (catalogLinks.length !== specCount) {
+      throw new Error(`HTTP matrix catalog exposes ${catalogLinks.length} DS links instead of ${specCount}.`);
     }
     const circuit = await browserDump(chrome, `${base}/specsLoader.html?spec=DS008-circuitjs.md`);
     requireText(circuit, ['id="content" class="content" data-rendered="true"'], 'Rendered HTTP DS viewer');

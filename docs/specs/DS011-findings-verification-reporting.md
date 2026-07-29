@@ -20,7 +20,7 @@ Verdicts include violation, compliant, not-applicable, undetermined, ambiguous, 
 
 ## CNL/Audit-1 contract
 
-`CNLAuditReport` schema version 1 is the canonical output of audit mode. It must contain `dialect: CNL/Audit-1`, `profile: audit`, agent, release, source digest, terminal status, compatibility, coverage, `auditObservations`, original findings, conflicts, limitations, and an issue when one exists. Each `CNLAuditObservation` projects one verified finding into an explicit natural-language audit statement plus rule, circuit, verdict, severity, subject, scope, evidence anchors, rule basis, guarantee, verifier result, certificate, remediation, and limitations.
+`CNLAuditReport` schema version 1 is the canonical output of audit mode. It must contain `dialect: CNL/Audit-1`, `profile: audit`, agent, release, selected foundation descriptor, source digest, terminal status, compatibility, coverage, `auditObservations`, original findings, conflicts, limitations, and an issue when one exists. Each `CNLAuditObservation` projects one verified finding into an explicit natural-language audit statement plus rule, circuit, verdict, severity, subject, scope, evidence anchors, rule basis, guarantee, verifier result, certificate, remediation, and limitations.
 
 The audit object may express correctness, compliance, quality, ambiguity, missing evidence, or inability to complete the audit, according to the released circuits. It is not restricted to violations. A stopped `CNLAuditReport` is a valid audit artifact but never means compliance.
 
@@ -38,9 +38,11 @@ Supported public levels are `mechanically-certified`, `evidence-certified`, `mod
 
 The envelope must contain only the finding statement, rule summary, authority anchor, main evidence, support evidence, reasoning edges, evaluated exceptions, guarantee explanation, limitation, and approved remediation options. A deterministic renderer is preferred. If a model verbalizes the envelope, a claims checker must establish that every material statement maps to envelope content.
 
+When a candidate originates from a normalized query or decision table, the envelope and trace also retain stable query, table, row, hit-policy, coverage-domain, coverage-token, and dependency-envelope identities. The experimental implementation records these facts in `QueryResult`, `DecisionTableResult`, `QueryDecisionWitness`, verifier certificate, generated source map, and logical scheduler trace. A dedicated high-level CNL renderer for those records remains future work. Physical node fusion, indexing, or renaming must not remove the route from a rendered result to its authority row, selected domain, evidence, verifier, and benchmark family.
+
 ## Markdown rendering
 
-`report.md` is a deterministic human-readable view of `cnl-audit.json`. It must include agent, release, source digest, terminal status, compatibility summary, coverage summary, active and blocked circuits, findings grouped by severity and rule, and each finding's identifier, circuit, subject, scope, verifier, certificate, support anchors, exact quote and location, rule basis, explanation, guarantee, limitation, and remediation. Coverage rendering must identify its verification method. Stopped and limited reports must enumerate unmet obligations and related issue identifiers. Reports must avoid absolute local paths and secrets.
+`report.md` is a deterministic human-readable view of `cnl-audit.json`. It must include agent, release, foundation selection, source digest, terminal status, compatibility summary, coverage summary, active and blocked circuits, findings grouped by severity and rule, and each finding's identifier, circuit, subject, scope, verifier, certificate, support anchors, exact quote and location, rule basis, explanation, guarantee, limitation, and remediation. Coverage rendering must identify its verification method. Stopped and limited reports must enumerate unmet obligations and related issue identifiers. Reports must avoid absolute local paths and secrets.
 
 The report must be stable enough for benchmark comparison. Volatile run identifiers and timestamps belong in an audit subsection that benchmark normalization may remove. The default report should remain useful without opening JSON artifacts.
 
@@ -73,6 +75,10 @@ Response: Only after the optional realization is ingested as untrusted source, e
 ### Question #6: Why call the linter result CNL?
 
 Response: The audit is a controlled natural-language artifact produced from verified circuit outputs. It is the audit profile of the same output family whose specification profile is `CNLGenerationPlan`. This naming does not move rules into CNL: CircuitJS remains the authority and executable method, while `CNLAuditReport` states what that method established about one source.
+
+### Question #7: Should a report explain a decision table by printing its physical graph?
+
+Response: Not by default. The stable explanation names the query domain, authority row, evaluated condition, unknowns, evidence, coverage, verifier, and publication decision. The source map exposes physical nodes for debugging without making generated node topology the user-level meaning.
 
 # Conclusion
 

@@ -30,7 +30,7 @@
 
     <h2 id="map">The conceptual map</h2>
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   REL[Authority + examples → published release]
   INPUT[Existing document or idea] --> LTX[LongTextJS source world]
   REL --> EXEC[Validation or planning CircuitJS]
@@ -166,6 +166,8 @@ flowchart TB
         <tr><td>LongTextJS</td><td>The declarative instance program for one source: structure, anchors,
           observations, alternatives, coverage, gaps, and task.</td><td>It represents the source world; it does not own
           compliance policy.</td></tr>
+        <tr><td>FoundationPack</td><td>A versioned platform overlay that contributes bounded observations, invariants, circuits, and limitations to ordinary runs.</td><td><code>foundation-core</code> is not a universal ontology and can be disabled for a different world model.</td></tr>
+        <tr><td>KnowledgePack</td><td>A proposed optional package for sourced, dated, jurisdiction- and world-scoped contingent facts.</td><td>The contract boundary is specified, but loading and governance are not implemented.</td></tr>
         <tr><td>CircuitJS</td><td>The typed declarative graph for reusable theory: ports, transformations, state,
           exceptions, operators, verification, and emission.</td><td>It is versioned theory; it is not arbitrary
           JavaScript or an opaque prompt.</td></tr>
@@ -383,7 +385,7 @@ flowchart TB
 
     <h2 id="status">Implemented mechanism versus research lineage</h2>
     <p>The page deliberately includes concepts broader than the current demonstration agent. The repository currently
-      implements canonical LongTextJS, restricted CircuitJS validation and planning graphs, observation contracts,
+      implements canonical LongTextJS, the bounded <code>foundation-core</code> overlay, restricted CircuitJS validation and planning graphs, observation contracts,
       registered operators and replay verifiers, CNL audit and plan artifacts, compatibility and coverage gates,
       immutable releases, natural benchmark checks, isolated learning, and optional bounded realization.
       Event-calculus-style state, argumentation, solver, multimodal, and richer legal modules are extension patterns
@@ -393,6 +395,7 @@ flowchart TB
     <nav class="page-nav" aria-label="Concept reading paths">
       <strong>Continue from the foundation</strong>
       <a href="architecture.html">See the concrete architecture</a>
+      <a href="foundation.html">Understand the default foundation</a>
       <a href="longtextjs.html">Study the source program</a>
       <a href="circuitjs.html">Study the theory program</a>
       <a href="circuit-tutorial.html">Run the interactive circuit tutorial</a>

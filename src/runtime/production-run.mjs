@@ -9,6 +9,7 @@ import { FileArtifactCache } from '../storage/artifact-cache.mjs';
 import { resolveTranslationBackend } from '../model/translation-backends.mjs';
 import { analyzeText } from './analyzer.mjs';
 import { createStandardRegistries } from './standard-operators.mjs';
+import { foundationPackDescriptor } from '../foundation/core-ontology.mjs';
 
 const TERMINAL_EXIT = {
   reported: 0,
@@ -44,7 +45,8 @@ async function persistAnalysis(run, analysis) {
         ...(analysis.verifierRejections || []).map((candidate) => ({ candidateRule: candidate.rule, ...candidate.verifierResult }))
       ]
     }),
-    writeJson(containedPath(run.root, 'model-captures.json'), { captures: analysis.modelCaptures || [] })
+    writeJson(containedPath(run.root, 'model-captures.json'), { captures: analysis.modelCaptures || [] }),
+    writeJson(containedPath(run.root, 'foundation.json'), analysis.foundation)
   ]);
 }
 
@@ -57,12 +59,15 @@ async function executeProductionRun(options) {
   const release = options.releaseVersion
     ? await loadRelease(agent, options.releaseVersion)
     : await loadActiveRelease(agent);
-  const command = `nllagent run --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)}`;
+  const foundation = options.foundation || 'core';
+  const command = `nllagent run --agent ${agent.manifest.name} --input ${basename(options.inputPath)} --output ${basename(options.outputPath)} --foundation ${foundation}`;
   let registries = options.registries || createStandardRegistries();
   const run = await createRun(agent, options.inputPath, inputText, release, command, {
     node: process.version, package: 'natural-language-linter-agent@0.1.0',
     operators: registries.operators.describe().map((entry) => entry.id),
-    verifiers: registries.verifiers.describe().map((entry) => entry.id)
+    verifiers: registries.verifiers.describe().map((entry) => entry.id),
+    extensions: registries.extensions || [],
+    foundation: foundationPackDescriptor(foundation)
   });
   const cache = options.cache || new FileArtifactCache(containedPath(agent.root, 'cache'));
   try {
@@ -80,13 +85,15 @@ async function executeProductionRun(options) {
           translationBackend: translationBackend.kind,
           modelGateway: translationBackend.gateway?.id || null,
           operators: registries.operators.describe().map((entry) => entry.id),
-          verifiers: registries.verifiers.describe().map((entry) => entry.id)
+          verifiers: registries.verifiers.describe().map((entry) => entry.id),
+          extensions: registries.extensions || []
         }
       });
     }
     const analysis = await analyzeText({
       agentName: agent.manifest.name, text: inputText, release, registries,
-      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache
+      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets, cache,
+      foundation
     });
     let issue;
     if (analysis.status === 'stopped-incompatible') {
@@ -144,6 +151,7 @@ async function executeProductionRun(options) {
       exitCode: analysis.status.startsWith('reported') && hasBlockingFindings ? 2 : TERMINAL_EXIT[analysis.status] ?? 70,
       run: run.record, outputPath: options.outputPath, status: analysis.status,
       findings: analysis.findings.length,
+      foundation: analysis.foundation,
       ...(issue ? { issue: issue.id } : {}),
       translationBackend: run.record.runtime?.translationBackend || 'injected'
     };
@@ -159,7 +167,7 @@ async function executeProductionRun(options) {
       agent: agent.manifest.name, release: release.manifest.version,
       sourceDigest: run.record.source.digest, status,
       compatibility: { status: 'unknown', activeCircuits: [], blockedCircuits: [] },
-      coverage: [], findings: [], issue
+      coverage: [], findings: [], issue, foundation: foundationPackDescriptor(foundation)
     });
     const report = renderReport(model);
     await writeJson(containedPath(run.root, 'cnl-audit.json'), model);

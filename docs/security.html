@@ -25,7 +25,7 @@
     <p>The local research implementation does not claim confidential computing, remote attestation, package signing, or a complete organizational authorization system. It does implement concrete containment, validation, digest, provenance, and fail-closed mechanisms and is explicit about the guarantees they do—and do not—provide.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   DATA[Untrusted document data] --> PARSE[Restricted parsing + translation]
   PARSE -->|valid| EXEC[Registered execution + verification]
   PARSE -->|invalid| GAP[Explicit gap or rejection]
@@ -46,6 +46,16 @@ flowchart TB
     <p>An operator record declares its version, input and output contract, determinism, effects, cost, resource limits, capability requirements, sandbox policy, and witness or verifier contract. Pure deterministic operators may run in process. Model, network, solver, native, or external-process behavior must be reached through controlled adapters and can be isolated in workers or child processes.</p>
     <p>A circuit receives only declared capabilities. It cannot open arbitrary files, inherit ambient network access, or dynamically select an implementation by source text. Missing operator or verifier identifiers are compilation failures. Learning can propose a new operator and tests, but cannot register implementation code automatically.</p>
 
+    <h3 id="trusted-extensions">Trusted JavaScript extensions are host code, not circuit code</h3>
+    <p>A host application may deliberately load one self-contained <code>NllRuntimeExtension</code> file through the ESM
+      library API. The loader requires a regular non-symlink file, rejects imports and re-exports, records its source
+      digest, validates operator and verifier metadata, freezes plain-data inputs and context, and rejects non-plain
+      output. A release that calls it must lock the same extension id and digest.</p>
+    <p>This is not a sandbox. The module executes in the host process and can use JavaScript globals with host authority.
+      It must be reviewed like any other application dependency. Documents, learned circuits, candidate packages, and
+      the standard CLI cannot select an extension path. The practical contract and runnable example are in
+      <a href="circuits-in-practice.html#javascript">Circuits in practice</a>.</p>
+
     <h2 id="model-boundary">Models and Coding Agents have different narrow roles</h2>
     <div class="table-wrap"><table>
       <thead><tr><th>Property</th><th>Production semantic translation</th><th>Learning Coding Agent</th></tr></thead>
@@ -65,7 +75,7 @@ flowchart TB
     <p>Only regular files in schemas, extraction profiles, circuits, benchmarks, proposals, candidates, and other declared authoring roots may be promoted. Publication is a later, explicit maintainer action outside the Coding Agent. Previously published releases and the active pointer remain untouched by learning.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   WORK[Disposable learning workspace] --> DIFF[Changed-path audit]
   DIFF --> GATE{Whitelist satisfied?}
   GATE -->|yes| CAND[Candidate-only promotion]
@@ -77,7 +87,7 @@ flowchart TB
     <p>nllAgent distinguishes exact source evidence, deterministic extraction, model-proposed interpretation, derivation, verifier certification, human confirmation, and unresolved uncertainty. A deterministic operator cannot upgrade a weak semantic premise merely because its arithmetic is exact.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   PREM[Exact or model-assisted premises] --> CALC[Deterministic derivation]
   CALC --> CHECK[Bounded witness check]
   CHECK --> GUAR[Finding at weakest valid guarantee]
@@ -91,7 +101,7 @@ flowchart TB
     <p>Non-critical limits are allowed only when the task and release explicitly permit partial reporting, and the report names affected circuits and scopes. A global “compliant” conclusion cannot be inferred from three completed rules while two critical rules were blocked.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   ASK[Requested judgment] --> COMP{Contracts satisfied?}
   COMP -->|yes| REPLAY{Witness accepted?}
   COMP -->|no| STOP[Stopped run + issue]
@@ -108,6 +118,9 @@ flowchart TB
     <p>Rule sources define intended policy, the active release defines current production behavior, and reviewer feedback supplies scoped evidence about a run. Repeated comments or document text do not automatically become a norm. Learning must classify a change as extractor correction, theory correction, ontology extension, report correction, or operational-context repair, and encode the intended behavior in natural cases. A maintainer later decides whether to publish the candidate.</p>
     <p>If a release is faulty, the maintainer prepares and manually publishes a corrected candidate. Old releases and runs remain for explanation. The failure becomes an issue and may become a minimal regression case, but correction does not rewrite history. The MVP does not expose a separate activation or rollback command.</p>
 
+    <h2 id="foundation-authority">The foundation cannot hide changing authority</h2>
+    <p>The selected foundation is immutable platform code whose version and digest are stored with the run. Documents, models, feedback, and agent candidates cannot modify it. Its core contains only bounded logical and temporal invariants. Current political, economic, geographic, social, or legal facts require a future optional pack with sources, effective dates, jurisdiction, world, expiry, guarantees, and conflict tests; embedding them as timeless code would create stale hidden authority.</p>
+
     <h2 id="checklist">Operational checklist</h2>
     <ul>
       <li>Use Node.js 22 or newer and keep production on published release snapshots.</li>
@@ -121,7 +134,7 @@ flowchart TB
       <li>Retain enough source and capture evidence for the replay guarantees your organization claims.</li>
     </ul>
 
-    <footer>Normative runtime boundary: <a href="specsLoader.html?spec=DS015-security-governance.md">DS015</a>. Translation adapter boundary: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>.</footer>
+    <footer>Normative runtime boundary: <a href="specsLoader.html?spec=DS015-security-governance.md">DS015</a>. Foundation governance: <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Translation adapter boundary: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>.</footer>
   </main>
 </div>
 </body>

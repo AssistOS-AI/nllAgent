@@ -22,9 +22,12 @@
 
     <div class="callout"><strong>Two modes, not two unrelated products.</strong> In audit mode, circuits publish verified observations about correctness, compliance, or quality as <code>CNL/Audit-1</code>. In specification mode, planning circuits publish <code>CNL/Plan-1</code>, an idea-specific plan for a document. Rules remain in CircuitJS in both modes; CNL is the controlled output.</div>
 
-    <p>New readers should begin with the <a href="quick-tutorial.html">Quick Tutorial</a>: one sentence, one rule,
-      one LongTextJS observation, and one three-node circuit. Continue with <a href="concepts.html">Concepts and
-      foundations</a> for vocabulary, scientific lineage, guarantee levels, and ethical commitments.</p>
+    <p>New readers should begin with the <a href="quick-tutorial.html">Quick Tutorial</a>: one source contradiction,
+      one default rule, and one three-node circuit shown in author DSL. Then read
+      <a href="circuits-in-practice.html">Circuits, without the mystery</a> for a practical account of port binding,
+      filtering, multiple records, cycles, and custom JavaScript operators. Continue with
+      <a href="concepts.html">Concepts and foundations</a> for vocabulary, scientific lineage, guarantee levels, and
+      ethical commitments.</p>
 
     <h2 id="problem">The problem it solves</h2>
     <p>Organizations already have the knowledge needed to review or create documents, but it is scattered across style guides, laws, regulations, procedures, technical standards, examples, and reviewer decisions. A generic LLM prompt can read some of that material and produce a plausible answer, but it does not create a stable specialized agent: the applicable rule can drift between calls, a distant exception can be missed, an absent fact can be invented, and the model can write a convincing explanation for its own mistake.</p>
@@ -43,7 +46,7 @@
     <p>A useful result must therefore survive concrete questions: Which passage established the premise? Which release and rule were applied? Was the evidence complete enough to conclude that something was absent? Did a model merely propose an event, or did a checker verify the final property? nllAgent publishes through the declared verification path and stops with a precise gap when the specialized agent lacks the required language, evidence, or capability.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   INPUT[Existing document or high-level idea]
   LTX[LongTextJS<br/>addressable source world]
   REL[Published CircuitJS release]
@@ -72,7 +75,7 @@ flowchart TB
     <h2 id="verification">What happens during one verification</h2>
     <ol class="step-list">
       <li>The CLI fixes a named agent, an immutable release, and an exact Markdown input snapshot.</li>
-      <li>The deterministic compiler creates LongTextJS structure and anchors. It materializes only the extra semantic types demanded by the release’s circuits.</li>
+      <li>The deterministic compiler creates LongTextJS structure and anchors, applies the small selected foundation, and materializes only the extra domain types demanded by the release’s circuits.</li>
       <li>The compatibility gate checks the concrete observations, statuses, cardinalities, resources, and coverage against the circuits’ observation contracts.</li>
       <li>Ready circuits execute. Registered verifiers inspect their witnesses before findings can be emitted.</li>
       <li>The run assembles verified findings into canonical <code>CNLAuditReport</code>, renders <code>report.md</code>, and persists both with the trace and any reusable issue.</li>
@@ -107,9 +110,12 @@ node bin/nllagent.mjs plan \
       <thead><tr><th>Question</th><th>Read this page</th></tr></thead>
       <tbody>
         <tr><td>Can I see the entire mechanism on one tiny example?</td><td><a href="quick-tutorial.html">Quick Tutorial</a></td></tr>
+        <tr><td>How does data actually move, and where can I write real JavaScript?</td><td><a href="circuits-in-practice.html">Circuits in practice</a></td></tr>
+        <tr><td>Which elementary checks run without an agent-specific rule?</td><td><a href="foundation.html">Default foundation</a></td></tr>
         <tr><td>What do the concepts and abbreviations mean, and where do they come from?</td><td><a href="concepts.html">Concepts and foundations</a></td></tr>
         <tr><td>Why are there two DSLs?</td><td><a href="dsl.html">Two DSLs, one linter</a></td></tr>
         <tr><td>How does a CircuitJS graph consume LongTextJS and execute node by node?</td><td><a href="circuit-tutorial.html">Interactive circuit execution tutorial</a></td></tr>
+        <tr><td>How do routine circuits become typed queries and decision tables?</td><td><a href="query-first.html">Experimental query-first authoring</a> and its <a href="query-first-tutorial.html">execution tutorial</a></td></tr>
         <tr><td>How do the DSLs connect without a universal ontology?</td><td><a href="connection.html">The observation contract</a></td></tr>
         <tr><td>What exactly happens after <code>nllagent run</code>?</td><td><a href="verification.html">Architecture of one verification</a></td></tr>
         <tr><td>How does an idea become a CNL plan before any prose is generated?</td><td><a href="generation.html">CNL generation planning</a></td></tr>
@@ -119,8 +125,16 @@ node bin/nllagent.mjs plan \
     </table></div>
 
     <h2 id="implemented">What exists today</h2>
-    <p>The current implementation provides the Node.js 22+ ESM library and CLI, Markdown ingestion with source maps and Unicode-aware anchors, canonical LongTextJS data, restricted validation and planning CircuitJS modules, canonical CNL audit and generation-plan artifacts, verified rule-to-plan coverage, optional bounded realize–validate–revise, registered operators and verifiers, compatibility and coverage checks, backend-neutral model roles, persistent runs and issues, isolated Coding Agent learning, natural benchmarks, immutable published releases, and explicit manual publication.</p>
-    <p>It does not claim universal document understanding. Live model profiles are not exercised by the default offline checks; pre-publication checks do not yet execute generated program mutations, differential implementations, shadow/canary traffic, or an agent-owned idea-to-plan and plan-to-document quality benchmark. Planning is structurally checked and covered by controlled integration tests, not by a statistical claim about prose quality. These concrete limits remain in <a href="../serious_issues.md">serious_issues.md</a>.</p>
+    <p>The current implementation provides the Node.js 22+ ESM library and CLI, Markdown ingestion with source maps
+      and Unicode-aware anchors, canonical LongTextJS data, a default versioned foundation for bounded logical,
+      temporal, exact-arithmetic, elementary physical, and literal emotion/type consistency, restricted validation and
+      planning CircuitJS modules, canonical CNL products, registered operators and verifiers, compatibility and coverage
+      checks, persistent runs, isolated learning, natural benchmarks, and immutable published releases.</p>
+    <p>Host applications can also install a content-addressed <code>NllRuntimeExtension</code> containing real
+      JavaScript operators and verifiers. The graph remains declarative, extension inputs and outputs remain plain data,
+      and published uses lock the implementation digest. The standard CLI does not load extension paths.</p>
+    <p>Query-first CircuitJS is now an experimental part of that implementation. The restricted loader accepts its bounded plain-data query/table subset, compilation lowers it to ordinary CircuitJS, release artifacts retain its QueryContract and source map, and benchmarks compare reference with lowered execution. Current editorial examples remain direct because their three-node operator wrappers are already simpler. DS020 distinguishes this implemented subset from aggregates, patterns, native indexes, and stronger analysis that still remain future work.</p>
+    <p>It does not claim universal document understanding. Live model profiles are not exercised by the default offline checks; pre-publication checks do not yet execute generated semantic mutations, an independently implemented native query engine, shadow/canary traffic, or an agent-owned idea-to-plan and plan-to-document quality benchmark. Planning is structurally checked and covered by controlled integration tests, not by a statistical claim about prose quality. The registry also lacks complete machine-typed contracts for arbitrary semantic query schemas and advanced operators. These concrete limits remain in <a href="../serious_issues.md">serious_issues.md</a>.</p>
 
     <footer>The tutorial pages explain the implementation. The contiguous <a href="specsLoader.html?spec=matrix.md">DS specification set</a> defines the contracts.</footer>
   </main>

@@ -47,6 +47,7 @@ async function runCli(argv, context) {
     validateCommandArguments(positionals, options);
     const dataRoot = resolvePath(context.cwd, options['data-root'] || 'data');
     const requestedBackend = options['no-llm'] ? 'none' : options.translator || 'auto';
+    const foundation = options.foundation || 'core';
     const translationOptions = {
       backend: requestedBackend,
       repoRoot: context.repoRoot || PACKAGE_ROOT,
@@ -63,6 +64,7 @@ async function runCli(argv, context) {
         inputPath: resolvePath(context.cwd, requireOption(options, 'input')),
         outputPath: resolvePath(context.cwd, requireOption(options, 'output')),
         releaseVersion: options.release,
+        foundation,
         translation: translationOptions
       });
     } else if (positionals[0] === 'plan') {
@@ -73,6 +75,7 @@ async function runCli(argv, context) {
         realizeOutputPath: options['realize-output']
           ? resolvePath(context.cwd, options['realize-output']) : undefined,
         releaseVersion: options.release,
+        foundation,
         maximumRevisions: options['max-revisions'] === undefined ? 2 : Number(options['max-revisions']),
         translation: translationOptions
       });
@@ -84,7 +87,7 @@ async function runCli(argv, context) {
         workspaceRoot: resolve(agent.root, 'temporary', sortableId('benchmark'))
       });
       const registries = createStandardRegistries({ modelGateway: backend.gateway });
-      const benchmark = await runBenchmark(agent, release, registries);
+      const benchmark = await runBenchmark(agent, release, registries, { foundation });
       result = { exitCode: benchmark.passed ? 0 : 9, ...benchmark };
     } else if (positionals[0] === 'agent' && positionals[1] === 'init') {
       const created = await initializeAgent(dataRoot, requireOption(options, 'agent'), {

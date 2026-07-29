@@ -21,9 +21,10 @@
     <p class="lead">LongTextJS represents the concrete input; CircuitJS represents reusable rule knowledge. Validation turns a document into a CNL audit. Planning turns an idea into a CNL generation specification. Learning builds candidates for both; maintainers publish them explicitly.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   INPUT[Document or idea] --> LTX[LongTextJS]
-  CIR[Published CircuitJS release] --> GRAPHS[Validation or planning graph]
+  FOUNDATION[Versioned foundation: core or off] --> LTX
+  FOUNDATION --> GRAPHS[Published CircuitJS validation or planning graph]
   LTX --> GRAPHS --> CNL[CNL audit or generation plan]
   CNL -. optional plan realization returns as input .-> INPUT
     </pre>
@@ -57,26 +58,48 @@ flowchart TB
       </tbody>
     </table></div>
 
-    <h2 id="connection">The connector is a contract, not a shared giant ontology</h2>
+    <h2 id="connection">A small foundation plus explicit domain contracts</h2>
     <p>Circuit compilation walks backward from every output and derives the LongTextJS types that can influence it. Pre-publication checks require each critical type to have an approved producer. During a run, compatibility proves that this particular source produced acceptable observations and coverage. These are different checks: a release may know how to produce <code>narrative.object-event@1</code> in general and still fail to produce enough such events for one damaged or unfamiliar document.</p>
+    <p><code>foundation-core</code> is the deliberate exception to per-agent repetition: it contributes bounded state,
+      order, exact-arithmetic, quantity, type, and literal-emotion observations plus five verifier-dominated circuits.
+      It does not provide domain authority, unrestricted interpretation, or changing world facts. See
+      <a href="foundation.html">Default foundation</a>.</p>
     <p>The detailed mechanism is in <a href="connection.html">The observation contract</a>. This is the central link between the two halves of the documentation.</p>
+
+    <h2 id="query-layer">Experimental query layer: an authoring aid, not a new authority</h2>
+    <p>DS020 now implements a bounded adapter over one canonical LongTextJS value as finite read-only relations, then expresses suitable CircuitJS rule families as typed queries and evidence-aware decisions. The normalized query/table data is the logical plan and lowers to the ordinary graph. This avoids a mandatory third semantic artifact and keeps direct graphs for fixpoints, state, search, argumentation, and solvers.</p>
+    <pre class="mermaid">
+flowchart LR
+  LTX[LongTextJS instance world] --> QUERY[Experimental typed query/table]
+  QUERY --> GRAPH[Canonical CircuitJS graph]
+  GRAPH --> VERIFY[Existing verifier + emit]
+  INDEX[Discardable physical index] -. optimization only .-> QUERY
+    </pre>
+    <p class="diagram-caption"><strong>Status boundary.</strong> The implemented subset generates ordinary ports and nodes, exact anti-join coverage checks, QueryContracts, source maps, replay witnesses, and benchmark differential records. Native indexes and the extended algebra remain unavailable.</p>
 
     <h2 id="deployment">Implementation shape</h2>
     <p>The current product is a modular local Node.js application, not a required microservice deployment. <code>src/runtime/production-run.mjs</code> owns direct validation, <code>src/generation/runner.mjs</code> owns planning and the optional realization branch, <code>src/runtime/analyzer.mjs</code> supplies the shared validation path, <code>src/learning/runner.mjs</code> owns isolated authoring, and <code>src/release/manager.mjs</code> owns explicit publication and active-pointer replacement.</p>
+    <p>Hard algorithms enter through registered operators. The standard registry ships with the runtime; a host
+      programmer may explicitly install a trusted, content-addressed JavaScript extension before compiling a circuit.
+      The graph still fixes dataflow, primitive meaning, witness, verifier, and publication. See
+      <a href="circuits-in-practice.html">Circuits in practice</a> for the concrete execution model.</p>
     <div class="callout warning"><strong>Architecture versus extension surface.</strong> The runtime supports versioned schemas and registered reasoning operators, but the repository does not ship a published implementation for every literary, legal, scientific, multimodal, or solver-backed theory described by the broader design. Missing domain capability remains a compatibility gap.</div>
 
     <nav class="page-nav" aria-label="Architecture reading path">
       <strong>Continue by question</strong>
       <a href="concepts.html">What ideas and guarantees is this built on?</a>
       <a href="longtextjs.html">What is the document program?</a>
+      <a href="foundation.html">What is checked before agent-specific rules?</a>
       <a href="circuitjs.html">What is the theory program?</a>
+      <a href="circuits-in-practice.html">How do values move and where does custom code belong?</a>
+      <a href="query-first.html">How does experimental query-first authoring lower to the graph?</a>
       <a href="circuit-tutorial.html">How does the graph execute step by step?</a>
       <a href="verification.html">How does a run execute?</a>
       <a href="generation.html">How does an idea become CNL?</a>
       <a href="learning-architecture.html">How is a candidate built and published?</a>
     </nav>
 
-    <footer>Normative boundaries: <a href="specsLoader.html?spec=DS000-vision.md">DS000</a>, <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>.</footer>
+    <footer>Normative boundaries: <a href="specsLoader.html?spec=DS000-vision.md">DS000</a>, <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>. Experimental query profile: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>
   </main>
 </div>
 </body>

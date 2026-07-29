@@ -50,11 +50,15 @@ async function runBenchmark(agent, release, registries, options = {}) {
     testCase.metadata = await readJson(testCase.metadataPath);
     const analysis = await analyzeText({
       agentName: agent.manifest.name, text: input, release, registries,
-      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets
+      language: agent.manifest.defaultLanguage || 'und', budgets: options.budgets,
+      differentialQueryFirst: true, foundation: options.foundation || 'core'
     });
     const comparison = compareText(expected, analysis.report);
     const layers = await readJson(testCase.expectedLayers);
     const layerFailures = compareLayers(layers, analysis);
+    for (const differential of analysis.queryFirstDifferentials || []) {
+      if (!differential.passed) layerFailures.push(`query-first physical plan drift in ${differential.circuit}`);
+    }
     layerFailures.push(...validateCaseMetadata(testCase.metadata));
     let semanticEvaluation = null;
     if (testCase.metadata.evaluation?.mode === 'llm') {
@@ -76,7 +80,8 @@ async function runBenchmark(agent, release, registries, options = {}) {
       ...(!reportPassed ? { expected: comparison.expected, actual: comparison.actual } : {}),
       layerFailures,
       semanticEvaluation,
-      status: analysis.status, findingCount: analysis.findings.length
+      status: analysis.status, findingCount: analysis.findings.length,
+      queryFirstDifferentials: analysis.queryFirstDifferentials || []
     });
   }
   const passed = results.filter((result) => result.passed).length;

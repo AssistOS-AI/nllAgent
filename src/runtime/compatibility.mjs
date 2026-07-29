@@ -76,6 +76,8 @@ function evaluateCompatibility(program, compiledCircuits, profile = {}) {
       }
       const coverageCertificates = (program.coverage || []).filter((coverage) =>
         coverage.mode === 'closed-world' && coverage.verified === true
+        && coverage.source === program.source.id
+        && coverage.revision === program.source.revision
         && types.some((type) => coverage.types?.includes(type)));
       if (port.coverage === 'closed-world' && !coverageCertificates.length) {
         status = critical ? 'missing' : 'partially-satisfied';

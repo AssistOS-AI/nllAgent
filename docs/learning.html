@@ -26,7 +26,7 @@
     <p>That flexibility is dangerous inside production. A document could contain instruction-like text, a reviewer could suggest a local exception, or a model could choose a convenient interpretation. nllAgent therefore gives the Coding Agent write access only to a disposable learning workspace. Production does not import those skills and cannot mutate the published theory.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   INPUT[Rules + examples + issues] --> STAGE[Coding Agent staging]
   STAGE --> AUDIT{Host audit}
   AUDIT -->|safe| CAND[Candidate ready for manual publication]
@@ -52,7 +52,7 @@ flowchart TB
   --agent editorial \
   --rules ./rulebook</code></pre>
     <p>The command locks the named agent, snapshots all rule Markdown files, selected issues and context, the active release, and the current authoring surface, then creates <code>learning-runs/&lt;learning-id&gt;/workspace/</code>. The configured Coding Agent process runs there with a bounded timeout and explicit final-output schema. The current reference adapter invokes OpenAI Codex, so <code>--codex-bin</code> is the shipped executable override; the learning contract itself is generic.</p>
-    <p>The learning command has no publication flag. It may create or update candidate packages, but it cannot invoke <code>publishRelease()</code> or change the active pointer.</p>
+    <p>The learning command has no publication flag. It may create or update candidate packages, but it cannot invoke <code>publishRelease()</code> or change the active pointer. It also has no <code>--translator</code> or <code>--no-llm</code> option: learning is the Coding Agent authoring boundary, while those switches select production translation and benchmark evaluation backends.</p>
 
     <h2 id="workspace">Inside the staging workspace</h2>
     <p>The workspace is a disposable copy, not a symlink to the live authoring tree. It contains the learning task, read-only snapshots and context, candidate-editable directories, the explicit result schema, and links to only the five learning skills. Process events, final output, diagnostics, and before/after inventories remain under the learning run for audit.</p>
@@ -63,20 +63,24 @@ flowchart TB
       <thead><tr><th>Skill</th><th>Main question</th><th>Principal artifacts</th></tr></thead>
       <tbody>
         <tr><td><code>nll-scope-project</code></td><td>What is the intended use, authority, document population, finding contract, and automation limit?</td><td>Scope contract, authority map, declared gaps.</td></tr>
-        <tr><td><code>nll-compile-theory</code></td><td>What is observable in LongTextJS and what must the reusable CircuitJS theory derive?</td><td>Rule cards, schemas, extraction profiles, circuits, witness and compatibility declarations.</td></tr>
-        <tr><td><code>nll-build-benchmark</code></td><td>Which natural positive, negative, exception, ambiguity, coverage, and long-range cases define the intended behavior?</td><td>Microcases, suites, expected layers, coverage matrix, counterexamples.</td></tr>
+        <tr><td><code>nll-compile-theory</code></td><td>What is observable, and is the simplest supported form an operator wrapper, query/table, aggregate/pattern, or direct graph?</td><td>Rule cards, form decision, schemas, extraction profiles, circuits, witness and compatibility declarations.</td></tr>
+        <tr><td><code>nll-build-benchmark</code></td><td>Which natural positive, negative, exception, ambiguity, coverage, row-conflict, and long-range cases define behavior?</td><td>Microcases, suites, expected layers, row coverage, mutation proposals, counterexamples.</td></tr>
         <tr><td><code>nll-learn-from-issues</code></td><td>Which layer caused each real failure and what is the smallest general repair?</td><td>Distilled cases, patches, new limits, regression evidence.</td></tr>
         <tr><td><code>nll-prepare-release</code></td><td>Is the candidate internally complete and ready for a maintainer to consider publishing?</td><td>Candidate manifest, public-check results, impact explanation, and known limitations.</td></tr>
       </tbody>
     </table></div>
     <p>Skills guide the Coding Agent but are not trusted evaluators. Their output still passes parsers, schemas, circuit compilation, registry linking, benchmark execution, and host policy. The learning catalog is intentionally separate from repository-maintenance skills and from the narrow production observation and optional CNL-realization skills.</p>
 
+    <h3 id="form-selection">Form selection comes before graph synthesis</h3>
+    <p>The compile skill now records why each rule family uses its representation. It prefers an existing exact <code>call → verify → emit</code> operator wrapper, then a supported query/table or aggregate/pattern form, and uses a direct graph for recursion, state, search, solvers, and argumentation. It does not add pass-through nodes merely to imitate a pattern.</p>
+    <div class="callout warning"><strong>Query-first is an experimental candidate format.</strong> Learning may emit only the implemented <code>LongTextQuery@1</code> and <code>DecisionTable@1</code> subset, and only when it is simpler than an exact operator wrapper. Unsupported aggregates, ordered patterns, arbitrary semantic schemas, or complex algorithms must remain ordinary CircuitJS, exact registered operators, or blocked proposals. Publication still requires graph compilation, benchmark equivalence, verifier dominance, and maintainer action.</div>
+
     <h2 id="editable-boundary">What may be changed</h2>
     <p>Learning can promote changed regular files only under the agent’s authoring roots: rule cards or authority-derived documentation, observation schemas, extraction profiles, restricted circuits, benchmark cases and suites, proposals, and candidate packages. The runner rejects deletions, symbolic links, writes outside the whitelist, or an absent, unreadable, or schema-invalid final result.</p>
     <p>The Coding Agent cannot change runtime source, verifier implementations, operator registries, publication policy, previously published releases, production run history, or the active pointer. When a rule needs a new trusted capability, learning writes a proposal instead of hiding code inside a circuit.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   EDIT[Editable candidate files] --> DIFF[Before/after inventory]
   DIFF --> POLICY{Whitelist + no delete/symlink}
   POLICY -->|pass| PROMOTE[Promote regular files]

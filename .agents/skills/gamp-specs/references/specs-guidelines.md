@@ -57,6 +57,7 @@ Write DS specifications as stable agent-facing contracts. Focus on rules, constr
 - Ground each requirement in the codebase, repository guidance, or confirmed system behavior.
 - Ensure each substantial requirement is defensible from code, repository guidance, or confirmed behavior.
 - If code behavior, repository guidance, and documentation disagree, prefer the most authoritative and currently defensible source.
+- Use specification status deliberately. A proposed profile may define future obligations, but it must enumerate its absent implementation gates and existing accepted specifications must not imply that the proposal is already executable.
 - Do not introduce speculative guarantees or contracts that the repository does not support.
 - When a conflict cannot be resolved confidently, state the narrower contract and add a numbered question in the affected DS file that captures the uncertainty or alternative paths.
 - The agent must not infer cross-module guarantees that are not explicitly established.

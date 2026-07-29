@@ -87,7 +87,9 @@ function continuityVerifier({ candidates = [] }, context) {
     const transitionAbsent = !actualIntervening.some((event) =>
       ['retrieve', 'transfer', 'replace'].includes(event.payload?.action));
     const closedCoverage = !witness.requiresClosedWorld || context.program.coverage.some((coverage) =>
-      coverage.scope === candidate.scope
+      coverage.source === context.program.source.id
+      && coverage.revision === context.program.source.revision
+      && coverage.scope === candidate.scope
       && coverage.mode === 'closed-world'
       && coverage.verified === true
       && coverage.types?.includes('narrative.object-event@1'));
@@ -106,7 +108,10 @@ function continuityVerifier({ candidates = [] }, context) {
       verifierResult: {
         status: accepted ? 'accept' : 'reject',
         verifier: 'narrative.object-continuity@1',
-        checkedProperties: ['stable-object-identity', 'event-order', 'complete-intervening-event-set', 'transition-gap', 'required-coverage'],
+        checkedProperties: [
+          'stable-object-identity', 'event-order', 'complete-intervening-event-set',
+          'transition-gap', 'coverage-source-revision', 'required-coverage'
+        ],
         diagnostics: accepted ? [] : ['Object continuity witness is inconsistent with materialized events.']
       },
       certificate: accepted ? {
@@ -121,6 +126,7 @@ function continuityVerifier({ candidates = [] }, context) {
 function registerNarrativeOperators(registry) {
   registry.register({
     id: 'narrative.object-continuity@1',
+    primitives: ['maintain', 'call'],
     description: 'Detect use after leave without a materialized recovery transition.',
     execute: continuityCandidates
   });

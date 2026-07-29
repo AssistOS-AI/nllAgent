@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { errorExit, runCli } from '../../src/cli/main.mjs';
 import { NllError } from '../../src/core/errors.mjs';
-import { writeJson } from '../../src/core/io.mjs';
+import { atomicWrite, writeJson } from '../../src/core/io.mjs';
 
 function capture() {
   let value = '';
@@ -57,6 +57,58 @@ test('CLI benchmark executes the active immutable release', async () => {
   assert.deepEqual(result.summary.rules, { 'ED-001': 5, 'ED-002': 5 });
 });
 
+test('CLI runs foundation-core by default and can disable it for an alternative world', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'nllagent-foundation-'));
+  const dataRoot = join(root, 'data');
+  await cp(resolve('data/editorial-demo'), join(dataRoot, 'editorial-demo'), { recursive: true });
+  const input = join(root, 'world.md');
+  await atomicWrite(input, [
+    'The north door is open at noon. The north door is not open at noon.',
+    '',
+    'The launch happened before the inspection. The inspection happened before the launch.',
+    '',
+    '2 times 3 equals 7.',
+    'The sample has mass -2 kg.',
+    'Alice feels afraid at noon. Alice does not feel afraid at noon.',
+    'The statue is an inanimate object. The statue feels lonely.'
+  ].join('\n'));
+
+  const coreStdout = capture();
+  const coreStderr = capture();
+  const coreOutput = join(root, 'core.md');
+  assert.equal(await runCli([
+    'run', '--agent', 'editorial-demo', '--data-root', dataRoot,
+    '--input', input, '--output', coreOutput, '--translator', 'none', '--json'
+  ], { stdout: coreStdout.stream, stderr: coreStderr.stream, env: {}, cwd: root }), 0, coreStderr.read());
+  const coreResult = JSON.parse(coreStdout.read());
+  assert.equal(coreResult.findings, 6);
+  assert.equal(coreResult.foundation.id, 'foundation-core');
+  const coreReport = await readFile(coreOutput, 'utf8');
+  assert.match(coreReport, /FOUNDATION-LOGIC-001/u);
+  assert.match(coreReport, /FOUNDATION-TIME-001/u);
+  assert.match(coreReport, /FOUNDATION-MATH-001/u);
+  assert.match(coreReport, /FOUNDATION-PHYSICS-001/u);
+  assert.match(coreReport, /FOUNDATION-EMOTION-001/u);
+  assert.match(coreReport, /FOUNDATION-PSYCHOLOGY-001/u);
+  assert.match(coreReport, /Foundation: `foundation-core@1\.1\.0`/u);
+  const foundationArtifact = JSON.parse(await readFile(join(
+    dataRoot, 'editorial-demo', 'runs', coreResult.run.id, 'foundation.json'
+  ), 'utf8'));
+  assert.equal(foundationArtifact.digest, coreResult.foundation.digest);
+
+  const offStdout = capture();
+  const offStderr = capture();
+  const offOutput = join(root, 'off.md');
+  assert.equal(await runCli([
+    'run', '--agent', 'editorial-demo', '--data-root', dataRoot,
+    '--input', input, '--output', offOutput, '--foundation', 'off', '--translator', 'none', '--json'
+  ], { stdout: offStdout.stream, stderr: offStderr.stream, env: {}, cwd: root }), 0, offStderr.read());
+  const offResult = JSON.parse(offStdout.read());
+  assert.equal(offResult.findings, 0);
+  assert.equal(offResult.foundation.mode, 'off');
+  assert.match(await readFile(offOutput, 'utf8'), /Foundation: `off`/u);
+});
+
 test('CLI plan produces CNL without a model and optionally realizes it', async () => {
   const root = await mkdtemp(join(tmpdir(), 'nllagent-cli-planning-'));
   const dataRoot = join(root, 'data');
@@ -78,6 +130,7 @@ test('CLI plan produces CNL without a model and optionally realizes it', async (
     dataRoot, 'editorial-demo', 'planning-runs', result.planningRun, 'planning.json'
   ), 'utf8'));
   assert.equal(planning.kind, 'NaturalLanguageLinterPlanningRun');
+  assert.equal(planning.runtime.foundation.id, 'foundation-core');
   assert.match(await readFile(output, 'utf8'), /CNL\/Plan-1 generation specification/u);
   assert.match(await readFile(output, 'utf8'), /Alice/u);
   assert.equal(result.realization, null);
@@ -127,10 +180,32 @@ test('CLI uses stable usage and runtime failure exit codes', async () => {
   assert.equal(await runCli(['run', '--translator', 'invented'], {
     stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
   }), 64);
+  assert.equal(await runCli(['run', '--foundation', 'invented'], {
+    stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
+  }), 64);
   assert.equal(await runCli(['plan', '--max-revisions', '1'], {
     stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
   }), 64);
   assert.equal(await runCli(['plan', '--realize-output', 'draft.md', '--max-revisions', '11'], {
     stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
   }), 64);
+  assert.equal(await runCli(['agent', 'list', '--json', '--json'], {
+    stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
+  }), 64);
+  assert.equal(await runCli(['learn', '--translator', 'none'], {
+    stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
+  }), 64);
+  assert.equal(await runCli(['plan', '--realize-output', 'draft.md', '--translator', 'none'], {
+    stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
+  }), 64);
+});
+
+test('CLI help documents the foundation default and opt-out', async () => {
+  const stdout = capture();
+  const stderr = capture();
+  assert.equal(await runCli(['--help'], {
+    stdout: stdout.stream, stderr: stderr.stream, env: {}, cwd: process.cwd()
+  }), 0);
+  assert.match(stdout.read(), /--foundation <mode>/u);
+  assert.match(stdout.read(), /foundation-core \(default\).*off/u);
 });

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Default Foundation — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Default foundation</div>
+    <p class="kicker">Shared baseline · explicit limits · optional alternate worlds</p>
+    <h1>What every agent checks before domain rules</h1>
+    <p class="lead"><code>foundation-core@1.1.0</code> supplies a small ontology and five elementary consistency
+      circuits without asking each agent to relearn them. It covers explicit state and time, exact decimal arithmetic,
+      bounded quantities, a small type vocabulary, and literal emotion attribution. This page defines the exact
+      language boundary and shows the result; it does not promise unrestricted common-sense understanding.</p>
+
+    <h2 id="mental-model">The useful mental model</h2>
+    <pre class="mermaid">
+flowchart LR
+  S[Source sentences] --> O[Typed foundation observations]
+  O --> C[Five verifier-dominated circuits]
+  C --> F[Replay-verified potential inconsistency]
+  K[Optional sourced knowledge pack<br/>future extension] -.-> C
+    </pre>
+    <p class="diagram-caption"><strong>Source assertions remain separate from judgment.</strong> The ontology names reusable data shapes. The materializer records what the source explicitly says. The circuits
+      compare those records under stable logical principles. None of these steps silently turns a sentence into a
+      verified fact about the outside world.</p>
+
+    <h2 id="automatic">What is automatic today</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Input form</th><th>LongTextJS meaning</th><th>Default check</th></tr></thead>
+      <tbody>
+        <tr><td><code>SUBJECT is [not] STATE [at TIME].</code></td><td>An anchored state assertion with polarity,
+          time frame, optional explicit time, and source world.</td><td>Opposite polarity and four exact exclusive-state
+          pairs in the same bounded context.</td></tr>
+        <tr><td><code>A happened before B.</code></td><td>An anchored strict-before relation between normalized event
+          labels.</td><td>Self-order and directed cycles.</td></tr>
+        <tr><td><code>2 times 3 equals 7.</code></td><td>An exact finite-decimal equality, with at most 128 digits in
+          each whole or fractional component.</td><td>Exact rational replay, including division by zero; no
+          floating-point approximation.</td></tr>
+        <tr><td><code>Sample has mass -2 kg at noon.</code></td><td>An exact quantity assertion with measure, unit,
+          time, and source world.</td><td>Small unit vocabularies, non-negative elementary measures, probability and
+          percentage ranges, absolute-zero bounds, and conflicting equal-unit values.</td></tr>
+        <tr><td><code>Alice feels afraid at noon.</code></td><td>A literal emotion attribution with polarity,
+          optional target, time, and source world.</td><td>Opposite polarity in one context; disjoint
+          <code>inanimate object</code> typing; literal emotion assigned to an explicitly inanimate subject.</td></tr>
+      </tbody>
+    </table></div>
+    <p>The recognized copulas are <code>is</code>, <code>are</code>, <code>was</code>, and <code>were</code>. Temporal
+      forms also accept <code>occurred</code>, present tense, and “took/takes place.” The exclusive registry is currently
+      <code>alive/dead</code>, <code>open/closed</code>, <code>present/absent</code>, and <code>on/off</code>. The built-in
+      classes are <code>person</code>, <code>animal</code>, <code>sentient agent</code>, <code>inanimate object</code>,
+      <code>physical object</code>, <code>event</code>, and <code>place</code>. The complete quantity and unit vocabulary is
+      carried in the versioned pack descriptor. Exact wording keeps this baseline testable.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Measure</th><th>Accepted unit tokens</th><th>Elementary bound</th></tr></thead>
+      <tbody>
+        <tr><td>mass</td><td><code>kg</code>, <code>g</code>, kilogram(s), gram(s)</td><td><code>&gt;= 0</code></td></tr>
+        <tr><td>duration</td><td><code>s</code>, <code>ms</code>, <code>min</code>, <code>h</code>, second(s), minute(s), hour(s)</td><td><code>&gt;= 0</code></td></tr>
+        <tr><td>distance or length</td><td><code>m</code>, <code>km</code>, <code>cm</code>, <code>mm</code>, meter(s), kilometer(s)</td><td><code>&gt;= 0</code></td></tr>
+        <tr><td>speed</td><td><code>m/s</code>, <code>km/h</code></td><td><code>&gt;= 0</code></td></tr>
+        <tr><td>temperature</td><td><code>K</code>/kelvin, <code>C</code>/<code>°C</code>/celsius, <code>F</code>/<code>°F</code>/fahrenheit</td><td><code>0 K</code>, <code>-273.15 C</code>, or <code>-459.67 F</code></td></tr>
+        <tr><td>probability</td><td>no unit</td><td><code>0..1</code></td></tr>
+        <tr><td>percentage</td><td>no unit or <code>%</code></td><td><code>0..100</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>The circuit compares conflicting exact quantities only when their unit tokens are already equal; it performs no
+      conversion. Emotion labels are source words, not a built-in valence taxonomy. The baseline compares the same
+      normalized label and polarity but does not declare different emotions mutually exclusive.</p>
+
+    <h2 id="demo">Run mathematics, physics, and emotion checks together</h2>
+    <pre><code>node bin/nllagent.mjs run \
+  --agent editorial-demo \
+  --input data/editorial-demo/examples/foundation/math-physics-emotion.md \
+  --output /tmp/foundation-report.md \
+  --translator none</code></pre>
+    <p>The example needs no agent-specific rules for these subjects. Its CNL audit reports four accepted foundation
+      findings:</p>
+    <pre><code>FOUNDATION-MATH-001       2 times 3 equals 7; exact replay gives 6
+FOUNDATION-PHYSICS-001    mass -2 kg is below the documented lower bound
+FOUNDATION-EMOTION-001    Alice both feels and does not feel afraid at noon
+FOUNDATION-PSYCHOLOGY-001 the statue is typed inanimate and literally feels lonely
+
+All four: severity warning · guarantee mechanically-certified · verifier accept</code></pre>
+    <p>“Mechanically certified” applies to the parse, bounded invariant, source anchors, and witness replay. It does not
+      certify that Alice or the statue exists, diagnose an emotion, or settle whether the last sentence is figurative.</p>
+
+    <h2 id="not-automatic">What is intentionally not automatic</h2>
+    <p>The pack does not resolve pronouns or aliases, infer actions, infer emotion from behavior, diagnose people,
+      understand figurative language, decide reported speech, identify fictional versus real entities, convert units,
+      or establish that two untimed assertions describe the same moment. It deliberately allows mixed emotions such
+      as happiness and sadness because they are not logical opposites. Findings remain warnings with these limits.</p>
+    <p>Current presidents, borders, prices, laws, social conventions, demographic claims, and similar knowledge do not
+      belong in universal code. They change or depend on date, jurisdiction, source, and perspective. The intended
+      extension is a named, dated <code>KnowledgePack</code> with evidence and an effective interval. That loader is
+      not implemented yet, so no current-world fact is claimed by the base package.</p>
+
+    <h2 id="extension">Where richer meaning belongs</h2>
+    <p>A domain release can demand reusable observations for people, actions, obligations, richer measurements, emotions, or
+      narrative events. An approved deterministic or model-assisted producer then adds those observations with exact
+      anchors, status, alternatives, provenance, and honest coverage. Query-first tables, direct graphs, and
+      specialized operators can consume the same types. The foundation is the shared floor, not a ceiling on domain
+      mathematics or semantics.</p>
+
+    <h2 id="disable">Alternative-world mode</h2>
+    <pre><code>nllagent run ... --foundation off
+nllagent benchmark ... --foundation off
+nllagent plan ... --foundation off</code></pre>
+    <p>The selection is stored in the run and printed in its report. Turning it off removes only foundation material
+      and circuits; it does not change the immutable agent release. A future replacement pack will require an equally
+      explicit name and digest.</p>
+
+    <h2 id="review">How to review a foundation finding</h2>
+    <p>Check the two source quotes or the ordered cycle, then inspect its time, world, and identity assumptions. The
+      certificate proves that the controlled observations and witness replayed against the immutable source. If the
+      warning is inappropriate, improve the text, choose an alternate world, or propose a versioned parser/ontology
+      change with a close-negative benchmark. Do not weaken the verifier to suppress one example.</p>
+
+    <nav class="page-nav" aria-label="Foundation reading path">
+      <strong>Continue by concern</strong>
+      <a href="quick-tutorial.html">Run the smallest example</a>
+      <a href="longtextjs.html">See how observations preserve source claims</a>
+      <a href="operators.html">See candidates and independent verifiers</a>
+      <a href="domains.html">Design a richer domain package</a>
+    </nav>
+
+    <footer>Normative contract: <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>.
+      Changing, sourced knowledge packs remain a documented extension boundary, not implemented behavior.</footer>
+  </main>
+</div>
+</body>
+</html>

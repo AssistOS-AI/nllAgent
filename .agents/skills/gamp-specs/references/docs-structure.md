@@ -26,6 +26,8 @@ This skill enforces a standard documentation layout rooted in `AGENTS.md` and `d
 - In a downstream project that only consumes imported skills, `docs/` must describe the host project rather than the imported skill catalog. Do not add `/docs` pages whose subject is the copied skills themselves.
 - Each skill page must review the actual contents of that skill folder, including local artifacts, dependencies, outputs, and conventions.
 - Each page must be written in English, use a technical writing style, and keep code samples minimal.
+- A project with a CLI must expose one complete man-page-style HTML reference synchronized with the current parser. A project with declarative formats must expose a data dictionary and primitive semantics suitable for human review.
+- Proposed architecture may have a dedicated page only when its status and unimplemented gates are visible before examples and it links to its governing proposed DS.
 - Keep SVG files and any other assets outside the HTML files and store them under `docs/assets/`.
 - Follow `technical-docs-guidelines.md` for HTML writing, editorial, and presentation rules.
 
@@ -74,3 +76,4 @@ Every generated HTML page must include the Mermaid ESM module in `<head>` so tha
 - When the repository is a downstream consumer rather than a skill catalog, the HTML docs must make clear that imported skills are agent tooling and are not part of the host project's direct documentation surface.
 - Preserve any system narrative or agent-role requirements found in `AGENTS.md` or existing docs.
 - Whenever new skills are added to the repository, the agent guidance, the HTML documentation, and the DS matrix must be updated in the same change set.
+- Concrete unresolved correctness or publication blockers belong in `serious_issues.md` when the repository uses that register; proposed documentation must not disguise them as implemented capability.

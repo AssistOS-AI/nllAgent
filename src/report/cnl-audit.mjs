@@ -47,6 +47,7 @@ function createCnlAuditReport(source) {
     agent: source.agent,
     release: source.release,
     sourceDigest: source.sourceDigest,
+    ...(source.foundation ? { foundation: source.foundation } : {}),
     status: source.status,
     compatibility: source.compatibility || {
       status: 'unknown', activeCircuits: [], blockedCircuits: []

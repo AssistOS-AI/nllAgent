@@ -99,6 +99,7 @@ async function verifyHtmlFile(filePath) {
 
 const MERMAID_PATTERN = /mermaid.*?\.esm\.min\.mjs/;
 const MERMAID_BLOCK_PATTERN = /<pre class="mermaid">([\s\S]*?)<\/pre>/gu;
+const MERMAID_UNQUOTED_AT_LABEL = /(?:^|\s)[A-Za-z][A-Za-z0-9_-]*\[(?!")[^\]\r\n]*@[^\]\r\n]*\]/gmu;
 
 function checkMermaidInclude(filePath, html) {
   const partialsDir = resolve(docsDir, 'partials');
@@ -115,15 +116,19 @@ function checkMermaidPresentation(filePath, html) {
   const issues = [];
   for (const match of html.matchAll(MERMAID_BLOCK_PATTERN)) {
     const source = match[1];
+    const unsafeLabels = [...source.matchAll(MERMAID_UNQUOTED_AT_LABEL)];
+    for (const unsafeLabel of unsafeLabels) {
+      issues.push(`${filePath}: Mermaid labels containing @ must be quoted for Mermaid 11: ${unsafeLabel[0].trim()}.`);
+    }
     const nodeIds = new Set(
       [...source.matchAll(/(?:^|\s)([A-Z][A-Z0-9_]*)\s*(?=\[|\{)/gmu)]
         .map((nodeMatch) => nodeMatch[1])
     );
-    if (nodeIds.size < 4 || nodeIds.size > 5) {
-      issues.push(`${filePath}: diagram has ${nodeIds.size} elements; documentation diagrams must have 4 or 5.`);
+    if (nodeIds.size < 3 || nodeIds.size > 6) {
+      issues.push(`${filePath}: diagram has ${nodeIds.size} elements; documentation diagrams must have 3 to 6.`);
     }
-    if (!/^\s*flowchart\s+T[BD]\b/mu.test(source)) {
-      issues.push(`${filePath}: diagram must use a compact top-down flow instead of a single horizontal row.`);
+    if (!/^\s*flowchart\s+LR\b/mu.test(source)) {
+      issues.push(`${filePath}: small documentation diagrams must use a compact left-to-right flow.`);
     }
     const followingHtml = html.slice(match.index + match[0].length);
     if (!/^\s*<p class="diagram-caption">/u.test(followingHtml)) {

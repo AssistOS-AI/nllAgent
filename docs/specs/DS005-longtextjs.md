@@ -14,13 +14,27 @@ LongTextJS is the declarative instance language consumed by CircuitJS. It repres
 
 ## Canonical program
 
-A LongTextJS program must declare its dialect version, program identity, source packages, views, schemas, observations, mentions, entities, identity candidates, scopes, worlds, task, capabilities, coverage records, gaps, and diagnostics. The canonical representation is plain data validated before execution.
+A LongTextJS program must declare its dialect version, program identity, source packages, views, schemas, ontology-pack selection, observations, mentions, entities, identity candidates, scopes, worlds, task, capabilities, coverage records, gaps, and diagnostics. The canonical representation is plain data validated before execution.
+
+`LongTextJS` names a declarative data language, not an arbitrary JavaScript module. The current canonical dialect is `longtextjs-json@1`: JavaScript implementation code compiles a source revision into a JSON-compatible `LongTextProgram`, and the runtime interprets that value through relation adapters, compatibility checks, circuits, and verifiers. The persisted artifact contains no callbacks, imports, control flow, ambient capabilities, or executable source. A future authoring shorthand may construct the same data, but it must normalize losslessly to the canonical program and cannot become a second runtime authority.
 
 The default audit task requests `CNLAuditReport@1`; the planning task requests `CNLGenerationPlan@1`. These names identify the canonical CNL products directly instead of introducing a second branded report alias.
 
 The source package is the lexical authority. It preserves input bytes or their immutable digest, canonical text, encoding, media type, language declaration, source revision, block tree, channel map, and source maps. A finding must cite only text that can be verified against the source revision.
 
-The current Markdown compiler emits `LongTextJS` dialect `1.0` with one source, a `view:whole` view, document and structural scopes, a primary world, task metadata, an anchor table, ordered blocks, observations, capabilities, coverage, gaps, and diagnostics. Structural observations include document, paragraph, sentence, and physical-line forms, plus line-channel candidates such as dash-prefixed dialogue. Fenced code, block quotes, lists, headings, and ordinary narrative paragraphs retain distinct channel and structure metadata.
+The current Markdown compiler emits dialect `longtextjs-json@1` with one source, a `view:whole` view, document and structural scopes, a primary world, task metadata, an anchor table, ordered blocks, observations, capabilities, coverage, gaps, and diagnostics. Structural observations include headings, paragraphs, heuristic sentences, physical lines, list items, quotations, code blocks, and thematic breaks, plus paragraph roles such as dash-prefixed dialogue candidates. Fenced code, block quotes, lists, headings, and ordinary narrative paragraphs retain distinct channel and structure metadata.
+
+The platform vocabulary is an extensible upper ontology for document computation: source objects, blocks, anchors, scopes, views, mentions, entity hypotheses, identity links, typed observations, worlds, time-bearing payloads, provenance, status, coverage, and gaps. It standardizes how a domain assertion is addressed and qualified; it does not assert a universal inventory of people, actions, relations, emotions, legal duties, measurements, or narrative roles. Exact domain schemas and their producers belong to versioned release packages.
+
+The default Markdown pass materializes deterministic source and structural objects and, unless disabled, applies the versioned foundation defined by DS021. That bounded pass recognizes controlled-English entity, state, type, explicit `before`, exact-arithmetic, quantity, and literal-emotion assertions under verified open-world coverage. These remain anchored source claims. The pass does not populate resolved identity relations or infer unrestricted actions, intentions, emotions from behavior, discourse roles, figurative meaning, or outside-world truth. After CircuitJS compilation derives a neutral demand, an approved extraction profile may add domain observations such as `narrative.object-event@1` as `proposed`, with exact anchors, alternatives, and producer provenance.
+
+## Queryable instance semantics
+
+The canonical program is also the finite immutable instance world for its source revision. `source` and `task` are singular records; `anchors` is an id-keyed map; `ontologyPacks` records the selected semantic baseline; and `blocks`, `views`, `scopes`, `worlds`, `mentions`, `entities`, `identityCandidates`, `observations`, `capabilities`, `coverage`, `gaps`, and `diagnostics` are finite relations in the semantic sense. Their JSON container shape does not grant or remove evidentiary authority.
+
+A query adapter may expose these components as read-only logical relations and may build deterministic type, status, anchor, scope, order, or coverage indexes. Every result remains derived data with dependencies on canonical identities. An index is discardable, is keyed by the complete program digest and adapter version, and cannot create an observation, close an open world, alter a status, upgrade a guarantee, or enter a source digest as if it were evidence.
+
+`observations` is the typed descriptive relation most circuits consume. `anchors`, `blocks`, `views`, and `scopes` locate it. `coverage`, `capabilities`, `gaps`, and `diagnostics` state what materialization could or could not establish. `worlds`, identity records, and time-bearing payloads prevent incompatible interpretations from being flattened. `task` fixes the permitted purpose and operational boundary. DS020 implements an experimental normalized scan algebra over these existing structures; it does not change the canonical LongTextJS kind or make a database mandatory.
 
 ## Anchors and views
 
@@ -89,6 +103,18 @@ Response: The high-level idea is compiled as an ordinary untrusted LongTextJS so
 ### Question #7: Why does the default task request CNLAuditReport rather than a product-branded report type?
 
 Response: `CNLAuditReport@1` is the canonical schema that the runtime actually assembles and persists. Naming it directly keeps the task contract aligned with DS011 and avoids a redundant alias whose spelling could drift from the artifact it denotes.
+
+### Question #8: Does calling LongTextJS queryable make query results source facts?
+
+Response: No. A query selects or derives values from canonical program objects and must retain their dependencies. Only approved ingestion and materialization paths create source-side observations, coverage, and gaps. Query rows and indexes remain derived execution data.
+
+### Question #9: Is LongTextJS JavaScript or JSON, and in what sense is it executable?
+
+Response: Its canonical runtime and persistence form is JSON-compatible plain data under `longtextjs-json@1`. The compiler and runtime are implemented in JavaScript, but a LongTextJS program itself contains no executable JavaScript. It is executable in the declarative sense: the runtime can mount its finite relations, answer typed queries, bind CircuitJS ports, check coverage, and replay evidence. CircuitJS has a restricted `.mjs` author convenience because maintainers author reusable theories; that source is also normalized to plain data before compilation. Document instances are compiler outputs, so admitting arbitrary JavaScript into them would add authority and nondeterminism without adding evidence.
+
+### Question #10: Why does the default compiler extract only a small foundation rather than every entity, action, relation, or emotion?
+
+Response: The foundation admits only versioned, conservative forms that can be tested and replayed without a model. Richer categories vary by domain, identity and polarity may be ambiguous, and exhaustive semantic extraction cannot generally establish closed-world coverage. The selected release therefore demands only the additional observations its output-reachable circuits need. A continuity release may request object events and identities; an affect release may request a separately defined emotional-interpretation schema. Such results normally remain `proposed` until stronger review or checking occurs.
 
 # Conclusion
 

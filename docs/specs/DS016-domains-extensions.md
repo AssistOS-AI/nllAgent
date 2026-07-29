@@ -16,6 +16,15 @@ The core system must support radically different document theories without embed
 
 Every extension must provide versioned LongTextJS schemas, neutral producers or adapters, CircuitJS operators or patterns, verifier contracts, compatibility probes, benchmark families, security effects, cost model, explanation policy, and migration rules. A new prompt without these artifacts is not a platform extension.
 
+The implemented programmer surface for new algorithms is `NllRuntimeExtension`. A host-selected self-contained ESM
+module exports exact operator and verifier definitions with executable JavaScript plus machine-readable contracts. The
+host installs it before circuit compilation; circuits refer only to its versioned registry ids. A published release that
+uses it locks the module digest. This local single-file loader is appropriate for focused algorithms and examples. A
+larger external solver still belongs behind a controlled adapter and package-specific deployment contract rather than
+being smuggled through a circuit callback.
+
+DS021 distinguishes platform invariants from changing knowledge. A reusable political, social, economic, legal, or geographic `KnowledgePack` must additionally declare authoritative sources and digests, effective interval, jurisdiction, world, epistemic status, conflict policy, update process, guarantee ceiling, and expiry tests. No such loader is implemented yet; domain packages must not describe current facts as built-in common sense.
+
 ## Editorial modules
 
 Editorial packages may cover lexical restrictions, sentence metrics, dialogue scope, focalization, mental-state access, repetition, chronology, object continuity, character knowledge, revelations, and rubric-based style suggestions. Exact rules may be mechanical. Semantic style judgments must remain evidence-certified, model-judgment, or human-confirmed.
@@ -50,7 +59,7 @@ Critical runtime properties such as verification dominance, fixpoint monotonicit
 
 ### Question #1: When should a repeated circuit pattern become a primitive?
 
-Response: Only after multiple evaluated circuits demonstrate stable semantics, a clear contract, measurable complexity reduction, verifier support, and mutation tests. The primitive proposal must preserve existing behavior.
+Response: Only after multiple evaluated circuits demonstrate stable semantics, a clear input, output, dependency and coverage contract, measurable complexity reduction, verifier support, and mutation tests. First test whether a normalized query, decision table, or exact operator wrapper expresses the pattern without adding a new algorithm. The primitive proposal must preserve existing behavior and declare why those simpler forms are insufficient.
 
 ### Question #2: Is multimodal support part of the default Markdown CLI?
 
@@ -63,6 +72,13 @@ Response: No. It can verify declared relationships, computations, procedure conf
 ### Question #4: What must a domain provide for CNL generation planning?
 
 Response: It must provide representative ideas, idea-observation schemas, one or more planning patterns, expected idea-specific CNL plans, and the authority and validation assets already required by the domain. Editorial, normative, technical, and scientific modules should reuse rule identities, schemas, calendars, units, operators, and validation oracles. Content selection, ordering, and dependencies belong in explicit planning circuits or registered planning operators rather than hidden prompts. Optional realization and repair require separate tests.
+
+### Question #5: Is a runtime-extension module equivalent to an agent circuit?
+
+Response: No. The extension is trusted application code and may implement an algorithm. The circuit is untrusted-to-
+execute declarative theory: it chooses the extension id, passes values, and routes the result through verification.
+Learning may propose the need, contract, examples, and tests for an operator, but it cannot install executable extension
+code into production automatically.
 
 # Conclusion
 

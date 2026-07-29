@@ -16,6 +16,8 @@ Observation materialization connects document structure to circuit inputs. It mu
 
 The planner must derive observation demands from selected circuits, merge compatible demands, deduplicate shared types and scopes, and order producers by cost, determinism, and narrowing value. Deterministic structural and lexical producers run before statistical or model-assisted producers when their output can reduce semantic search.
 
+The LongTextJS upper ontology standardizes the containers and epistemic qualifiers shared by every domain: anchored mentions, scoped entity hypotheses, identity candidates, typed observations, scopes, worlds, time, status, provenance, coverage, alternatives, and gaps. DS021 adds a small default vocabulary for controlled state, type, temporal, exact-arithmetic, quantity, and literal-emotion assertions. Domain schemas extend this boundary with exact payloads for richer events, actions, relations, emotions, obligations, measurements, or other concepts; those remain demand-driven.
+
 Each producer contract must declare its identifier, version, accepted source and view types, output schemas, maximum epistemic status, deterministic or nondeterministic nature, effects, language and domain support, coverage semantics, cost model, resource budgets, and checker. A producer must not emit a type or status above its contract.
 
 ## Neutrality and evidence
@@ -25,6 +27,8 @@ Extraction prompts and rules must describe the requested observation independent
 Every model-assisted observation must include exact supporting anchors, payload values tied to the evidence, operational confidence, alternatives considered, producer identity, model capture reference, and reasons supplied by the producer. Local semantic checks must confirm quote existence, polarity, modality, discourse attribution, enum values, and referential integrity.
 
 The release may list JSON extraction profiles. The runtime selects only profiles whose output types are demanded by circuit ports or a dynamic request. Each block call uses the backend-neutral `model.structured-extractor@1` operator, requires an exact source quote, validates required payload fields and enums, requires bounded confidence, alternatives, and an evidence reason, and stores the result as `proposed`. Configured Achilles routes the request through `LLMAgent`; a Coding Agent adapter supplies the same response shape under DS018. Model producers receive open-world coverage and cannot establish exhaustive absence.
+
+The current generic model materializer adds only typed entries to the `observations` relation. The deterministic Markdown baseline leaves `mentions`, `entities`, and `identityCandidates` empty. A release that needs resolved participants must therefore demand an approved identity-capable producer or represent its bounded participant fields inside a documented observation schema; it must not infer global entity identity from repeated strings. Future dedicated producers may populate the identity relations only under the same anchoring, status, alternative, provenance, and coverage rules.
 
 The materializer distinguishes failure strength. Invalid candidates and isolated block failures are quality gaps; valid observations from the same producer may still support a `compatible-with-limits` result. A profile-level `minimumObservations` failure is `insufficient-materialization` and blocks a critical port. Exhausted call budget terminates the run rather than becoming a zero-observation result.
 
@@ -71,6 +75,14 @@ Response: No. Exact anchor verification may certify the quoted span and a determ
 ### Question #5: How does a Coding Agent preserve the same extraction semantics as Achilles?
 
 Response: Both receive the same neutral prompt, output JSON Schema, task role, source block, and profile. Both return `observations[]` with quote, payload, confidence, alternatives, and reason. The shared materializer, not either backend, owns validation, anchoring, capability, coverage, and gaps.
+
+### Question #6: What semantic ontology is built in?
+
+Response: The shared upper ontology covers identity, evidence, scope, time, uncertainty, and coverage. `foundation-core` additionally recognizes the six controlled assertion families defined by DS021 and feeds five default circuits. It does not resolve identity, infer arbitrary actions or emotions, diagnose people, understand figurative language, apply rich physical models, or supply current world facts. Domain packages provide those richer schemas and producers on demand.
+
+### Question #7: Does a lexical marker such as “in fact” prove surprise or another emotional interpretation?
+
+Response: No. Its exact occurrence and location are deterministic lexical facts. Its discourse function or emotional effect depends on context and a declared interpretive schema. An editorial rule may judge the phrase directly without asking for emotion observations; a discourse or affect circuit may separately request and review such observations. Neither reading is silently inserted into the other.
 
 # Conclusion
 

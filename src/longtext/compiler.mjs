@@ -1,4 +1,5 @@
 import { parseMarkdown } from './markdown-adapter.mjs';
+import { configureFoundation } from '../foundation/core-ontology.mjs';
 
 function compileMarkdown(text, options = {}) {
   const program = parseMarkdown(text, options);
@@ -8,6 +9,7 @@ function compileMarkdown(text, options = {}) {
       delete observation.embeddedAnchor;
     }
   }
+  configureFoundation(program, options.foundation || 'core');
   return program;
 }
 

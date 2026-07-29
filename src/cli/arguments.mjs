@@ -1,10 +1,10 @@
 import { NllError } from '../core/errors.mjs';
 
 const COMMAND_OPTIONS = new Map([
-  ['run', ['agent', 'input', 'output', 'release', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['plan', ['agent', 'input', 'output', 'realize-output', 'release', 'max-revisions', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['learn', ['agent', 'rules', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['benchmark', ['agent', 'release', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
+  ['run', ['agent', 'input', 'output', 'release', 'foundation', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
+  ['plan', ['agent', 'input', 'output', 'realize-output', 'release', 'foundation', 'max-revisions', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
+  ['learn', ['agent', 'rules', 'data-root', 'json', 'codex-bin']],
+  ['benchmark', ['agent', 'release', 'foundation', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
   ['agent init', ['agent', 'description', 'language', 'data-root', 'json']],
   ['agent list', ['data-root', 'json']],
   ['agent inspect', ['agent', 'data-root', 'json']],
@@ -14,6 +14,7 @@ const COMMAND_OPTIONS = new Map([
   ['model inspect', ['json']]
 ]);
 const TRANSLATION_BACKENDS = new Set(['auto', 'achilles', 'codex', 'none']);
+const FOUNDATION_MODES = new Set(['core', 'off']);
 
 function parseArguments(argv) {
   const positionals = [];
@@ -25,6 +26,9 @@ function parseArguments(argv) {
       continue;
     }
     const name = token.slice(2);
+    if (Object.hasOwn(options, name)) {
+      throw new NllError('invalid-arguments', `Option --${name} may be specified only once.`);
+    }
     if (['json', 'no-llm', 'help'].includes(name)) {
       options[name] = true;
       continue;
@@ -54,6 +58,9 @@ function validateCommandArguments(positionals, options) {
   if (options.translator && !TRANSLATION_BACKENDS.has(options.translator)) {
     throw new NllError('invalid-arguments', `Unknown translation backend ${options.translator}.`);
   }
+  if (options.foundation && !FOUNDATION_MODES.has(options.foundation)) {
+    throw new NllError('invalid-arguments', `Unknown foundation mode ${options.foundation}.`);
+  }
   if (options['no-llm'] && options.translator && options.translator !== 'none') {
     throw new NllError('invalid-arguments', '--no-llm conflicts with an enabled --translator value.');
   }
@@ -66,6 +73,13 @@ function validateCommandArguments(positionals, options) {
       throw new NllError('invalid-arguments', '--max-revisions is meaningful only with --realize-output.');
     }
   }
+  if (key === 'plan' && options['realize-output']
+    && (options['no-llm'] || options.translator === 'none')) {
+    throw new NllError(
+      'invalid-arguments',
+      '--realize-output requires an enabled translation backend; remove --no-llm or --translator none.'
+    );
+  }
 }
 
 function requireOption(options, name) {
@@ -75,6 +89,7 @@ function requireOption(options, name) {
 
 export {
   COMMAND_OPTIONS,
+  FOUNDATION_MODES,
   TRANSLATION_BACKENDS,
   parseArguments,
   requireOption,

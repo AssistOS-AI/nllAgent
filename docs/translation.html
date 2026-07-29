@@ -23,10 +23,16 @@
 
     <h2 id="purpose">What this layer does—and does not do</h2>
     <p>When a release circuit consumes <code>narrative.object-event@1</code>, the runtime needs observations such as “Alice left the phone in the car” and “Alice used the phone in the hotel,” including exact evidence, scope, negation, and modality. A translation backend receives a neutral demand and selected source fragments, then returns schema-bound candidate observations. The LongTextJS compiler validates and anchors those candidates before admitting them.</p>
+    <p>This path is not an always-on general ontology extractor. The release must list a versioned extraction profile,
+      an output-reachable circuit port must demand that profile's exact <code>outputType</code>, and an approved backend
+      must be available within budget. The current generic materializer adds schema-bound entries to
+      <code>observations</code>; it does not automatically populate <code>mentions</code>, <code>entities</code>, or
+      <code>identityCandidates</code>. Releases that need identity resolution must declare and test that additional
+      producer contract.</p>
     <p>The translator does <em>not</em> decide whether the two events form a continuity error. It does not see a hidden expected verdict, edit the active circuit, declare coverage by itself, or publish a finding. That separation keeps extraction errors distinguishable from rule errors and allows the same document world to be reused by several circuits.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   NEED[Typed observation demand] --> CALL[Translation backend]
   CALL --> ANCHOR{Schema + exact anchor valid?}
   ANCHOR -->|yes| LTX[LongTextJS observation]
@@ -35,24 +41,28 @@ flowchart TB
     <p class="diagram-caption"><strong>Translation ends before judgment.</strong> The backend proposes structured candidates. The compiler checks their form and source grounding; only accepted observations enter LongTextJS, while failures become explicit gaps.</p>
 
     <h2 id="deterministic-boundary">What remains deterministic</h2>
-    <p>The runtime never pays a model to rediscover information it can compute exactly. Markdown ingestion, Unicode normalization policy, block identities, line and sentence observations, heading structure, source maps, occurrence counting, digests, exact-quote relocation, canonical serialization, and cache keys are platform work. Models are reserved for semantic interpretations declared by extraction profiles.</p>
+    <p>The runtime never pays a model to rediscover information it can compute exactly. Markdown ingestion, Unicode normalization policy, block identities, line and sentence observations, heading structure, source maps, occurrence counting, digests, exact-quote relocation, canonical serialization, cache keys, and the selected foundation's controlled-English scan are platform work. Models are reserved for richer semantic interpretations declared by extraction profiles.</p>
     <div class="table-wrap"><table>
       <thead><tr><th>Produced without a model</th><th>Often model-assisted</th></tr></thead>
       <tbody>
         <tr><td>Document, channel, block, line, paragraph, and sentence structure</td><td>Event kind and participants</td></tr>
+        <tr><td>Foundation state, type, <code>before</code>, exact arithmetic, quantity, and literal emotion assertions in
+          the documented grammar</td><td>Implicit actions, emotion inferred from behavior, coreference, figurative
+          language, and relations outside that grammar</td></tr>
         <tr><td>Exact lexical occurrence and Unicode code-point anchor</td><td>Discourse mode, focalizer, and mental-state attribution</td></tr>
         <tr><td>Numbers, obvious dates, headings, links, and code-fence boundaries</td><td>Coreference candidates and domain-specific roles</td></tr>
         <tr><td>Source digest, view membership, request digest, and cache identity</td><td>Claim type, modality, reported speech, and temporal interpretation</td></tr>
         <tr><td>Schema validation and quote-to-source verification</td><td>Natural benchmark equivalence under a declared evaluation rubric</td></tr>
       </tbody>
     </table></div>
+    <p>The foundation is deliberately narrow and open-world. A sentence outside its forms is not “missing data” and is not automatically sent to a model. Model-assisted materialization occurs only when an output-reachable release circuit demands a richer typed observation.</p>
 
     <h2 id="backend-contract">One backend-neutral request contract</h2>
     <p><code>src/model/translation-backends.mjs</code> resolves a backend, but downstream compilation does not receive a vendor-specific response. All live and replay routes use the same canonical request digest, complete JSON Schema validation, observation normalization, exact anchoring, model-capture format, and guarantee propagation.</p>
     <p>A translation request identifies the run, agent, release, extraction profile, observation schema and version, selected source blocks, accepted output fields, budget, and task role. The response contains candidates, quoted evidence, alternatives, and diagnostics in the requested schema. A backend capability says whether it supports translation or semantic benchmark evaluation; it does not grant filesystem or theory-authoring authority.</p>
 
     <pre class="mermaid">
-flowchart TB
+flowchart LR
   ROUTE{Backend selection} --> ACH[Achilles LLMAgent]
   ROUTE --> AGT[Coding Agent adapter]
   ACH --> CONTRACT[Canonical schema + capture]
@@ -122,7 +132,7 @@ nllagent run ... --translator none</code></pre>
     <p>The backend resolver lives in <code>src/model/translation-backends.mjs</code>; Achilles integration and configuration inspection live in <code>src/model/achilles-gateway.mjs</code>; the shipped Coding Agent implementation lives in <code>src/model/codex-translation-backend.mjs</code>; materialization and anchoring are coordinated by <code>src/longtext/compiler.mjs</code> and <code>src/runtime/analyzer.mjs</code>. Tests use controlled <code>LLMAgent.executePrompt()</code> and process doubles so the default suite is deterministic and credential-independent. They cover route selection, Spark preference, complete schemas, Unicode and repeated anchors, request digests, captures, replay, Coding Agent workspace isolation, and an end-to-end semantic continuity circuit.</p>
     <p>Those offline tests validate the integration contract, not a live provider’s quality. High-impact releases still need explicit live-profile evaluation against representative agent-owned cases, as recorded in <a href="../serious_issues.md">serious issues</a>.</p>
 
-    <footer>Normative backend contract: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>. Model strategy and guarantees: <a href="specsLoader.html?spec=DS002-llm-model-strategy.md">DS002</a>.</footer>
+    <footer>Normative backend contract: <a href="specsLoader.html?spec=DS018-translation-backends-achilles-coding-agent.md">DS018</a>. Deterministic foundation boundary: <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Model strategy and guarantees: <a href="specsLoader.html?spec=DS002-llm-model-strategy.md">DS002</a>.</footer>
   </main>
 </div>
 </body>

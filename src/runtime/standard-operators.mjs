@@ -3,10 +3,20 @@ import { NllError } from '../core/errors.mjs';
 import { registerLogicOperators, registerLogicVerifiers } from './logic-operators.mjs';
 import { registerReasoningOperators, registerReasoningVerifiers } from './reasoning-operators.mjs';
 import { registerNarrativeOperators, registerNarrativeVerifiers } from './narrative-operators.mjs';
+import {
+  registerFoundationOperators, registerFoundationVerifiers
+} from '../foundation/core-reasoning.mjs';
+import {
+  registerExtendedFoundationOperators, registerExtendedFoundationVerifiers
+} from '../foundation/extended-reasoning.mjs';
 import { verifiedGuarantee } from './guarantees.mjs';
 import {
   interpolatePlanTemplate, validateCnlPlanBody, validateCnlPlanCandidate
 } from '../generation/cnl.mjs';
+import { executeLongTextQuery } from '../circuit/query-first/query.mjs';
+import {
+  decisionCandidates, evaluateDecisionTable, verifyQueryDecisions
+} from '../circuit/query-first/decision-table.mjs';
 
 function compareValues(left, operator, right) {
   if (operator === 'eq') return left === right;
@@ -52,17 +62,19 @@ function occurrenceRanges(text, parentStart, policy) {
 
 function relationalOperators(registry) {
   registry.register({
-    id: 'relational.filter@1', description: 'Filter records by declarative comparisons.',
+    id: 'relational.filter@1', primitives: ['filter', 'call'],
+    description: 'Filter records by declarative comparisons.',
     execute: ({ records = [], predicates = [] }) => records.filter((record) =>
       predicates.every((predicate) => compareValues(valueAt(record, predicate.path), predicate.operator || 'eq', predicate.value)))
   });
   registry.register({
-    id: 'relational.project@1', description: 'Project named paths from records.',
+    id: 'relational.project@1', primitives: ['project', 'call'],
+    description: 'Project named paths from records.',
     execute: ({ records = [], fields = {} }) => records.map((record) =>
       Object.fromEntries(Object.entries(fields).map(([name, path]) => [name, valueAt(record, path)])))
   });
   registry.register({
-    id: 'relational.join@1', description: 'Deterministic inner join.',
+    id: 'relational.join@1', primitives: ['join', 'call'], description: 'Deterministic inner join.',
     execute: ({ left = [], right = [], leftKey, rightKey }) => {
       const index = new Map();
       for (const record of right) {
@@ -74,7 +86,8 @@ function relationalOperators(registry) {
     }
   });
   registry.register({
-    id: 'relational.aggregate@1', description: 'Count or collect records by key.',
+    id: 'relational.aggregate@1', primitives: ['aggregate', 'call'],
+    description: 'Count or collect records by key.',
     execute: ({ records = [], groupBy, operation = 'count' }) => {
       const groups = new Map();
       for (const record of records) {
@@ -311,21 +324,59 @@ function createStandardRegistries(options = {}) {
   registerLogicOperators(operators);
   registerReasoningOperators(operators);
   registerNarrativeOperators(operators);
-  operators.register({ id: 'text.lexical-occurrences@1', description: 'Find literal text under explicit lexical rules.', execute: lexicalOccurrences });
+  registerFoundationOperators(operators);
+  registerExtendedFoundationOperators(operators);
+  operators.register({
+    id: 'text.lexical-occurrences@1', primitives: ['call'],
+    description: 'Find literal text under explicit lexical rules.', execute: lexicalOccurrences
+  });
   operators.register({
     id: 'text.frequency-threshold@1',
+    primitives: ['call'],
     description: 'Find scoped literal frequency above a configured maximum.',
     execute: frequencyThreshold
   });
-  operators.register({ id: 'core.identity@1', description: 'Return records unchanged.', execute: ({ records = [] }) => records });
+  operators.register({
+    id: 'core.identity@1', primitives: ['call'],
+    description: 'Return records unchanged.', execute: ({ records = [] }) => records
+  });
+  operators.register({
+    id: 'longtext.query@1', primitives: ['call'],
+    description: 'Execute a validated LongTextQuery@1 over one immutable LongTextJS program.',
+    inputSchema: 'longtext-query-call@1', outputSchema: 'QueryResult@1',
+    deterministic: true, effects: [], cost: 'bounded-relational',
+    coverageBehavior: 'preserve-and-check-exact-negation', ordering: 'query-total-order',
+    execute: ({ query, boundRelations = {} }, context) => executeLongTextQuery(
+      query, context.program, { boundRelations }
+    )
+  });
+  operators.register({
+    id: 'decision.table@1', primitives: ['call'],
+    description: 'Evaluate one evidence-aware DecisionTable@1 and construct candidates plus decision records.',
+    inputSchema: 'decision-table-call@1', outputSchema: 'DecisionTableResult@1',
+    deterministic: true, effects: [], cost: 'bounded-table',
+    coverageBehavior: 'consume-query-state', ordering: 'query-row-then-priority',
+    execute: ({ queryResult, table, query }, context) => evaluateDecisionTable(
+      queryResult, table, query, context.program
+    )
+  });
+  operators.register({
+    id: 'decision.candidates@1', primitives: ['call'],
+    description: 'Project candidates from a DecisionTableResult without discarding its trace node.',
+    inputSchema: 'DecisionTableResult@1', outputSchema: 'finding-candidate-array@1',
+    deterministic: true, effects: [], cost: 'linear', ordering: 'preserve',
+    execute: decisionCandidates
+  });
   operators.register({
     id: 'planning.cnl-plan@1',
+    primitives: ['call'],
     description: 'Build an idea-specific CNL generation plan from LongTextJS observations and released planning logic.',
     execute: buildCnlGenerationPlan
   });
   if (options.modelGateway) {
     operators.register({
       id: 'model.rubric-judge@1', description: 'Run a bounded rubric judgment through the selected translation backend.',
+      primitives: ['judge', 'call'],
       deterministic: false, effects: ['model'],
       execute: async ({ prompt, model, tier, tags, taskRole = 'judgment', templateId, responseShape = 'json', outputSchema }) =>
         invokeModelGateway(options.modelGateway, {
@@ -334,6 +385,7 @@ function createStandardRegistries(options = {}) {
     });
     operators.register({
       id: 'model.structured-extractor@1', description: 'Produce schema-bounded neutral observations through the selected translation backend.',
+      primitives: ['judge', 'call'],
       deterministic: false, effects: ['model'],
       execute: async ({ prompt, model, tier, tags, taskRole = 'extraction', templateId, responseShape = 'json', outputSchema }) =>
         invokeModelGateway(options.modelGateway, {
@@ -345,7 +397,19 @@ function createStandardRegistries(options = {}) {
   registerLogicVerifiers(verifiers);
   registerReasoningVerifiers(verifiers);
   registerNarrativeVerifiers(verifiers);
+  registerFoundationVerifiers(verifiers);
+  registerExtendedFoundationVerifiers(verifiers);
   verifiers.register({ id: 'text.exact-match@1', description: 'Re-read exact source spans for literal matches.', execute: exactMatchVerifier });
+  verifiers.register({
+    id: 'query.decision-replay@1',
+    description: 'Replay a LongText query, decision row, candidate template, dependencies, and source anchor.',
+    candidateSchema: 'query-decision-candidate@1', witnessSchema: 'QueryDecisionWitness@1',
+    outcomes: ['accept', 'reject'], checkedProperties: [
+      'source-revision', 'query-replay', 'decision-row', 'hit-policy',
+      'candidate-template', 'dependency-envelope', 'source-anchor'
+    ],
+    execute: verifyQueryDecisions
+  });
   verifiers.register({
     id: 'text.frequency-threshold@1',
     description: 'Recount exact source spans and check a frequency threshold witness.',
@@ -356,7 +420,7 @@ function createStandardRegistries(options = {}) {
     description: 'Validate CNL plan structure, source-idea binding, released rule provenance, and rule-to-plan coverage.',
     execute: verifyCnlGenerationPlan
   });
-  return { operators, verifiers };
+  return { operators, verifiers, extensions: [] };
 }
 
 export {

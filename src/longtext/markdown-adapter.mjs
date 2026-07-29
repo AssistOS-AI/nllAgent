@@ -244,7 +244,20 @@ function sourceDiagnostics(text, options) {
 }
 
 function splitSentences(block, sourceText) {
-  const parts = block.text.match(/[^.!?]+(?:[.!?]+|$)/gu) || [];
+  const points = Array.from(block.text);
+  const parts = [];
+  let partStart = 0;
+  for (let cursor = 0; cursor < points.length; cursor += 1) {
+    const point = points[cursor];
+    if (!'.!?'.includes(point)) continue;
+    const decimalPoint = point === '.' && /\d/u.test(points[cursor - 1] || '')
+      && /\d/u.test(points[cursor + 1] || '');
+    if (decimalPoint) continue;
+    while (cursor + 1 < points.length && '.!?'.includes(points[cursor + 1])) cursor += 1;
+    parts.push(points.slice(partStart, cursor + 1).join(''));
+    partStart = cursor + 1;
+  }
+  if (partStart < points.length) parts.push(points.slice(partStart).join(''));
   const result = [];
   let localOffset = 0;
   for (let index = 0; index < parts.length; index += 1) {

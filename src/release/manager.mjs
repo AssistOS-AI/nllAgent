@@ -9,7 +9,9 @@ import { atomicWrite, readJson, writeJson } from '../core/io.mjs';
 import { assertRealPathContained, containedPath } from '../core/paths.mjs';
 import { runBenchmark } from '../benchmark/runner.mjs';
 import { validateCnlPlanBody, validateRuleApplications } from '../generation/cnl.mjs';
+import { FOUNDATION_PRODUCER, FOUNDATION_TYPES } from '../foundation/core-ontology.mjs';
 import { STATUS_CEILINGS, guaranteeSatisfies } from '../runtime/guarantees.mjs';
+import { validateRuntimeExtensionLocks } from '../runtime/extensions.mjs';
 import { loadRelease, pathExists } from '../storage/agent-store.mjs';
 import { withLock } from '../storage/locks.mjs';
 
@@ -89,6 +91,9 @@ async function validateCandidate(agent, version, registries) {
     ? await readJson(containedPath(root, manifest.authorityMap || 'authority-map.json')) : null;
   const authoritySources = new Set((authority?.rules || []).map((rule) => rule.source));
   const allCompiledCircuits = [...compiledCircuits, ...compiledPlanningCircuits];
+  const runtimeExtensions = validateRuntimeExtensionLocks(
+    manifest, allCompiledCircuits, registries, { requireExact: true }
+  );
   invariant(new Set(allCompiledCircuits.map((compiled) => compiled.circuit.id)).size === allCompiledCircuits.length,
     'invalid-release', 'Validation and planning circuit ids must be unique.');
   for (const compiled of allCompiledCircuits) {
@@ -102,7 +107,7 @@ async function validateCandidate(agent, version, registries) {
   const snapshot = await candidateSnapshot(root);
   return {
     root, manifest, manifestDigest: digestJson(manifest), compiledCircuits, compiledPlanningCircuits,
-    extractionProfiles, compatibility, authority, alignment, snapshot
+    extractionProfiles, compatibility, authority, alignment, snapshot, runtimeExtensions
   };
 }
 
@@ -165,6 +170,9 @@ function validateObservationAlignment(compiledCircuits, extractionProfiles, adap
   };
   for (const type of STRUCTURAL_PRODUCERS) addProducer({
     id: 'markdown-structural@1', type, statuses: ['extracted'], coverage: 'closed-world'
+  });
+  for (const type of FOUNDATION_TYPES) addProducer({
+    id: FOUNDATION_PRODUCER, type, statuses: ['extracted'], coverage: 'open-world'
   });
   for (const profile of extractionProfiles) addProducer({
     id: profile.id, type: profile.outputType, statuses: ['proposed'],
@@ -249,6 +257,23 @@ async function publishRelease(agent, version, registries, options = {}) {
       contracts: [...candidate.compiledCircuits, ...candidate.compiledPlanningCircuits]
         .map((compiled) => compiled.observationContract)
     });
+    const queryFirstArtifacts = [...candidate.compiledCircuits, ...candidate.compiledPlanningCircuits]
+      .filter((compiled) => compiled.queryContract)
+      .map((compiled) => ({
+        circuit: `${compiled.circuit.id}@${compiled.circuit.version}`,
+        author: compiled.author,
+        authorDigest: compiled.authorDigest,
+        generatedGraph: compiled.circuit,
+        generatedGraphDigest: compiled.generatedGraphDigest,
+        queryContract: compiled.queryContract,
+        sourceMap: compiled.sourceMap,
+        analysis: { status: 'passed', diagnostics: [] }
+      }));
+    if (queryFirstArtifacts.length) {
+      await writeJson(containedPath(stagingRoot, 'query-first-artifacts.json'), {
+        kind: 'QueryFirstArtifactBundle', schemaVersion: 1, circuits: queryFirstArtifacts
+      });
+    }
     await writeJson(containedPath(stagingRoot, 'alignment-report.json'), candidate.alignment);
     const files = [];
     for (const path of await listFiles(stagingRoot)) {
@@ -267,8 +292,10 @@ async function publishRelease(agent, version, registries, options = {}) {
       alignment: { status: candidate.alignment.status, ports: candidate.alignment.ports.length },
       checks: [
         'manifest', 'circuit-static-analysis', 'operator-linking', 'verification-dominance',
+        ...(candidate.runtimeExtensions.length ? ['runtime-extension-digest-locking'] : []),
         'compatibility-profile', 'observation-contract-producer-alignment',
         'planning-circuit-and-cnl-authority-linking',
+        ...(queryFirstArtifacts.length ? ['query-first-normalization-and-source-map'] : []),
         'available-agent-benchmarks', 'benchmark-snapshot-stability',
         'candidate-snapshot-stability', 'copied-snapshot-integrity',
         'semantic-diff-and-impact-map', 'release-file-digests'

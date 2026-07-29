@@ -9,19 +9,27 @@ Build a reviewable theory from source anchors through verified findings. Author 
 
 ## Required reading
 
-Read the learning job's scope contract and authority map. Read `docs/specs/DS005-longtextjs.md`, `DS008-circuitjs.md`, `DS009-runtime-operators.md`, `DS010-compatibility-coverage.md`, `DS011-findings-verification-reporting.md`, and `DS013-learning-coding-agent-skills.md`.
+Read the learning job's scope contract and authority map. Read `docs/specs/DS005-longtextjs.md`, `DS008-circuitjs.md`, `DS009-runtime-operators.md`, `DS010-compatibility-coverage.md`, `DS011-findings-verification-reporting.md`, `DS013-learning-coding-agent-skills.md`, `DS020-query-first-circuit-authoring.md`, and `DS021-foundation-ontology-validation.md`. Check DS020's status and the candidate toolchain before using any query-first syntax.
 
 ## Workflow
 
 1. Create one rule card per independently applicable rule. Include source references, scope, trigger, premises, outcome, exceptions, priority, absence policy, guarantee ceiling, and examples.
-2. Design a minimal pragmatic vocabulary. Distinguish source observations from concepts whose value can change when the rulebook changes.
+2. Design a minimal pragmatic vocabulary. Reuse LongTextJS's upper-ontology structures for evidence, mentions,
+   scoped identity hypotheses, worlds, time, status, provenance, alternatives, coverage, and gaps. Add versioned domain
+   schemas for events, relations, actions, emotions, obligations, or measurements only when an output-reachable rule
+   requires them. Distinguish an anchored name from an entity identity, an exact lexical marker from its discourse or
+   emotional interpretation, and source observations from concepts whose value can change when the rulebook changes.
 3. Define observation contracts with exact nominal type versions, fields, epistemic statuses, scope, cardinality, producers, and coverage requirements.
-4. Select a supported reasoning pattern: relational, derivation/fixpoint, state maintenance, temporal, search, argumentation, or rubric judgment.
-5. Synthesize `.circuit.mjs` using only `circuit`, `port`, and `node`, plus registered primitives, operators, and verifiers. Put literal rules in node inputs or versioned rule packages.
-6. Design the witness before `emit`. Every emitted path must be dominated by `verify`; subjective judgments must retain their non-mechanical guarantee ceiling.
-7. Derive observation demand backward from each emit and compare it with the designed producer contract.
-8. Run static compilation and public cases. When an operator or verifier is missing, create a proposal and blocking issue; never hide behavior in inline code or bypass verification.
-9. Assemble a complete candidate under `candidates/<semantic-version>/` with `release.json`, circuits, compatibility profile, authority mappings, schemas, extraction profiles, and explanation policy.
+4. Reuse DS021 observation types only with their exact controlled-English and open-world meanings. Never duplicate a
+   foundation circuit identifier, reinterpret a foundation warning as domain compliance, or assume those types exist
+   when the selected foundation is `off`.
+5. Write `circuit-form-decision.md` for each rule family. Choose the smallest correct supported form in this order: reuse one exact registered operator as `call -> verify -> emit`; use a supported named query and decision table for repeated local alternatives; use a registered aggregate or ordered-pattern operator; use a direct graph for recursion, truth maintenance, state, search, solver, or argumentation behavior. Explain why a simpler prior form is insufficient.
+6. If the host compiler and publication report do not advertise `circuitjs-query-first@1`, treat DS020 examples as design guidance only and emit ordinary CircuitJS. Never place an unsupported dialect label or unvalidated query/table object in a publishable candidate.
+7. Synthesize `.circuit.mjs` using either direct `circuit`, `port`, and `node` or the supported `queryFirstCircuit` plain-data form, plus registered primitives, operators, and verifiers. Put literal rules in node inputs or versioned rule packages. Do not add graph nodes that merely rename or pass through values without a contract reason.
+8. Design the witness before `emit`. Every emitted path must be dominated by `verify`; subjective judgments must retain their non-mechanical guarantee ceiling.
+9. Derive observation demand backward from each emit. When query-first is supported, also inspect the generated QueryContract and ensure its types, statuses, fields, scopes, order, coverage, and producer demand are neutral and exact.
+10. Run static compilation and public cases. When an operator, verifier, typed registry contract, or query compiler capability is missing, create a proposal and blocking issue; never hide behavior in inline code or bypass verification.
+11. Assemble a complete candidate under `candidates/<semantic-version>/` with `release.json`, circuits, compatibility profile, authority mappings, schemas, extraction profiles, explanation policy, and the form-selection record.
 
 ## Canonical constraints
 
@@ -29,4 +37,4 @@ Use exact versions and repository-relative paths. Circuits require `kind`, `id`,
 
 ## Completion check
 
-The candidate must pass the restricted module loader, link only registered capabilities, map every finding to authority, expose every critical observation demand, and return an explicit limitation when a required capability or budget is unavailable.
+The candidate must pass the restricted module loader, link only registered capabilities, map every finding to authority, expose every critical observation demand, use the simplest justified supported form, and return an explicit limitation when a required capability or budget is unavailable.
