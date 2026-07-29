@@ -2,6 +2,61 @@ function words(text) {
   return String(text || '').trim().split(/\s+/u).filter(Boolean);
 }
 
+const OPEN_OBJECT = { type: 'object', properties: {}, additionalProperties: true };
+const OBSERVATION = {
+  type: 'object',
+  required: ['id', 'payload', 'anchors'],
+  properties: {
+    id: { type: 'string' },
+    payload: {
+      type: 'object', required: ['text'], additionalProperties: true,
+      properties: { text: { type: 'string' } }
+    },
+    anchors: { type: 'array', items: { type: 'string' } }
+  },
+  additionalProperties: true
+};
+const WITNESS = {
+  type: 'object',
+  required: ['observationId', 'count', 'maximumWords'],
+  properties: {
+    observationId: { type: 'string' },
+    count: { type: 'integer', minimum: 0 },
+    maximumWords: { type: 'integer', minimum: 0 }
+  },
+  additionalProperties: false
+};
+const CANDIDATE = {
+  type: 'object',
+  required: [
+    'kind', 'rule', 'subject', 'mainAnchor', 'supportAnchors',
+    'sourceRuleReferences', 'witness'
+  ],
+  properties: {
+    kind: { type: 'string', enum: ['FindingCandidate'] },
+    rule: { type: 'string' },
+    subject: { type: 'string' },
+    mainAnchor: OPEN_OBJECT,
+    supportAnchors: { type: 'array', items: { type: 'string' } },
+    sourceRuleReferences: { type: 'array', items: { type: 'string' } },
+    witness: WITNESS
+  },
+  additionalProperties: true
+};
+const CANDIDATE_ARRAY = { type: 'array', items: CANDIDATE };
+const VERIFIED_CANDIDATE = {
+  type: 'object',
+  required: ['kind', 'rule', 'subject', 'mainAnchor', 'witness', 'verifierResult'],
+  properties: {
+    ...CANDIDATE.properties,
+    verifierResult: {
+      type: 'object', required: ['status', 'verifier'], additionalProperties: true,
+      properties: { status: { type: 'string' }, verifier: { type: 'string' } }
+    }
+  },
+  additionalProperties: true
+};
+
 function paragraphCandidates({ paragraphs = [], maximumWords = 12 }, context) {
   return paragraphs.flatMap((paragraph) => {
     const count = words(paragraph.payload?.text).length;
@@ -15,12 +70,14 @@ function paragraphCandidates({ paragraphs = [], maximumWords = 12 }, context) {
       subject: paragraph.id,
       scope: paragraph.scope,
       mainAnchor: anchor,
+      supportAnchors: [...(paragraph.anchors || [])],
       premises: [paragraph.id],
       witness: { observationId: paragraph.id, count, maximumWords },
       guarantee: 'candidate',
       explanation: `The paragraph contains ${count} words; the configured maximum is ${maximumWords}.`,
       remediation: 'Split the paragraph or raise the published threshold.',
-      limitations: ['Words are separated by Unicode whitespace in this example operator.']
+      limitations: ['Words are separated by Unicode whitespace in this example operator.'],
+      sourceRuleReferences: [...(context.circuit.sourceRuleReferences || [])]
     }];
   });
 }
@@ -63,8 +120,15 @@ export default {
     id: 'example.paragraph-length@1',
     description: 'Count whitespace-delimited words and construct over-limit candidates.',
     primitives: ['call'],
-    inputSchema: 'example.paragraph-length-input@1',
-    outputSchema: 'finding-candidate-array@1',
+    inputSchema: {
+      id: 'example.paragraph-length-input@1', type: 'object',
+      required: ['paragraphs', 'maximumWords'], additionalProperties: false,
+      properties: {
+        paragraphs: { type: 'array', items: OBSERVATION },
+        maximumWords: { type: 'integer', minimum: 0 }
+      }
+    },
+    outputSchema: { id: 'finding-candidate-array@1', ...CANDIDATE_ARRAY },
     deterministic: true,
     effects: [],
     capabilities: [],
@@ -82,6 +146,14 @@ export default {
     description: 'Recount the canonical paragraph and compare the threshold witness.',
     candidateSchema: 'finding-candidate-array@1',
     witnessSchema: 'example.paragraph-length-witness@1',
+    inputSchema: {
+      id: 'example.paragraph-length-verifier-input@1', type: 'object',
+      required: ['candidates'], additionalProperties: false,
+      properties: { candidates: CANDIDATE_ARRAY }
+    },
+    outputSchema: {
+      id: 'verified-finding-candidate-array@1', type: 'array', items: VERIFIED_CANDIDATE
+    },
     checkedProperties: ['observation-identity', 'word-count', 'threshold', 'source-anchor'],
     outcomes: ['accept', 'reject'],
     guaranteeContribution: 'mechanically-certified',

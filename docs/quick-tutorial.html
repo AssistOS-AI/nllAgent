@@ -79,7 +79,7 @@ flowchart LR
     id: 'candidates',
     primitive: 'call',
     operator: 'foundation.state-conflicts@1',
-    inputs: { assertions: port('assertions') }
+    inputs: { assertions: binding('assertions') }
   }, {
     id: 'verified',
     primitive: 'verify',

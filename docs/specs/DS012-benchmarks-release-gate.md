@@ -32,6 +32,12 @@ The local runner first checks structured terminal status, compatibility status, 
 
 Each rule must have positive, close-negative, boundary, scope, exception, ambiguous, and coverage cases where those categories apply. Distributed rules require long-range scenarios. Translation-sensitive producers require instruction-like source content, Unicode, negation, modality, reported speech, ambiguous identity, invalid quote, partial output, and resource-exhaustion cases.
 
+An observation-binding matcher requires cases for each selected and excluded local value plus cardinality after
+selection. A custom runtime extension requires compile-time bad-wiring cases, runtime invalid-input/output cases,
+forged-witness rejection, digest-lock evidence, and one final CNL report case that asserts rule basis, main and support
+anchors, verifier, certificate, guarantee, limitation, and order. A capability-gap report links every resolved,
+mitigated, or blocked serious issue to its concrete reproducer and expected terminal behavior.
+
 Generated contrastive cases must declare the controlled transformation and expected metamorphic relation. Model-generated cases remain candidates until mechanically derived, model-agreed under a recorded protocol, or human-confirmed. Contested cases test ambiguity handling and do not count as binary oracles.
 
 ## Semantic evaluation and independence
@@ -106,6 +112,13 @@ Response: No. A source map establishes traceability and a scaffold states intend
 ### Question #10: Must every agent relearn and retest the foundation pack?
 
 Response: No. Platform tests establish the shared semantics once. An agent tests only its reliance on, extension of, or deliberate departure from those semantics; its publication record still captures the exact selected pack identity.
+
+### Question #11: Does documenting a known limitation satisfy the benchmark requirement for an affected use case?
+
+Response: No. Documentation prevents overclaiming, but the use case still needs an executable reproducer. A resolved
+gap needs positive, close-negative, and prior-failure evidence. A mitigated or blocked gap needs a regression that
+asserts the honest unknown, limited, incompatible, or stopped result. This prevents a future circuit change from
+silently crossing the documented boundary.
 
 # Conclusion
 

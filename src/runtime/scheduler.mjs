@@ -2,6 +2,7 @@ import { performance } from 'node:perf_hooks';
 import { digestJson } from '../core/canonical.mjs';
 import { NllError } from '../core/errors.mjs';
 import { guaranteeCeilingFromValue, guaranteeMeet } from './guarantees.mjs';
+import { matchesObservationBinding } from './observation-bindings.mjs';
 
 function resolveValue(value, ports, results) {
   if (Array.isArray(value)) return value.map((item) => resolveValue(item, ports, results));
@@ -14,10 +15,8 @@ function resolveValue(value, ports, results) {
 function bindPorts(program, circuit) {
   const ports = {};
   for (const [name, definition] of Object.entries(circuit.inputs)) {
-    const types = definition.types || [definition.type];
     const records = program.observations.filter((observation) =>
-      types.includes(observation.type)
-      && (!definition.statuses?.length || definition.statuses.includes(observation.status)));
+      matchesObservationBinding(observation, definition));
     const cardinality = definition.cardinality || 'many';
     if ((cardinality === 'one' && records.length !== 1)
       || (cardinality === 'optional' && records.length > 1)

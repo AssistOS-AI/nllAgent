@@ -104,7 +104,7 @@ Open [`docs/index.html`](docs/index.html) for the documentation. The shortest re
 1. [`docs/quick-tutorial.html`](docs/quick-tutorial.html) — one source, the exact default verbal rule,
    real CircuitJS DSL, one command, and one verified result.
 2. [`docs/circuits-in-practice.html`](docs/circuits-in-practice.html) — the practical dataflow model,
-   port binding, multiple records, cycles, filtering, and real JavaScript operators.
+   observation binding, multiple records, cycles, filtering, and real JavaScript operators.
 3. [`docs/foundation.html`](docs/foundation.html) — what the default baseline checks, what it cannot know,
    and how alternative worlds opt out.
 4. [`docs/concepts.html`](docs/concepts.html) — terminology, abbreviations, scientific lineage,
@@ -113,16 +113,18 @@ Open [`docs/index.html`](docs/index.html) for the documentation. The shortest re
 6. [`docs/longtextjs.html`](docs/longtextjs.html) and [`docs/circuitjs.html`](docs/circuitjs.html) —
    the two DSLs as implemented today.
 7. [`docs/circuit-tutorial.html`](docs/circuit-tutorial.html) — an interactive, node-by-node model
-   of LongTextJS port binding, CircuitJS execution, verification, and both CNL products.
-8. [`docs/connection.html`](docs/connection.html) — the observation contract that links
+   of LongTextJS observation binding, CircuitJS execution, verification, and both CNL products.
+8. [`docs/advanced-circuit-tutorial.html`](docs/advanced-circuit-tutorial.html) — a runnable mixed example
+   with local matching, trusted JavaScript, foundation circuits, and the actual CNL/Audit-1 result.
+9. [`docs/connection.html`](docs/connection.html) — the observation contract that links
    CircuitJS demand to LongTextJS producers and concrete materialization.
-9. [`docs/verification.html`](docs/verification.html) — one production verification,
+10. [`docs/verification.html`](docs/verification.html) — one production verification,
    chronologically and file by file.
-10. [`docs/generation.html`](docs/generation.html) — one idea-to-CNL planning run and its optional
+11. [`docs/generation.html`](docs/generation.html) — one idea-to-CNL planning run and its optional
    realization branch.
-11. [`docs/learning-architecture.html`](docs/learning-architecture.html) — one learning,
+12. [`docs/learning-architecture.html`](docs/learning-architecture.html) — one learning,
    candidate preparation and manual publication cycle.
-12. [`docs/query-first.html`](docs/query-first.html) — the experimental query-first subset, its
+13. [`docs/query-first.html`](docs/query-first.html) — the experimental query-first subset, its
    representation choices, executable semantics, and remaining promotion gates.
 
 The sidebar keeps the LongTextJS document side and CircuitJS theory side visibly separate. Operational details continue in the complete [`docs/cli.html`](docs/cli.html) man page, [`docs/learning.html`](docs/learning.html), and [`docs/benchmark.html`](docs/benchmark.html).

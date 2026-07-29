@@ -18,7 +18,7 @@ Tests are organized by the claim they protect rather than by repository folder:
 
 | Layer | Required evidence |
 | --- | --- |
-| Contract | Canonical data, status transitions, release digests, path containment, observation and query contracts, port types, verification dominance, CNL schemas, and issue shapes. |
+| Contract | Canonical data, status transitions, release digests, path containment, observation-binding and query contracts, structured registry schemas, verification dominance, CNL schemas, and issue shapes. |
 | Primitive | Every LongTextJS construction algorithm, CircuitJS primitive, standard operator, and replay verifier has focused positive, negative, boundary, and forged-input tests. |
 | Integration | CLI commands execute against temporary agent roots and persist the documented artifacts and terminal status. |
 | Semantic | Natural Markdown cases distinguish materialization errors from circuit, verifier, coverage, and reporting errors. |
@@ -46,8 +46,11 @@ The experimental query-first suite covers restricted loading, canonical relation
 The trusted runtime-extension suite loads an executable example, compiles its direct CircuitJS graph, exercises its
 operator and independent verifier, and checks deterministic order and emitted output. Negative cases cover imports,
 missing contract metadata, input mutation, non-plain output, duplicate registry identities, missing or mismatched release
-locks, and cache identity without the implementation digest. These tests establish the host API and trust boundary; they
-do not make arbitrary third-party JavaScript safe.
+locks, cache identity without the implementation digest, missing and unknown node inputs, wrong literal types, and
+runtime schema failures. The advanced example combines a local observation matcher, custom operator, foundation
+circuits, independent verification, and final CNL rendering; its test asserts support anchors and rule basis rather than
+only candidate count. These tests establish the host API and trust boundary; they do not make arbitrary third-party
+JavaScript safe or complete the older standard registry contracts.
 
 ## Documentation is layered by reader task
 
@@ -112,6 +115,13 @@ Response: No. Differential evidence executes distinct paths on the same LongText
 Response: The programmer path must show the executable extension, the graph that calls it, one concrete input and
 output, the values crossing each node, the verifier replay, the release digest lock, and the trust boundary. A registry
 catalogue without runnable dataflow is insufficient; a tutorial callback inside CircuitJS would teach an invalid model.
+
+### Question #12: How are repository-wide serious issues tested in an agent-specific repair?
+
+Response: Only issues that affect the scoped use case enter its capability-gap report. Each receives a minimal natural
+reproducer and an asserted safe behavior. Platform tests protect generic mechanisms; agent benchmarks protect the
+meaning and fallback chosen for that agent. This avoids both hiding a real limit and forcing every agent to copy every
+unrelated platform test.
 
 # Conclusion
 

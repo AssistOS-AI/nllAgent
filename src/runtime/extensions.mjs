@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { deepFreeze, normalizeJson, sha256Bytes } from '../core/canonical.mjs';
 import { NllError, invariant } from '../core/errors.mjs';
 import { readUtf8Strict } from '../core/io.mjs';
+import { normalizeValueSchema, validateValueAgainstSchema } from './value-schema.mjs';
 
 const VERSIONED_ID = /^[A-Za-z][A-Za-z0-9._-]*@\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u;
 const ENTRY_ID = /^[A-Za-z][A-Za-z0-9._-]*@\d+(?:\.\d+){0,2}(?:-[0-9A-Za-z.-]+)?$/u;
@@ -15,7 +16,7 @@ const OPERATOR_KEYS = new Set([
 ]);
 const VERIFIER_KEYS = new Set([
   'id', 'description', 'candidateSchema', 'witnessSchema', 'checkedProperties',
-  'outcomes', 'guaranteeContribution', 'limits', 'execute'
+  'inputSchema', 'outputSchema', 'outcomes', 'guaranteeContribution', 'limits', 'execute'
 ]);
 
 function assertObject(value, label) {
@@ -36,6 +37,16 @@ function stringArray(value, label, { allowEmpty = false } = {}) {
   return [...value];
 }
 
+function contractSchema(value, label) {
+  try {
+    return normalizeValueSchema(value);
+  } catch (error) {
+    throw new NllError('invalid-runtime-extension', `${label} must be a valid structured value schema.`, {
+      causeCode: error.code, schemaPath: error.details?.path || null
+    }, { cause: error });
+  }
+}
+
 function defineRuntimeOperator(definition) {
   assertObject(definition, 'Runtime operator');
   assertKeys(definition, OPERATOR_KEYS, `Runtime operator ${definition.id || '<unknown>'}`);
@@ -43,10 +54,8 @@ function defineRuntimeOperator(definition) {
     'Runtime operator requires an exact versioned id.');
   invariant(typeof definition.description === 'string' && definition.description.trim(),
     'invalid-runtime-extension', `Runtime operator ${definition.id} requires a description.`);
-  invariant(typeof definition.inputSchema === 'string' && definition.inputSchema,
-    'invalid-runtime-extension', `Runtime operator ${definition.id} requires inputSchema.`);
-  invariant(typeof definition.outputSchema === 'string' && definition.outputSchema,
-    'invalid-runtime-extension', `Runtime operator ${definition.id} requires outputSchema.`);
+  const inputSchema = contractSchema(definition.inputSchema, `${definition.id}.inputSchema`);
+  const outputSchema = contractSchema(definition.outputSchema, `${definition.id}.outputSchema`);
   invariant(typeof definition.deterministic === 'boolean', 'invalid-runtime-extension',
     `Runtime operator ${definition.id} requires an explicit deterministic flag.`);
   invariant(typeof definition.cost === 'string' && definition.cost, 'invalid-runtime-extension',
@@ -60,6 +69,8 @@ function defineRuntimeOperator(definition) {
     effects: stringArray(definition.effects, `${definition.id}.effects`, { allowEmpty: true }),
     capabilities: stringArray(definition.capabilities, `${definition.id}.capabilities`, { allowEmpty: true }),
     failureCodes: stringArray(definition.failureCodes, `${definition.id}.failureCodes`),
+    inputSchema,
+    outputSchema,
     limits: deepFreeze(normalizeJson(definition.limits))
   });
 }
@@ -75,6 +86,8 @@ function defineRuntimeVerifier(definition) {
     invariant(typeof definition[field] === 'string' && definition[field], 'invalid-runtime-extension',
       `Runtime verifier ${definition.id} requires ${field}.`);
   }
+  const inputSchema = contractSchema(definition.inputSchema, `${definition.id}.inputSchema`);
+  const outputSchema = contractSchema(definition.outputSchema, `${definition.id}.outputSchema`);
   invariant(typeof definition.execute === 'function', 'invalid-runtime-extension',
     `Runtime verifier ${definition.id} requires execute().`);
   assertObject(definition.limits, `${definition.id}.limits`);
@@ -82,6 +95,8 @@ function defineRuntimeVerifier(definition) {
     ...definition,
     checkedProperties: stringArray(definition.checkedProperties, `${definition.id}.checkedProperties`),
     outcomes: stringArray(definition.outcomes, `${definition.id}.outcomes`),
+    inputSchema,
+    outputSchema,
     limits: deepFreeze(normalizeJson(definition.limits))
   });
 }
@@ -121,11 +136,18 @@ function safeContext(context) {
 function guardedExecute(entry, extension, descriptor) {
   return async (inputs, context) => {
     try {
-      const output = await entry.execute(
-        deepFreeze(normalizeJson(inputs)),
+      const normalizedInputs = deepFreeze(normalizeJson(inputs));
+      validateValueAgainstSchema(normalizedInputs, entry.inputSchema, {
+        code: 'runtime-extension-input-invalid', label: `${entry.id} input`
+      });
+      const output = deepFreeze(normalizeJson(await entry.execute(
+        normalizedInputs,
         safeContext(context)
-      );
-      return deepFreeze(normalizeJson(output));
+      )));
+      validateValueAgainstSchema(output, entry.outputSchema, {
+        code: 'runtime-extension-output-invalid', label: `${entry.id} output`
+      });
+      return output;
     } catch (error) {
       if (error instanceof NllError) throw error;
       throw new NllError('runtime-extension-failed',

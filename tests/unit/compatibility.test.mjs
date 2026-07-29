@@ -45,7 +45,7 @@ test('quality gaps limit a produced observation type without blocking its circui
   assert.equal(report.circuits[0].obligations[0].status, 'satisfied-with-limits');
 });
 
-test('insufficient semantic materialization blocks a critical port even when a producer exists', () => {
+test('insufficient semantic materialization blocks a critical binding even when a producer exists', () => {
   const registries = createStandardRegistries();
   const circuit = compileConsumer('narrative.event-minimum', 'events', {
     type: 'narrative.event@1', critical: true, statuses: ['proposed']
@@ -103,4 +103,25 @@ test('closed-world coverage must belong to the current source revision', () => {
     evaluateCompatibility(wrongRevision, [circuit], { formats: ['text/markdown'] }).status,
     'incompatible'
   );
+});
+
+test('compatibility applies observation-binding matchers before cardinality', () => {
+  const registries = createStandardRegistries();
+  const circuit = compileConsumer('document.ordinary-paragraph', 'paragraphs', {
+    type: 'document.paragraph@1', critical: true, statuses: ['extracted'], cardinality: 'at-least-one',
+    where: [{ path: 'payload.structuralRole', operator: 'eq', value: 'paragraph' }]
+  }, registries);
+  const program = compileMarkdown('# Test\n\nOrdinary paragraph.\n\n— Dialogue paragraph.');
+  const report = evaluateCompatibility(program, [circuit], { formats: ['text/markdown'] });
+
+  assert.equal(report.status, 'compatible');
+  assert.equal(report.circuits[0].obligations[0].kind, 'observation-binding');
+  assert.equal(report.circuits[0].obligations[0].evidence.observations, 1);
+  assert.deepEqual(report.circuits[0].obligations[0].evidence.matchers,
+    [{ path: 'payload.structuralRole', operator: 'eq', value: 'paragraph' }]);
+
+  const dialogueOnly = compileMarkdown('— Dialogue paragraph.');
+  const blocked = evaluateCompatibility(dialogueOnly, [circuit], { formats: ['text/markdown'] });
+  assert.equal(blocked.status, 'incompatible');
+  assert.equal(blocked.circuits[0].obligations[0].evidence.observations, 0);
 });

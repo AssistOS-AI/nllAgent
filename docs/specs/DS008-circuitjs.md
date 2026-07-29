@@ -3,7 +3,7 @@ id: DS008
 title: CircuitJS Language Contract
 status: accepted
 owner: nllAgent maintainers
-summary: Defines validation and planning circuit purposes, typed ports, graph nodes, effects, applicability, verification dominance, and canonical CircuitJS data.
+summary: Defines validation and planning circuit purposes, observation bindings, graph nodes, effects, applicability, verification dominance, and canonical CircuitJS data.
 ---
 
 # Introduction
@@ -20,13 +20,27 @@ Absent `purpose` means `validation`. Such circuits publish verified findings, wh
 
 A package must declare namespace, semantic version, imports, exported circuits, schema requirements, operator requirements, verifier requirements, explanation policies, and source authority mappings. Imports must be exact after release locking.
 
-A circuit must declare identifier, version, description, applicability contract, input and output ports, nodes, edges, budgets, error routes, finding contract, and source rule references. Ports must be nominally typed and must declare version, cardinality, scope relation, accepted epistemic statuses, coverage requirements, ordering, deduplication, and guarantee requirements.
+A circuit must declare identifier, version, description, applicability contract, input bindings and output ports, nodes, edges, budgets, error routes, finding contract, and source rule references. Observation bindings are nominally typed and declare cardinality, accepted epistemic statuses, coverage, criticality, guarantee requirements, and optional safe local matchers. Relational ordering, joins, grouping, deduplication, and completeness-sensitive conditions belong in a query or exact operator contract rather than being implied by the graph boundary.
+
+## Observation bindings and graph references
+
+`inputs.<name>` is an observation-binding declaration. The scheduler scans the immutable LongTextJS observation
+relation, selects exact nominal types and statuses, applies optional `where` matchers, preserves source order, and then
+enforces cardinality. Matchers are an AND-only local projection over safe static paths with `eq`, `neq`, `gt`, `gte`,
+`lt`, `lte`, `includes`, `in`, `startsWith`, and `exists`. They do not establish identity, join relations, infer
+absence, or turn open-world data into a complete domain. Equality and membership are strict. Ordered comparisons accept
+only finite numbers, and text operations require strings; JavaScript coercion is forbidden.
+
+The recommended author reference is `binding(name)`. It creates the canonical `{ "$port": name }` graph reference,
+which resolves to the already selected immutable array; it performs no further matching. `port(name)` remains an exact
+compatibility alias. `observationBinding(definition)` is authoring sugar for the plain selector definition. Joins,
+reusable expressions, aggregates, ordered patterns, and coverage-aware absence use Query-First or a registered operator.
 
 ## Canonical graph
 
 The production form is a JSON-compatible directed graph. Nodes receive immutable named inputs and produce immutable named outputs. Edges refer only to declared node and port identifiers. Cycles are invalid unless enclosed in a `fixpoint`, `maintain`, or `search` construct with explicit termination and revision semantics.
 
-The author form may be JSON or a `.circuit.mjs` file containing one direct `export default circuit({...})` expression. The experimental DS020 form uses one direct `export default queryFirstCircuit({...})` expression. `circuit()` and `queryFirstCircuit()` return their definitions, while `port(name)` and `node(name)` create graph data references. The loader rejects wrappers, indirection, functions, classes, control flow, all imports—including an import of the helpers, because they are injected—plus `require`, async/await, template literals, dynamic code generation, runtime globals, external I/O, prototype access, `Proxy`, and `Reflect`. It evaluates the expression in a restricted VM with a short timeout and performs lossless conversion to plain data before invoking the CircuitJS compiler.
+The author form may be JSON or a `.circuit.mjs` file containing one direct `export default circuit({...})` expression. The experimental DS020 form uses one direct `export default queryFirstCircuit({...})` expression. `circuit()` and `queryFirstCircuit()` return their definitions; `observationBinding()` names a selector definition; `binding()` and its compatibility alias `port()` create graph input references; and `node()` creates a prior-node reference. The loader rejects wrappers, indirection, functions, classes, control flow, all imports—including an import of the helpers, because they are injected—plus `require`, async/await, template literals, dynamic code generation, runtime globals, external I/O, prototype access, `Proxy`, and `Reflect`. It evaluates the expression in a restricted VM with a short timeout and performs lossless conversion to plain data before invoking the CircuitJS compiler.
 
 ## Primitive families
 
@@ -116,7 +130,7 @@ DS020 implements an experimental `LongTextQuery@1` and `DecisionTable@1` subset 
 
 ## Static analysis
 
-The compiler must validate schemas and references, link every computational primitive to a registered operator, link every verifier, type-check ports and expressions, enforce cardinality and status constraints, analyze effects, calculate capabilities, identify undeclared cycles, verify budgets, ensure all terminal paths are explicit, derive the observation contract through backward slicing, and prove that every emitted finding is dominated by verification or an allowed review gate. Nodes and input ports that cannot affect a declared output are rejected rather than executed as hidden side paths. The current compiler implements nominal versioned input checks, status, guarantee, and cardinality constraints, finite budgets, registry effect matching, reference validation, dead-declaration rejection, verification dominance, and a persisted derived observation contract. Rich expression typing, declared cycles, and every advanced primitive family remain contract requirements for later operators rather than silently claimed capabilities.
+The compiler must validate schemas and references, link every computational primitive to a registered operator, link every verifier, type-check bindings and expressions, enforce cardinality and status constraints, analyze effects, calculate capabilities, identify undeclared cycles, verify budgets, ensure all terminal paths are explicit, derive the observation contract through backward slicing, and prove that every emitted finding is dominated by verification or an allowed review gate. Nodes and input bindings that cannot affect a declared output are rejected rather than executed as hidden side paths. The current compiler implements nominal versioned binding checks, safe local matcher validation, status, guarantee, and cardinality constraints, finite budgets, registry effect matching, reference validation, dead-declaration rejection, verification dominance, and a persisted derived observation contract. A trusted runtime extension also supplies structured value schemas: compilation checks required, unknown, and literal fields plus compatible referenced result types, while runtime checks resolved input and actual output. Rich typing remains incomplete for older registry entries, semantic nominal payloads, declared cycles, and advanced primitive families; those remain tracked limitations rather than silently claimed capabilities.
 
 ## Errors
 
@@ -172,6 +186,13 @@ Response: In a trusted, explicitly installed runtime operator or verifier. Circu
 that selects inputs, fixes dependencies and budgets, and controls publication. The extension owns the algorithm and is
 tested as code; the release locks its id and digest. This division keeps hard algorithms possible without making every
 circuit an opaque general-purpose program.
+
+### Question #11: Why keep the canonical word `port` if the input declaration performs matching?
+
+Response: The canonical `$port` object is a graph-boundary reference, and changing stored graphs would create needless
+format churn. The matching object is now named an observation binding, while `binding(name)` is the recommended author
+helper. Keeping `port()` as an alias preserves existing releases without continuing to teach that the reference itself
+is a query or pattern matcher.
 
 # Conclusion
 

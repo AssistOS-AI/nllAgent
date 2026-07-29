@@ -5,7 +5,9 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { runCli } from '../../src/cli/main.mjs';
 import { writeJson } from '../../src/core/io.mjs';
-import { validateCandidate, validateObservationAlignment } from '../../src/release/manager.mjs';
+import {
+  validateCandidate, validateCapabilityGapReport, validateObservationAlignment
+} from '../../src/release/manager.mjs';
 import { loadAndInstallRuntimeExtension } from '../../src/runtime/extensions.mjs';
 import { createStandardRegistries } from '../../src/runtime/standard-operators.mjs';
 import { loadAgent } from '../../src/storage/agent-store.mjs';
@@ -25,7 +27,17 @@ test('manual publication creates a reproducible release and updates the active p
   const manifest = JSON.parse(await readFile(join(candidate, 'release.json'), 'utf8'));
   manifest.version = '0.1.1';
   manifest.lineage = '0.1.0';
+  manifest.capabilityGapReport = 'capability-gap-report.json';
   manifest.circuits.push('circuits/query-first-noop.circuit.mjs');
+  await writeJson(join(candidate, 'capability-gap-report.json'), {
+    kind: 'CapabilityGapReport', schemaVersion: 1,
+    gaps: [{
+      issue: 'serious-issue:1', status: 'mitigated',
+      summary: 'The query-first test uses reference-to-lowered comparison but claims no mutation score.',
+      reproducer: 'circuits/query-first-noop.circuit.mjs',
+      evidence: ['query-first-artifacts.json'], guaranteeCeiling: 'mechanically-certified-for-tested-cases'
+    }]
+  });
   await writeFile(join(candidate, 'circuits', 'query-first-noop.circuit.mjs'), `export default queryFirstCircuit({
     kind: 'CircuitJSQueryFirst', dialect: 'circuitjs-query-first@1',
     id: 'editorial.query-first-noop', version: '0.1.1',
@@ -64,10 +76,12 @@ test('manual publication creates a reproducible release and updates the active p
   const published = JSON.parse(stdout.read());
   assert.equal(published.status, 'published');
   assert.equal(published.pointer.release, '0.1.1');
+  assert.ok(published.checks.includes('capability-gap-report'));
   const publishedManifest = JSON.parse(await readFile(join(agentRoot, 'releases', '0.1.1', 'release.json'), 'utf8'));
   assert.equal(publishedManifest.kind, 'NaturalLanguageLinterRelease');
   assert.equal(publishedManifest.status, 'published');
   await access(join(agentRoot, 'releases', '0.1.1', 'publication.json'));
+  await access(join(agentRoot, 'releases', '0.1.1', 'capability-gap-report.json'));
   await access(join(agentRoot, 'releases', '0.1.1', 'observation-contracts.json'));
   const queryArtifacts = JSON.parse(await readFile(
     join(agentRoot, 'releases', '0.1.1', 'query-first-artifacts.json'), 'utf8'
@@ -82,7 +96,7 @@ test('manual publication creates a reproducible release and updates the active p
   await access(join(agentRoot, 'releases', '0.1.1', 'benchmark-snapshot', 'public', 'weak-phrase', 'input.md'));
 });
 
-test('publication checks reject a critical CircuitJS port with no LongTextJS producer', async () => {
+test('publication checks reject a critical observation binding with no LongTextJS producer', async () => {
   const root = await mkdtemp(join(tmpdir(), 'nllagent-release-alignment-'));
   const dataRoot = join(root, 'data');
   const agentRoot = join(dataRoot, 'editorial-demo');
@@ -135,6 +149,27 @@ test('candidate validation locks every referenced trusted runtime extension dige
   await writeJson(manifestPath, manifest);
   await assert.rejects(() => validateCandidate(agent, '0.1.3', registries),
     (error) => error.code === 'runtime-extension-lock-mismatch');
+});
+
+test('candidate capability-gap reports use explicit reviewable states and evidence', () => {
+  const report = validateCapabilityGapReport({
+    kind: 'CapabilityGapReport', schemaVersion: 1,
+    gaps: [{
+      issue: 'serious-issue:5', status: 'blocked',
+      summary: 'Cross-document identity is required but no approved materializer is installed.',
+      reproducer: 'benchmark/identity/repeated-name/input.md',
+      evidence: ['benchmark/identity/repeated-name/expected.json', 'proposals/identity-materializer.md'],
+      guaranteeCeiling: 'review-required'
+    }]
+  });
+  assert.equal(report.gaps[0].status, 'blocked');
+  assert.throws(() => validateCapabilityGapReport({
+    kind: 'CapabilityGapReport', schemaVersion: 1,
+    gaps: [{
+      issue: 'serious-issue:5', status: 'fixed-in-prose', summary: 'No executable evidence.',
+      reproducer: 'case.md', evidence: ['note.md'], guaranteeCeiling: 'unknown'
+    }]
+  }), (error) => error.code === 'invalid-release' && /invalid status/u.test(error.message));
 });
 
 test('release alignment does not treat proposed extraction as mechanical evidence', () => {

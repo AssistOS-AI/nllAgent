@@ -62,11 +62,11 @@ flowchart LR
     <div class="table-wrap"><table>
       <thead><tr><th>Skill</th><th>Main question</th><th>Principal artifacts</th></tr></thead>
       <tbody>
-        <tr><td><code>nll-scope-project</code></td><td>What is the intended use, authority, document population, finding contract, and automation limit?</td><td>Scope contract, authority map, declared gaps.</td></tr>
-        <tr><td><code>nll-compile-theory</code></td><td>What is observable, and is the simplest supported form an operator wrapper, query/table, aggregate/pattern, or direct graph?</td><td>Rule cards, form decision, schemas, extraction profiles, circuits, witness and compatibility declarations.</td></tr>
-        <tr><td><code>nll-build-benchmark</code></td><td>Which natural positive, negative, exception, ambiguity, coverage, row-conflict, and long-range cases define behavior?</td><td>Microcases, suites, expected layers, row coverage, mutation proposals, counterexamples.</td></tr>
-        <tr><td><code>nll-learn-from-issues</code></td><td>Which layer caused each real failure and what is the smallest general repair?</td><td>Distilled cases, patches, new limits, regression evidence.</td></tr>
-        <tr><td><code>nll-prepare-release</code></td><td>Is the candidate internally complete and ready for a maintainer to consider publishing?</td><td>Candidate manifest, public-check results, impact explanation, and known limitations.</td></tr>
+        <tr><td><code>nll-scope-project</code></td><td>What is the intended use, authority, document population, finding contract, and automation limit?</td><td>Scope contract, authority map, applicable platform issues, and capability gaps.</td></tr>
+        <tr><td><code>nll-compile-theory</code></td><td>What is observable, and is the simplest supported form a binding, query/table, operator wrapper, or direct graph?</td><td>Rule cards, form decision, schemas, extraction profiles, circuits, witness contracts, and capability proposals.</td></tr>
+        <tr><td><code>nll-build-benchmark</code></td><td>Which natural positive, negative, exception, ambiguity, coverage, row-conflict, and long-range cases define behavior?</td><td>Microcases, suites, expected layers, capability-gap cases, mutation proposals, and CNL assertions.</td></tr>
+        <tr><td><code>nll-learn-from-issues</code></td><td>Which layer caused each real failure and what is the smallest general repair?</td><td>Distilled cases, patches or protected-layer proposals, new limits, and regression evidence.</td></tr>
+        <tr><td><code>nll-prepare-release</code></td><td>Is the candidate internally complete and ready for a maintainer to consider publishing?</td><td>Candidate manifest, public-check results, impact explanation, and capability-gap report.</td></tr>
       </tbody>
     </table></div>
     <p>Skills guide the Coding Agent but are not trusted evaluators. Their output still passes parsers, schemas, circuit compilation, registry linking, benchmark execution, and host policy. The learning catalog is intentionally separate from repository-maintenance skills and from the narrow production observation and optional CNL-realization skills.</p>
@@ -78,6 +78,21 @@ flowchart LR
     <h2 id="editable-boundary">What may be changed</h2>
     <p>Learning can promote changed regular files only under the agent’s authoring roots: rule cards or authority-derived documentation, observation schemas, extraction profiles, restricted circuits, benchmark cases and suites, proposals, and candidate packages. The runner rejects deletions, symbolic links, writes outside the whitelist, or an absent, unreadable, or schema-invalid final result.</p>
     <p>The Coding Agent cannot change runtime source, verifier implementations, operator registries, publication policy, previously published releases, production run history, or the active pointer. When a rule needs a new trusted capability, learning writes a proposal instead of hiding code inside a circuit.</p>
+
+    <h3 id="capability-gaps">Turn a known limit into a scoped engineering result</h3>
+    <p><code>serious_issues.md</code> is not a checklist that every agent must solve. The scope skill selects an issue only
+      when it causally affects the current rule family. The candidate then records the smallest missing capability and
+      finishes in one of three honest states: <code>resolved</code> by agent-owned artifacts, <code>mitigated</code> by a
+      narrower supported contract, or <code>blocked</code> with a trusted-runtime or policy proposal.</p>
+    <p>A proposal for real executable processing names structured input and output schemas, deterministic and effect
+      contracts, budgets, a separate verifier, natural counterexamples, and expected CNL. Learning still cannot install
+      that JavaScript. A maintainer may implement and digest-lock it as a runtime extension; the next candidate can then
+      reference the installed exact capability. This keeps the system extensible without making document text or a
+      generated circuit executable.</p>
+    <p>When at least one issue applies, the candidate manifest names <code>capability-gap-report.json</code> through
+      <code>capabilityGapReport</code>. The release manager validates its version, unique issue identities, allowed
+      states, reproducer, evidence references, and guarantee ceiling. It cannot infer whether scope omitted a relevant
+      issue, so that judgment remains visible in maintainer review.</p>
 
     <pre class="mermaid">
 flowchart LR
@@ -94,7 +109,7 @@ flowchart LR
       <li><strong>Feedback captures the disputed layer.</strong> The reviewer attaches a false-positive or scope correction to the run and points to the dialogue passage.</li>
       <li><strong>Learning snapshots the case.</strong> The issue, source evidence, current circuit, relevant extraction profile, and existing tests enter a new staging workspace.</li>
       <li><strong>The failure is distilled.</strong> The Coding Agent creates a small natural positive case in narration, a close negative case in dialogue, and—if needed—a reported-speech boundary case. It does not reduce them to preapproved facts.</li>
-      <li><strong>The correct layer is patched.</strong> If discourse mode was extracted correctly, the CircuitJS scope filter changes. If dialogue was misclassified, the extraction profile and expected observation layer change instead. The distinction is visible.</li>
+      <li><strong>The correct layer is patched.</strong> If discourse mode was extracted correctly, an observation-binding matcher or query filter changes. If dialogue was misclassified, the extraction profile and expected observation layer change instead. The distinction is visible.</li>
       <li><strong>Local candidate tests run.</strong> Existing positive cases must remain valid while the new negative case stops producing a finding.</li>
       <li><strong>The host audits and promotes.</strong> Only allowed candidate files leave staging.</li>
       <li><strong>A maintainer publishes explicitly.</strong> Observation alignment, circuit compilation, natural suites, and immutable candidate digests must pass. A semantic diff records the affected rule and behavior.</li>

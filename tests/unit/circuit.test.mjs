@@ -58,12 +58,45 @@ test('Circuit runtime emits a mechanically verified source finding', async () =>
   assert.equal(result.outputs.findings[0].mainAnchor.quote, 'perhaps');
 });
 
-test('runtime port binding enforces accepted statuses and cardinality', () => {
+test('runtime observation binding enforces accepted statuses and cardinality', () => {
   const program = compileMarkdown('One paragraph.');
   const circuit = validCircuit();
   circuit.inputs.paragraphs.statuses = ['proposed'];
   circuit.inputs.paragraphs.cardinality = 'at-least-one';
   assert.throws(() => bindPorts(program, circuit), (error) => error.code === 'port-cardinality-failed');
+});
+
+test('observation bindings apply safe declarative field matchers before cardinality', () => {
+  const program = compileMarkdown('Narrative paragraph.\n\n— Dialogue candidate.');
+  const circuit = validCircuit();
+  circuit.inputs.paragraphs.where = [{
+    path: 'payload.structuralRole', operator: 'eq', value: 'paragraph'
+  }];
+  circuit.inputs.paragraphs.cardinality = 'one';
+  const bound = bindPorts(program, compileCircuit(circuit, registries).circuit);
+  assert.equal(bound.paragraphs.length, 1);
+  assert.equal(bound.paragraphs[0].payload.text, 'Narrative paragraph.');
+});
+
+test('observation binding matchers reject unsafe paths and unsupported operators', () => {
+  const circuit = validCircuit();
+  circuit.inputs.paragraphs.where = [{ path: 'payload.__proto__.polluted', operator: 'eq', value: true }];
+  assert.throws(() => compileCircuit(circuit, registries), /safe static field path/u);
+  circuit.inputs.paragraphs.where = [{ path: 'payload.text', operator: 'regex', value: 'perhaps' }];
+  assert.throws(() => compileCircuit(circuit, registries), /unsupported operator/u);
+  circuit.inputs.paragraphs.where = [{ path: 'payload.order', operator: 'gt', value: '0' }];
+  assert.throws(() => compileCircuit(circuit, registries), /requires a finite numeric value/u);
+});
+
+test('observation binding matchers never use JavaScript coercion', () => {
+  const program = compileMarkdown('One paragraph.');
+  const paragraph = program.observations.find((item) => item.type === 'document.paragraph@1');
+  paragraph.payload.order = '12';
+  const circuit = validCircuit();
+  circuit.inputs.paragraphs.cardinality = 'at-least-one';
+  circuit.inputs.paragraphs.where = [{ path: 'payload.order', operator: 'gt', value: 10 }];
+  assert.throws(() => bindPorts(program, compileCircuit(circuit, registries).circuit),
+    (error) => error.code === 'port-cardinality-failed');
 });
 
 test('deterministic verification preserves a proposed semantic premise ceiling', async () => {

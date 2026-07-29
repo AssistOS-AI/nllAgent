@@ -1,11 +1,11 @@
 export default circuit({
   kind: 'CircuitJS',
-  id: 'example.paragraph-length',
+  id: 'example.advanced-review',
   version: '1.0.0',
-  description: 'Apply the example JavaScript paragraph-length extension.',
-  sourceRuleReferences: ['example:paragraphs-must-have-at-most-twelve-words'],
+  description: 'Select narrative paragraphs and apply the trusted paragraph-length algorithm.',
+  sourceRuleReferences: ['example:narrative-paragraphs-have-at-most-twelve-words'],
   inputs: {
-    paragraphs: observationBinding({
+    narrativeParagraphs: observationBinding({
       type: 'document.paragraph@1',
       cardinality: 'many',
       statuses: ['extracted'],
@@ -15,19 +15,19 @@ export default circuit({
     })
   },
   nodes: [{
-    id: 'candidates',
+    id: 'lengthCandidates',
     primitive: 'call',
     operator: 'example.paragraph-length@1',
-    inputs: { paragraphs: binding('paragraphs'), maximumWords: 12 }
+    inputs: { paragraphs: binding('narrativeParagraphs'), maximumWords: 12 }
   }, {
-    id: 'verified',
+    id: 'verifiedLengths',
     primitive: 'verify',
     verifier: 'example.paragraph-length@1',
-    inputs: { candidates: node('candidates') }
+    inputs: { candidates: node('lengthCandidates') }
   }, {
     id: 'findings',
     primitive: 'emit',
-    inputs: { verified: node('verified') }
+    inputs: { verified: node('verifiedLengths') }
   }],
   outputs: { findings: node('findings') },
   budgets: { nodes: 3, wallTimeMs: 1000 }

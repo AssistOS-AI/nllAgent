@@ -28,7 +28,8 @@
       every step, who is allowed to transform it, and why a candidate cannot silently become a finding or plan.</p>
 
     <div class="callout"><strong>The central intuition.</strong> LongTextJS is the addressable memory of one concrete
-      source. CircuitJS is a frozen dataflow program of reusable judgment. A port connects the two. An operator proposes
+      source. CircuitJS is a frozen dataflow program of reusable judgment. An observation binding selects the rows that
+      cross the graph boundary. An operator proposes
       or transforms data. A verifier checks a bounded property. <code>emit</code> publishes only the accepted value.</div>
 
     <h2 id="first-principles">1. Five objects to understand first</h2>
@@ -39,7 +40,7 @@
           Unicode range in one Markdown snapshot.</td></tr>
         <tr><td>LongTextJS observation</td><td>What typed thing did the compiler observe, and where?</td><td>An
           extracted <code>document.paragraph@1</code> linked to the range containing the paragraph.</td></tr>
-        <tr><td>CircuitJS port</td><td>What kind of observation does this theory agree to consume?</td><td>Many
+        <tr><td>Observation binding</td><td>Which observations does this theory agree to consume?</td><td>Many
           extracted paragraphs, under closed-world structural coverage.</td></tr>
         <tr><td>Node output</td><td>What new immutable value did one declared operation produce?</td><td>A candidate
           with an exact-text witness, or an empty collection.</td></tr>
@@ -49,7 +50,7 @@
     </table></div>
 
     <p>A circuit does not “read the document” in the vague sense. It receives only the records bound to its input
-      ports. It does not “think inside the arrow.” Every computational arrow names a core primitive or a registered,
+      bindings. It does not “think inside the arrow.” Every computational arrow names a core primitive or a registered,
       versioned operator. Values are plain data and remain inspectable before and after each node.</p>
 
     <h2 id="interactive">2. Run the interactive mental model</h2>
@@ -115,27 +116,28 @@
       <tbody>
         <tr><td>Parse the restricted <code>.circuit.mjs</code> author expression into JSON-compatible data.</td><td>Load
           the immutable compiled graph selected by the run's release.</td></tr>
-        <tr><td>Validate circuit identity, semantic version, purpose, ports, nodes, outputs, and finite budgets.</td><td>
+        <tr><td>Validate circuit identity, semantic version, purpose, observation bindings, nodes, outputs, and finite budgets.</td><td>
           Compile the current source into LongTextJS and evaluate compatibility.</td></tr>
         <tr><td>Reject unknown operators, unknown verifiers, malformed references, hidden effects, and ordinary cycles.</td>
           <td>Bind observations that match the declared nominal type and accepted status.</td></tr>
         <tr><td>Build the dependency graph and deterministic topological order.</td><td>Resolve each node's
           <code>$port</code> and <code>$node</code> references to immutable values.</td></tr>
-        <tr><td>Reject dead nodes or unused ports that cannot affect a declared output.</td><td>Execute ready nodes,
+        <tr><td>Reject dead nodes or unused bindings that cannot affect a declared output.</td><td>Execute ready nodes,
           enforce budgets, apply guarantee ceilings, cache deterministic outputs, and append trace records.</td></tr>
         <tr><td>Prove verification dominance and derive the external observation contract by backward slicing.</td><td>
           Return outputs, per-node values, trace, duration, and later the CNL artifact.</td></tr>
-        <tr><td>Link every critical demanded port to an approved producer and pass natural benchmark cases.</td><td>Never
+        <tr><td>Link every critical demanded binding to an approved producer and pass natural benchmark cases.</td><td>Never
           modify the circuit, rulebook, benchmark, or active release.</td></tr>
       </tbody>
     </table></div>
 
-    <h2 id="references">4. How values move: <code>port()</code> and <code>node()</code></h2>
-    <p>The author helper <code>port('paragraphs')</code> becomes plain data <code>{ "$port": "paragraphs" }</code>.
+    <h2 id="references">4. How values move: <code>binding()</code> and <code>node()</code></h2>
+    <p>The author helper <code>binding('paragraphs')</code> becomes plain data <code>{ "$port": "paragraphs" }</code>.
+      The old <code>port()</code> spelling creates the same compatibility representation.
       The helper <code>node('matches')</code> becomes <code>{ "$node": "matches" }</code>. They are references, not
       JavaScript function calls executed during production.</p>
     <pre><code>inputs: {
-  observations: port('paragraphs'),    // external LongTextJS records
+  observations: binding('paragraphs'), // selected LongTextJS records
   rules: [{ id: 'ED-001', term: 'in fact', /* published policy */ }]
 }
 
@@ -147,15 +149,15 @@ inputs: {
       The result is hashed and passed to the registered implementation. This is ordinary explicit dataflow—not hidden
       state shared between nodes.</p>
 
-    <p>A direct port performs only the stable interface filter: exact observation type plus accepted status, followed
-      by cardinality. A <code>many</code> port produces one array and may legitimately produce <code>[]</code>. Payload,
-      scope, channel, joins, and order are handled by a query or operator; they are not guessed by port binding. The
+    <p>A direct observation binding selects exact type and status, applies an optional AND-list of safe local field
+      matchers, then enforces cardinality. A <code>many</code> binding produces one array and may legitimately produce
+      <code>[]</code>. Joins, grouping, order-sensitive logic, and coverage-aware absence use a query or operator. The
       practical page shows <a href="circuits-in-practice.html#multiple">zero, one, and many records</a> with executable
       JavaScript processing.</p>
 
     <pre class="mermaid">
 flowchart LR
-  PORT[LongTextJS → bound paragraphs port] --> CALL[call operator]
+  PORT[LongTextJS → paragraph binding] --> CALL[call operator]
   CALL --> CAND[FindingCandidate + witness]
   CAND --> VERIFY[verify witness]
   VERIFY --> EMIT[emit accepted findings]
@@ -167,13 +169,13 @@ flowchart LR
     <ol class="step-list">
       <li><strong>Fix budgets.</strong> The runtime selects the smaller applicable node and wall-time limits from the
         circuit and run configuration. Too many nodes stop before execution.</li>
-      <li><strong>Bind external ports.</strong> For each port, it filters <code>program.observations</code> by exact
-        nominal type and accepted status, then enforces <code>one</code>, <code>optional</code>, <code>many</code>, or
+      <li><strong>Evaluate observation bindings.</strong> For each input, it filters
+        <code>program.observations</code> by exact type, accepted status, and safe local matchers, then enforces <code>one</code>, <code>optional</code>, <code>many</code>, or
         <code>at-least-one</code> cardinality.</li>
       <li><strong>Follow compiled order.</strong> The current executor evaluates the compiler's deterministic
         topological order. Independent-node parallelism is a contract direction, not a behavior claimed by this local
         executor.</li>
-      <li><strong>Resolve node inputs.</strong> It replaces reference objects with the port or prior-node value and
+      <li><strong>Resolve node inputs.</strong> It replaces reference objects with the selected binding or prior-node value and
         computes an input digest.</li>
       <li><strong>Calculate a guarantee ceiling.</strong> If any material input is only proposed or model-judged, a
         later deterministic calculation cannot upgrade the final semantic guarantee beyond that premise.</li>
@@ -197,7 +199,7 @@ flowchart LR
         <tr><td>Verifier rejection</td><td>A candidate exists, but replay returns <code>status: reject</code>.</td><td>
           The operator proposed a witness that the trusted checker could not reproduce. <code>emit</code> filters it out,
           and diagnostics can become an issue.</td></tr>
-        <tr><td>Incompatible</td><td>Before or during port materialization.</td><td>The source cannot supply a critical
+        <tr><td>Incompatible</td><td>Before or during observation materialization.</td><td>The source cannot supply a critical
           type, status, coverage, schema, or resource demanded by the theory. The system must not interpret this as a
           clean document.</td></tr>
         <tr><td>Incomplete</td><td>Coverage evaluation.</td><td>The system may have candidates, but cannot support a
@@ -213,7 +215,7 @@ flowchart LR
       <code>narrative.mental-access@1</code>. A model may propose them, but the same interface applies:</p>
     <pre class="mermaid">
 flowchart LR
-  TEXT[Anchored source → schema-bound extractor] --> PROPOSED[Proposed observation → typed port]
+  TEXT[Anchored source → schema-bound extractor] --> PROPOSED[Proposed observation → typed binding]
   PROPOSED --> STATE[Circuit reasoning → witness]
   STATE --> VERIFY[State or structural verifier]
   VERIFY --> LIMITED[Bounded audit finding]
@@ -236,8 +238,8 @@ flowchart LR
     <div class="table-wrap"><table>
       <thead><tr><th>Validation path</th><th>Planning path</th></tr></thead>
       <tbody>
-        <tr><td><code>document.paragraph@1</code>, events, claims, or evidence enter ports.</td><td>
-          <code>document.line@1</code> or domain idea observations enter ports.</td></tr>
+        <tr><td><code>document.paragraph@1</code>, events, claims, or evidence enter observation bindings.</td><td>
+          <code>document.line@1</code> or domain idea observations enter observation bindings.</td></tr>
         <tr><td>Operators select, derive, compare, or maintain candidate violations and conclusions.</td><td>Operators
           construct document design, ordered content, dependencies, required facts, and realization guidance.</td></tr>
         <tr><td>A finding verifier checks its witness.</td><td>The plan verifier checks source-idea binding, structure,
@@ -297,7 +299,7 @@ flowchart LR
       <p>Because <code>matches</code> contains candidates. Static analysis requires the entire dependency path into
         <code>emit</code> to be dominated exclusively by verification. The runtime also filters records for an accepted
         verifier result.</p></details>
-    <details><summary>Why does the paragraph port ask for closed-world coverage?</summary>
+    <details><summary>Why does the paragraph binding ask for closed-world coverage?</summary>
       <p>The rule promises to scan every qualifying Markdown paragraph, not only retrieved candidates. The structural
         compiler can certify that finite domain. Semantic absence claims require their own appropriate coverage.</p></details>
     <details><summary>If a model proposes an event and deterministic replay accepts the timeline, what is certified?</summary>

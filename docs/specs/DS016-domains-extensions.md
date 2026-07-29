@@ -19,7 +19,8 @@ Every extension must provide versioned LongTextJS schemas, neutral producers or 
 The implemented programmer surface for new algorithms is `NllRuntimeExtension`. A host-selected self-contained ESM
 module exports exact operator and verifier definitions with executable JavaScript plus machine-readable contracts. The
 host installs it before circuit compilation; circuits refer only to its versioned registry ids. A published release that
-uses it locks the module digest. This local single-file loader is appropriate for focused algorithms and examples. A
+uses it locks the module digest. Its structured input and output value schemas are checked against graph wiring where
+types are available and against actual runtime values on every call. This local single-file loader is appropriate for focused algorithms and examples. A
 larger external solver still belongs behind a controlled adapter and package-specific deployment contract rather than
 being smuggled through a circuit callback.
 
@@ -79,6 +80,14 @@ Response: No. The extension is trusted application code and may implement an alg
 execute declarative theory: it chooses the extension id, passes values, and routes the result through verification.
 Learning may propose the need, contract, examples, and tests for an operator, but it cannot install executable extension
 code into production automatically.
+
+### Question #6: What may a Coding Agent do when a use case needs a new trusted algorithm?
+
+Response: It may preserve the natural reproducer and propose the complete runtime-extension contract, ordinary
+JavaScript implementation, independent verifier, structured schemas, budgets, security effects, CNL example, and
+tests in an agent-owned proposal. It may also author a candidate circuit against an extension already installed and
+digest-locked by the host. It cannot install new trusted code or describe an unavailable proposal as production
+support; the dependent candidate remains blocked or explicitly limited until platform review and installation.
 
 # Conclusion
 

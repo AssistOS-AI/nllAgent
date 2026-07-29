@@ -46,7 +46,7 @@ flowchart LR
       <li><strong>Lock and snapshot the project.</strong> <code>src/learning/runner.mjs</code> acquires the named agent’s learning lock, copies the requested Markdown rules, selects open issues, records the active release, and creates <code>learning-runs/&lt;id&gt;/</code>. Each named agent therefore learns against its own authority, benchmark, and release lineage.</li>
       <li><strong>Build a disposable workspace.</strong> The runner copies authoring roots—<code>circuits</code>, <code>schemas</code>, <code>extraction</code>, <code>candidates</code>, <code>benchmark</code>, and <code>proposals</code>—plus read-only context such as authority, feedback, issues, DS contracts, serious issues, the active release, and trusted registry descriptions.</li>
       <li><strong>Expose only learning skills.</strong> <code>src/learning/workspace.mjs</code> links exactly five agent-local skills: scope the project, compile the theory, build the benchmark, learn from issues, and prepare a candidate for release. Production translation and unrelated repository-maintenance skills are absent.</li>
-      <li><strong>Let the Coding Agent author a coherent candidate.</strong> The agent may add or change observation schemas, extraction profiles, restricted CircuitJS modules, natural microcases, proposals, and candidate packages. It returns a schema-valid terminal result. OpenAI Codex is the current reference adapter; the architecture depends on the generic staged-workspace and result contract.</li>
+      <li><strong>Let the Coding Agent author a coherent candidate.</strong> The agent may add or change observation schemas, extraction profiles, restricted CircuitJS modules, natural microcases, proposals, and candidate packages. For each relevant platform limitation it also records a capability gap as resolved, mitigated, or blocked. It returns a schema-valid terminal result. OpenAI Codex is the current reference adapter; the architecture depends on the generic staged-workspace and result contract.</li>
       <li><strong>Audit every changed path.</strong> After the process exits, the host compares before and after snapshots. Deletions, symlinks, forbidden paths, non-regular files, absent output, and schema-invalid output reject promotion. Only whitelisted authoring files and current learning-run outputs are copied back to the real agent workspace.</li>
       <li><strong>Stop at the candidate boundary.</strong> Learning records candidate versions and limitations but cannot call the release manager, write <code>releases/</code>, or change <code>active-release.json</code>.</li>
       <li><strong>Publish only on explicit maintainer request.</strong> <code>nllagent release publish</code> validates the selected candidate, derives contracts, checks producer alignment, snapshots candidate and benchmark bytes, runs the available suites, and confirms neither snapshot changed.</li>
@@ -65,8 +65,15 @@ flowchart LR
         <tr><td>Witness and verifier references</td><td>What concrete evidence allows a trusted checker to accept the candidate?</td></tr>
         <tr><td>Natural benchmark cases</td><td>Which positive, close-negative, exception, boundary, ambiguity, and coverage texts fix operational meaning?</td></tr>
         <tr><td>Compatibility profile and limitations</td><td>For which formats, languages, structures, producers, and evidence conditions may this candidate be published?</td></tr>
+        <tr><td>Capability-gap report</td><td>Which concrete limitation affects this use case, what evidence reproduces it, and is it resolved, mitigated, or blocked?</td></tr>
       </tbody>
     </table></div>
+
+    <p>A blocked capability is still useful work when the missing layer is protected. The proposal must state the
+      required observation or operator contract, structured value schemas, verifier boundary, budgets, and benchmark
+      family. It must not manufacture identity from a matching name, infer absence from an empty open-world collection,
+      invent unsourced world facts, or embed a JavaScript callback in a learned circuit. Those shortcuts make one case
+      look solved while weakening the architecture.</p>
 
     <h2 id="example">Worked repair: dialogue is not narration</h2>
     <p>Assume a run reports the phrase “in fact” inside a line of dialogue, but the style rule applies only to narration. A reviewer rejects the finding and marks the disputed scope. The learning system should not add a document-specific exception.</p>
@@ -91,7 +98,7 @@ flowchart LR
     </table></div>
 
     <h2 id="limits">What the gate proves today</h2>
-    <p>The implemented gate validates manifests, circuits, operator and verifier links, verification dominance, compatibility profiles, observation-contract alignment, available agent benchmarks, byte stability, copied snapshot integrity, semantic diff, impact map, and release digests.</p>
+    <p>The implemented gate validates manifests, circuits, operator and verifier links, verification dominance, compatibility profiles, observation-contract alignment, available agent benchmarks, byte stability, copied snapshot integrity, semantic diff, impact map, and release digests. The learning skills also require a capability-gap report when a scoped serious issue applies; this report is review evidence, not proof that the missing platform feature exists.</p>
     <div class="callout warning"><strong>Current publication-check limit.</strong> The command does not yet generate mutated CircuitJS or LongTextJS programs and calculate a mutation score. It also does not execute differential implementations, shadow/canary traffic, or a complete metric program. Natural cases stored in a <code>mutations</code> suite are valuable cases, but are not executed program mutation. The publication record reports only checks that actually ran.</div>
 
     <nav class="page-nav" aria-label="Learning reading path">

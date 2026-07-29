@@ -6,6 +6,14 @@ function port(name) {
   return reference('port', name);
 }
 
+function binding(name) {
+  return reference('port', name);
+}
+
+function observationBinding(definition) {
+  return definition;
+}
+
 function node(name) {
   return reference('node', name);
 }
@@ -18,4 +26,4 @@ function queryFirstCircuit(definition) {
   return definition;
 }
 
-export { circuit, node, port, queryFirstCircuit };
+export { binding, circuit, node, observationBinding, port, queryFirstCircuit };

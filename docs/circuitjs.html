@@ -23,12 +23,12 @@
     <div class="callout"><strong>New to graph execution?</strong> Read
       <a href="circuits-in-practice.html">Circuits, without the mystery</a> for the practical programmer model, then use
       the <a href="circuit-tutorial.html">interactive circuit execution tutorial</a>. It lets you move from a source
-      through LongTextJS, port binding, operator output, witness replay, <code>emit</code>, and both CNL profiles one
+      through LongTextJS, observation binding, operator output, witness replay, <code>emit</code>, and both CNL profiles one
       stage at a time.</div>
 
     <h2 id="lifecycle">A theory has a different lifecycle</h2>
     <p>A production document may change daily. A published rule theory should remain stable across many documents until authority, evidence, or feedback justifies a new release. CircuitJS is therefore authored and tested in learning, locked into an immutable release by a manual publication command, and only read during production.</p>
-    <p>The five <code>foundation-core</code> circuits are versioned platform theory rather than agent release files. The runtime prepends them in <code>core</code> mode and records their pack digest beside the selected release. They still use ordinary ports, registered operators, independent verifiers, and <code>emit</code>; <a href="quick-tutorial.html#circuit">the Quick Tutorial shows the exact DSL shape</a>.</p>
+    <p>The five <code>foundation-core</code> circuits are versioned platform theory rather than agent release files. The runtime prepends them in <code>core</code> mode and records their pack digest beside the selected release. They still use ordinary observation bindings, registered operators, independent verifiers, and <code>emit</code>; <a href="quick-tutorial.html#circuit">the Quick Tutorial shows the exact DSL shape</a>.</p>
 
     <pre class="mermaid">
 flowchart LR
@@ -63,7 +63,7 @@ flowchart LR
       id: 'matches',
       primitive: 'call',
       operator: 'text.lexical-occurrences@1',
-      inputs: { observations: port('paragraphs'), rules: [/* ED-001 */] }
+      inputs: { observations: binding('paragraphs'), rules: [/* ED-001 */] }
     },
     {
       id: 'verified',
@@ -84,7 +84,7 @@ flowchart LR
     <h2 id="read-it">How to read the graph</h2>
     <ol class="step-list">
       <li><strong>Identity and authority.</strong> The circuit has a semantic version and a source-rule reference. A finding can therefore return to the rulebook passage that authorized it.</li>
-      <li><strong>Typed port.</strong> <code>paragraphs</code> accepts many <code>document.paragraph@1</code> observations, but only with <code>extracted</code> status and closed-world coverage. It is critical, so a missing producer blocks the circuit.</li>
+      <li><strong>Typed observation binding.</strong> <code>paragraphs</code> accepts many <code>document.paragraph@1</code> observations, but only with <code>extracted</code> status and closed-world coverage. It is critical, so a missing producer blocks the circuit. <code>binding()</code> names the selected immutable value; <code>port()</code> remains an exact compatibility alias for older sources.</li>
       <li><strong>Registered computation.</strong> <code>call</code> invokes <code>text.lexical-occurrences@1</code>. The circuit supplies policy data; the operator supplies reviewed executable behavior.</li>
       <li><strong>Independent check.</strong> <code>verify</code> gives the candidate and source evidence to <code>text.exact-match@1</code>. A rejected candidate never reaches the output.</li>
       <li><strong>Controlled publication.</strong> <code>emit</code> consumes only the verified result. Static analysis proves that every path to this output is verification-dominated.</li>
@@ -98,7 +98,7 @@ flowchart LR
     <p>Restricted circuit source does not make the runtime computationally weak. A host programmer can implement an
       ordinary JavaScript function in a trusted <code>NllRuntimeExtension</code>, install its operator and verifier into
       the registries, and use their exact ids in the graph. The function receives resolved plain-data inputs and a
-      read-only LongTextJS context; its plain-data result becomes the node output.</p>
+      read-only LongTextJS context; its schema-checked plain-data result becomes the node output.</p>
     <p>The runnable <code>examples/runtime-extension</code> example counts paragraph words with JavaScript, constructs a
       witness, independently recounts it in a verifier, and emits one finding. Run it with
       <code>node examples/runtime-extension/run.mjs</code>. The
@@ -112,19 +112,24 @@ flowchart LR
       <thead><tr><th>Construction</th><th>Fields</th><th>Meaning and restrictions</th></tr></thead>
       <tbody>
         <tr><td>Top-level circuit</td><td><code>kind</code>, <code>id</code>, <code>version</code>, <code>purpose</code>, <code>description</code>, <code>sourceRuleReferences</code></td><td>Stable theory identity, validation/planning purpose, human summary, and immutable authority links. <code>kind</code> is <code>CircuitJS</code>.</td></tr>
-        <tr><td>Graph interface</td><td><code>inputs</code>, <code>outputs</code></td><td>Named external observation ports and named graph result references. Only output-reachable inputs enter the compiled contract.</td></tr>
+        <tr><td>Graph interface</td><td><code>inputs</code>, <code>outputs</code></td><td>Named external observation bindings and named graph result references. Only output-reachable inputs enter the compiled contract.</td></tr>
         <tr><td>Execution body</td><td><code>nodes</code>, <code>budgets</code></td><td>Finite node list plus graph node and wall-time ceilings. Node ids are unique and references must form an acyclic dependency graph.</td></tr>
-        <tr><td>Input port</td><td><code>type</code>/<code>types</code>, <code>cardinality</code>, <code>statuses</code>, <code>coverage</code>, <code>critical</code></td><td>Exact nominal observation family, <code>one</code>/<code>optional</code>/<code>many</code> shape, accepted epistemic states, completeness demand, and fail-closed importance.</td></tr>
-        <tr><td>Input refinements</td><td><code>scopeRelation</code>, <code>guarantee</code></td><td>Optional structural relationship and minimum premise contract. Runtime compatibility must establish them; declaration alone creates no evidence. General port ordering and deduplication fields are not implemented.</td></tr>
+        <tr><td>Observation binding</td><td><code>type</code>/<code>types</code>, <code>cardinality</code>, <code>statuses</code>, <code>coverage</code>, <code>critical</code></td><td>Exact nominal observation family, <code>one</code>/<code>optional</code>/<code>many</code> shape, accepted epistemic states, completeness demand, and fail-closed importance.</td></tr>
+        <tr><td>Binding refinements</td><td><code>where</code>, <code>scopeRelation</code>, <code>guarantee</code></td><td><code>where</code> is an AND-list of safe local field matchers. Structural relationship and minimum premise requirements remain explicit. Joins, absence, general ordering, and deduplication are not binding semantics.</td></tr>
         <tr><td>Node</td><td><code>id</code>, <code>primitive</code>, <code>operator</code>/<code>verifier</code>, <code>inputs</code>, <code>effects</code></td><td>The primitive chooses orchestration semantics. An executable registry id is exact and versioned; its permitted primitive and declared effects are checked by the compiler.</td></tr>
         <tr><td>Generated logical metadata</td><td><code>logical</code>, <code>authoringProfile</code>, author/graph digests</td><td>Compiler-owned traceability for lowered query-first graphs. Direct authors cannot spoof the profile marker.</td></tr>
         <tr><td>References</td><td><code>{ "$port": name }</code>, <code>{ "$node": id }</code></td><td>Immutable whole-value references. No dynamic property lookup or hidden ambient value is available.</td></tr>
       </tbody>
     </table></div>
 
-    <h2 id="ports">Ports are the public interface of a theory</h2>
-    <p>Inputs currently declare nominal type and version, cardinality, accepted statuses, coverage, criticality, scope relation, and guarantee requirements. The compiler traces which inputs can actually affect an output and persists an <code>ObservationContract</code>. Dead declarations and hidden side paths are rejected. General port ordering and deduplication contracts remain an extension rather than ignored current behavior.</p>
+    <h2 id="ports">Observation bindings are the document-side interface</h2>
+    <p>Inputs declare nominal type and version, cardinality, accepted statuses, coverage, criticality, safe local matchers, scope relation, and guarantee requirements. The compiler traces which inputs can affect an output and persists an <code>ObservationContract</code> including matcher field demand. Dead declarations and hidden side paths are rejected. Query-First owns cross-relation, ordering, aggregation, and evidence-aware absence semantics.</p>
     <p>This is how CircuitJS asks the document side for neutral premises without sending the desired verdict. The weak-phrase circuit asks for all qualifying paragraphs. A continuity circuit asks for leave, retrieve, transfer, and use events—including negated or hypothetical candidates—not for “evidence that continuity is broken.”</p>
+    <p>Matchers are evaluated as an AND-list. <code>eq</code>, <code>neq</code>, <code>in</code>, and array
+      <code>includes</code> use strict values; <code>gt</code>, <code>gte</code>, <code>lt</code>, and <code>lte</code>
+      accept finite numbers only; string <code>includes</code> and <code>startsWith</code> require strings; and
+      <code>exists</code> distinguishes a present value from <code>null</code> or an unavailable path. No JavaScript
+      coercion, regular expression, callback, OR expression, or negative coverage claim is hidden in a binding.</p>
 
     <h2 id="execution">Primitives coordinate; operators reason</h2>
     <div class="table-wrap"><table>
@@ -138,13 +143,15 @@ flowchart LR
     </table></div>
     <p>The runtime currently implements the static core and a set of deterministic relational, temporal, state, unit, interval, fixpoint, argumentation, lexical, semantic, and replay operators used by tests and example packages. The broader primitive catalog is an extension contract; unsupported semantics must block rather than appear to work.</p>
 
-    <h3 id="constructors">The four author constructors</h3>
+    <h3 id="constructors">The direct author constructors</h3>
     <div class="table-wrap"><table>
       <thead><tr><th>Constructor</th><th>Generated data</th><th>Semantics</th></tr></thead>
       <tbody>
         <tr><td><code>circuit(definition)</code></td><td>The definition object unchanged before lossless normalization.</td><td>Marks the single allowed module expression; it executes no domain algorithm.</td></tr>
         <tr><td><code>queryFirstCircuit(definition)</code></td><td>The query-first definition unchanged before lossless normalization.</td><td>Marks the experimental author profile; compilation validates and generates an ordinary <code>CircuitJS</code> graph.</td></tr>
-        <tr><td><code>port(name)</code></td><td><code>{ "$port": name }</code></td><td>References the immutable array bound from LongTextJS for one input port.</td></tr>
+        <tr><td><code>observationBinding(definition)</code></td><td>The definition unchanged.</td><td>Names the type/status/local-matcher selector at the graph boundary.</td></tr>
+        <tr><td><code>binding(name)</code></td><td><code>{ "$port": name }</code></td><td>Recommended reference to the immutable selected array.</td></tr>
+        <tr><td><code>port(name)</code></td><td><code>{ "$port": name }</code></td><td>Compatibility alias for <code>binding(name)</code>; it performs no matching.</td></tr>
         <tr><td><code>node(name)</code></td><td><code>{ "$node": name }</code></td><td>References the complete immutable output of a dependency node.</td></tr>
       </tbody>
     </table></div>
@@ -222,7 +229,8 @@ flowchart LR
       <a href="operators.html">How operators and verifiers execute</a>
       <a href="circuits-in-practice.html#javascript">How to add trusted JavaScript processing</a>
       <a href="benchmark.html">How natural cases test a theory</a>
-      <a href="connection.html">How ports connect to LongTextJS</a>
+      <a href="advanced-circuit-tutorial.html">Run bindings, custom code, foundation, and CNL together</a>
+      <a href="connection.html">How bindings connect to LongTextJS</a>
     </nav>
 
     <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Experimental query profile: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>

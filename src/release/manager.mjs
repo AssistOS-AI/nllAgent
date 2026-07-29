@@ -43,6 +43,8 @@ async function validateCandidate(agent, version, registries) {
   invariant(new Set(manifest.circuits).size === manifest.circuits.length, 'invalid-release', 'Candidate circuit paths must be unique.');
   invariant(manifest.planningCircuits === undefined || Array.isArray(manifest.planningCircuits),
     'invalid-release', 'planningCircuits must be an array.');
+  const capabilityGapReport = manifest.capabilityGapReport
+    ? await loadCapabilityGapReport(root, manifest.capabilityGapReport) : null;
   const allCircuitPaths = [...manifest.circuits, ...(manifest.planningCircuits || [])];
   invariant(new Set(allCircuitPaths).size === allCircuitPaths.length,
     'invalid-release', 'Validation and planning circuit paths must be unique.');
@@ -107,8 +109,46 @@ async function validateCandidate(agent, version, registries) {
   const snapshot = await candidateSnapshot(root);
   return {
     root, manifest, manifestDigest: digestJson(manifest), compiledCircuits, compiledPlanningCircuits,
-    extractionProfiles, compatibility, authority, alignment, snapshot, runtimeExtensions
+    extractionProfiles, compatibility, authority, alignment, snapshot, runtimeExtensions,
+    capabilityGapReport
   };
+}
+
+async function loadCapabilityGapReport(root, relativePath) {
+  invariant(typeof relativePath === 'string' && relativePath.length > 0,
+    'invalid-release', 'capabilityGapReport must be a repository-relative file path.');
+  const path = containedPath(root, relativePath);
+  const file = await lstat(path).catch(() => null);
+  invariant(file?.isFile() && !file.isSymbolicLink(), 'invalid-release',
+    'capabilityGapReport must name a regular file.');
+  await assertRealPathContained(root, path);
+  return validateCapabilityGapReport(await readJson(path));
+}
+
+function validateCapabilityGapReport(report) {
+  invariant(report?.kind === 'CapabilityGapReport' && report.schemaVersion === 1,
+    'invalid-release', 'Capability-gap report requires kind CapabilityGapReport and schemaVersion 1.');
+  invariant(Array.isArray(report.gaps) && report.gaps.length > 0,
+    'invalid-release', 'Capability-gap report requires at least one applicable gap.');
+  const identities = new Set();
+  for (const [index, gap] of report.gaps.entries()) {
+    const label = `Capability gap ${index}`;
+    invariant(gap && typeof gap === 'object' && !Array.isArray(gap),
+      'invalid-release', `${label} must be an object.`);
+    invariant(/^serious-issue:[1-9]\d*$/u.test(gap.issue || '') && !identities.has(gap.issue),
+      'invalid-release', `${label} requires a unique serious-issue:<number> identity.`);
+    identities.add(gap.issue);
+    invariant(['resolved', 'mitigated', 'blocked'].includes(gap.status),
+      'invalid-release', `${label} has invalid status ${gap.status}.`);
+    for (const field of ['summary', 'reproducer', 'guaranteeCeiling']) {
+      invariant(typeof gap[field] === 'string' && gap[field].trim(),
+        'invalid-release', `${label} requires ${field}.`);
+    }
+    invariant(Array.isArray(gap.evidence) && gap.evidence.length > 0
+      && gap.evidence.every((item) => typeof item === 'string' && item.length > 0),
+    'invalid-release', `${label} requires non-empty evidence references.`);
+  }
+  return report;
 }
 
 function validateCnlPlanningAuthority(planningCircuits, authority) {
@@ -293,6 +333,7 @@ async function publishRelease(agent, version, registries, options = {}) {
       checks: [
         'manifest', 'circuit-static-analysis', 'operator-linking', 'verification-dominance',
         ...(candidate.runtimeExtensions.length ? ['runtime-extension-digest-locking'] : []),
+        ...(candidate.capabilityGapReport ? ['capability-gap-report'] : []),
         'compatibility-profile', 'observation-contract-producer-alignment',
         'planning-circuit-and-cnl-authority-linking',
         ...(queryFirstArtifacts.length ? ['query-first-normalization-and-source-map'] : []),
@@ -363,6 +404,7 @@ export {
   computeSemanticDiff,
   listFiles,
   publishRelease,
+  validateCapabilityGapReport,
   validateCnlPlanningAuthority,
   validateCandidate,
   validateObservationAlignment

@@ -24,7 +24,7 @@
 
     <p>New readers should begin with the <a href="quick-tutorial.html">Quick Tutorial</a>: one source contradiction,
       one default rule, and one three-node circuit shown in author DSL. Then read
-      <a href="circuits-in-practice.html">Circuits, without the mystery</a> for a practical account of port binding,
+      <a href="circuits-in-practice.html">Circuits, without the mystery</a> for a practical account of observation bindings,
       filtering, multiple records, cycles, and custom JavaScript operators. Continue with
       <a href="concepts.html">Concepts and foundations</a> for vocabulary, scientific lineage, guarantee levels, and
       ethical commitments.</p>
@@ -67,7 +67,7 @@ flowchart LR
       </section>
       <section class="concept-card">
         <h2>CircuitJS: the theory side</h2>
-        <p>One rulebook lineage becomes typed ports, declarative nodes, registered operators, exceptions, budgets, verifiers, finding contracts, and links to authority. It is reused across documents and changes only through a new published release.</p>
+        <p>One rulebook lineage becomes typed observation bindings, declarative nodes, registered operators, exceptions, budgets, verifiers, finding contracts, and links to authority. It is reused across documents and changes only through a new published release.</p>
         <p><a href="circuitjs.html">Read the CircuitJS program</a> and then <a href="operators.html">follow its execution</a>.</p>
       </section>
     </div>
@@ -115,6 +115,7 @@ node bin/nllagent.mjs plan \
         <tr><td>What do the concepts and abbreviations mean, and where do they come from?</td><td><a href="concepts.html">Concepts and foundations</a></td></tr>
         <tr><td>Why are there two DSLs?</td><td><a href="dsl.html">Two DSLs, one linter</a></td></tr>
         <tr><td>How does a CircuitJS graph consume LongTextJS and execute node by node?</td><td><a href="circuit-tutorial.html">Interactive circuit execution tutorial</a></td></tr>
+        <tr><td>Can I run matching, custom JavaScript, foundation checks, and final CNL together?</td><td><a href="advanced-circuit-tutorial.html">Advanced combined circuit tutorial</a></td></tr>
         <tr><td>How do routine circuits become typed queries and decision tables?</td><td><a href="query-first.html">Experimental query-first authoring</a> and its <a href="query-first-tutorial.html">execution tutorial</a></td></tr>
         <tr><td>How do the DSLs connect without a universal ontology?</td><td><a href="connection.html">The observation contract</a></td></tr>
         <tr><td>What exactly happens after <code>nllagent run</code>?</td><td><a href="verification.html">Architecture of one verification</a></td></tr>
@@ -131,8 +132,10 @@ node bin/nllagent.mjs plan \
       planning CircuitJS modules, canonical CNL products, registered operators and verifiers, compatibility and coverage
       checks, persistent runs, isolated learning, natural benchmarks, and immutable published releases.</p>
     <p>Host applications can also install a content-addressed <code>NllRuntimeExtension</code> containing real
-      JavaScript operators and verifiers. The graph remains declarative, extension inputs and outputs remain plain data,
-      and published uses lock the implementation digest. The standard CLI does not load extension paths.</p>
+      JavaScript operators and verifiers. Structured value schemas are checked at compilation and runtime, the graph
+      remains declarative, and published uses lock the implementation digest. Direct circuit inputs now support safe
+      local observation matchers through <code>observationBinding()</code>; joins and evidence-aware absence remain
+      Query-First operations. The standard CLI does not load extension paths.</p>
     <p>Query-first CircuitJS is now an experimental part of that implementation. The restricted loader accepts its bounded plain-data query/table subset, compilation lowers it to ordinary CircuitJS, release artifacts retain its QueryContract and source map, and benchmarks compare reference with lowered execution. Current editorial examples remain direct because their three-node operator wrappers are already simpler. DS020 distinguishes this implemented subset from aggregates, patterns, native indexes, and stronger analysis that still remain future work.</p>
     <p>It does not claim universal document understanding. Live model profiles are not exercised by the default offline checks; pre-publication checks do not yet execute generated semantic mutations, an independently implemented native query engine, shadow/canary traffic, or an agent-owned idea-to-plan and plan-to-document quality benchmark. Planning is structurally checked and covered by controlled integration tests, not by a statistical claim about prose quality. The registry also lacks complete machine-typed contracts for arbitrary semantic query schemas and advanced operators. These concrete limits remain in <a href="../serious_issues.md">serious_issues.md</a>.</p>
 

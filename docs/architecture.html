@@ -75,7 +75,7 @@ flowchart LR
   GRAPH --> VERIFY[Existing verifier + emit]
   INDEX[Discardable physical index] -. optimization only .-> QUERY
     </pre>
-    <p class="diagram-caption"><strong>Status boundary.</strong> The implemented subset generates ordinary ports and nodes, exact anti-join coverage checks, QueryContracts, source maps, replay witnesses, and benchmark differential records. Native indexes and the extended algebra remain unavailable.</p>
+    <p class="diagram-caption"><strong>Status boundary.</strong> The implemented subset generates ordinary observation bindings and nodes, exact anti-join coverage checks, QueryContracts, source maps, replay witnesses, and benchmark differential records. Native indexes and the extended algebra remain unavailable.</p>
 
     <h2 id="deployment">Implementation shape</h2>
     <p>The current product is a modular local Node.js application, not a required microservice deployment. <code>src/runtime/production-run.mjs</code> owns direct validation, <code>src/generation/runner.mjs</code> owns planning and the optional realization branch, <code>src/runtime/analyzer.mjs</code> supplies the shared validation path, <code>src/learning/runner.mjs</code> owns isolated authoring, and <code>src/release/manager.mjs</code> owns explicit publication and active-pointer replacement.</p>

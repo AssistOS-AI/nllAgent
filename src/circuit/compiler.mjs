@@ -1,5 +1,9 @@
 import { deepFreeze, digestJson, normalizeJson } from '../core/canonical.mjs';
 import { NllError, invariant } from '../core/errors.mjs';
+import {
+  observationBindingFields, validateObservationBindingKeys
+} from '../runtime/observation-bindings.mjs';
+import { validateValueAgainstSchema } from '../runtime/value-schema.mjs';
 import { lowerQueryFirstCircuit } from './query-first/compiler.mjs';
 
 const PRIMITIVES = new Set([
@@ -103,6 +107,7 @@ function compileCircuit(source, registries) {
       indegree.set(node.id, indegree.get(node.id) + 1);
     }
     validatePorts(node.inputs || {}, circuit.inputs, node.id);
+    validateNodeInputSchema(node, nodes, circuit.inputs, registries);
   }
 
   const ready = [...nodes.keys()].filter((id) => indegree.get(id) === 0).sort();
@@ -166,6 +171,30 @@ function compileCircuit(source, registries) {
   });
 }
 
+function validateNodeInputSchema(node, nodes, ports, registries) {
+  const implementation = node.operator ? registries.operators.get(node.operator)
+    : node.verifier ? registries.verifiers.get(node.verifier) : null;
+  if (!implementation?.inputSchema || typeof implementation.inputSchema !== 'object') return;
+  validateValueAgainstSchema(node.inputs || {}, implementation.inputSchema, {
+    code: 'circuit-schema-mismatch',
+    label: `Node ${node.id} input`,
+    resolveReference(reference) {
+      if (reference.$port) {
+        const portDefinition = ports[reference.$port];
+        return portDefinition ? {
+          type: 'array', items: { type: 'object', properties: {}, additionalProperties: true }
+        } : null;
+      }
+      const dependency = nodes.get(reference.$node);
+      const dependencyImplementation = dependency?.operator
+        ? registries.operators.get(dependency.operator)
+        : dependency?.verifier ? registries.verifiers.get(dependency.verifier) : null;
+      return typeof dependencyImplementation?.outputSchema === 'object'
+        ? dependencyImplementation.outputSchema : null;
+    }
+  });
+}
+
 function deriveObservationContract(circuit) {
   const nodes = new Map(circuit.nodes.map((node) => [node.id, node]));
   const pending = [...referencedNodes(circuit.outputs)];
@@ -191,7 +220,9 @@ function deriveObservationContract(circuit) {
       coverage: port.coverage || 'any',
       critical: port.critical !== false,
       scopeRelation: port.scopeRelation || null,
-      guarantee: port.guarantee || null
+      guarantee: port.guarantee || null,
+      fields: observationBindingFields(port),
+      where: [...(port.where || [])]
     }))
   };
 }
@@ -213,6 +244,7 @@ function validatePorts(value, ports, nodeId) {
 function validateInputPortDefinitions(ports) {
   for (const [name, port] of Object.entries(ports)) {
     invariant(port && typeof port === 'object' && !Array.isArray(port), 'invalid-circuit', `Input port ${name} must be an object.`);
+    validateObservationBindingKeys(port, `Input binding ${name}`);
     const types = port.types || (port.type ? [port.type] : []);
     invariant(Array.isArray(types) && types.length > 0 && types.every((type) => typeof type === 'string' && NOMINAL_TYPE_PATTERN.test(type)), 'invalid-circuit', `Input port ${name} requires versioned nominal types.`);
     invariant(!port.type || !port.types, 'invalid-circuit', `Input port ${name} cannot declare both type and types.`);
@@ -254,5 +286,6 @@ export {
   referencedNodes,
   referencedPorts,
   validateBudgets,
-  validateInputPortDefinitions
+  validateInputPortDefinitions,
+  validateNodeInputSchema
 };

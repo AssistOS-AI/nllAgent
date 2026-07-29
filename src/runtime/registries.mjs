@@ -1,4 +1,5 @@
 import { NllError, invariant } from '../core/errors.mjs';
+import { normalizeValueSchema } from './value-schema.mjs';
 
 class Registry {
   constructor(kind) {
@@ -15,10 +16,17 @@ class Registry {
       'invalid-registry-entry', `${entry.id} primitives must be a non-empty string array.`);
     }
     if (this.entries.has(entry.id)) throw new NllError('duplicate-registry-entry', `${entry.id} is already registered.`);
+    const normalizedSchemas = {};
+    for (const name of ['inputSchema', 'outputSchema']) {
+      if (entry[name] && typeof entry[name] === 'object') {
+        normalizedSchemas[name] = normalizeValueSchema(entry[name]);
+      }
+    }
     this.entries.set(entry.id, Object.freeze({
       effects: [], deterministic: true,
       ...(this.kind === 'operator' ? { primitives: ['call'] } : {}),
-      ...entry
+      ...entry,
+      ...normalizedSchemas
     }));
     return this;
   }

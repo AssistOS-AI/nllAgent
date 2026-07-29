@@ -53,7 +53,7 @@ flowchart LR
       </section>
       <section class="concept-card" id="circuitjs">
         <h2>CircuitJS</h2>
-        <p>Created from authority and calibration, then frozen in a release. It declares typed ports, graph nodes, registered operators, budgets, error routes, verifiers, explanation policy, and finding contracts. It is a restricted declarative graph.</p>
+        <p>Created from authority and calibration, then frozen in a release. It declares typed observation bindings, graph nodes, registered operators, budgets, error routes, verifiers, explanation policy, and finding contracts. It is a restricted declarative graph.</p>
         <p><a href="circuitjs.html">Open the theory-side tutorial →</a></p>
       </section>
     </div>
@@ -64,11 +64,11 @@ flowchart LR
       <tbody>
         <tr><td>LongTextJS</td><td>Normally no hand-authored module. Deterministic ingestion and approved
           materializers compile one source revision.</td><td>A JSON-compatible <code>LongTextProgram</code> under
-          <code>longtextjs-json@1</code>.</td><td>Read-only relation adapters, compatibility checks, CircuitJS port
+          <code>longtextjs-json@1</code>.</td><td>Read-only relation adapters, compatibility checks, CircuitJS observation
           binding, queries, and evidence replay interpret the data.</td></tr>
         <tr><td>Direct CircuitJS</td><td>One restricted
           <code>export default circuit({...})</code> expression in <code>.circuit.mjs</code>.</td><td>A finite plain-data
-          graph containing ports, primitive nodes, references, budgets, outputs, and exact registry identities.</td>
+          graph containing observation bindings, primitive nodes, references, budgets, outputs, and exact registry identities.</td>
           <td>The graph compiler and scheduler execute registered, versioned primitive semantics.</td></tr>
         <tr><td>Query-first CircuitJS</td><td>One restricted
           <code>export default queryFirstCircuit({...})</code> expression using data constructors.</td><td>A plain-data
@@ -90,8 +90,8 @@ flowchart LR
       <a href="circuits-in-practice.html#javascript">the runnable custom-operator example</a>.</p>
 
     <h2 id="not-universal">Why not use one universal representation?</h2>
-    <p>A scene, a legal obligation, and a pressure measurement do not share the same truth conditions, scope, exceptions, or verifier. A giant ontology would move those differences into opaque payloads and operators. nllAgent standardizes a smaller common boundary—type, source, anchor, scope, status, coverage, port, witness, and guarantee—while domain packages define the meanings they actually need.</p>
-    <p>The languages therefore do not need equal ontologies. LongTextJS may preserve observations unused by the current theory. CircuitJS may derive concepts, such as <code>continuityViolation</code>, that should never be extracted directly from source text. They need agreement only at the input ports that can influence a finding.</p>
+    <p>A scene, a legal obligation, and a pressure measurement do not share the same truth conditions, scope, exceptions, or verifier. A giant ontology would move those differences into opaque payloads and operators. nllAgent standardizes a smaller common boundary—type, source, anchor, scope, status, coverage, binding, witness, and guarantee—while domain packages define the meanings they actually need.</p>
+    <p>The languages therefore do not need equal ontologies. LongTextJS may preserve observations unused by the current theory. CircuitJS may derive concepts, such as <code>continuityViolation</code>, that should never be extracted directly from source text. They need agreement only at output-reachable observation bindings.</p>
     <p>LongTextJS nevertheless has a common upper ontology: mentions, scoped entity hypotheses, identity candidates,
       typed observations, scopes, worlds, time, status, provenance, alternatives, coverage, and gaps. What it does not
       have is an always-on domain ontology that declares every capitalized token an entity, every verb an actual event,
@@ -107,7 +107,7 @@ flowchart LR
     <p>This is why the implementation does not use SQL or JavaScript callbacks. The useful abstraction is not “run arbitrary queries”; it is “state the selected domain, statuses, scope, coverage, dependencies, alternatives, witness, and verifier in one inspectable value.” The <a href="query-first.html">experimental subset</a> implements exactly that bounded path and rejects unsupported forms.</p>
 
     <h2 id="why-it-works">Why the split remains executable</h2>
-    <p>The CircuitJS compiler derives an observation contract from actual graph dependencies. Manual publication links every critical port to a structural producer, extraction profile, or approved adapter. Production checks the concrete LongTextJS materialization against that contract. This prevents two independently named vocabularies from merely looking compatible.</p>
+    <p>The CircuitJS compiler derives an observation contract from actual graph dependencies. Manual publication links every critical binding to a structural producer, extraction profile, or approved adapter. Production checks the concrete LongTextJS materialization and local matcher cardinality against that contract. This prevents two independently named vocabularies from merely looking compatible.</p>
     <p>Continue to <a href="connection.html">The observation contract</a> for the exact static and runtime checks, then follow either <a href="verification.html">CNL audit mode</a>, <a href="generation.html">CNL specification mode</a>, or <a href="learning-architecture.html">one learning cycle</a>.</p>
 
     <footer>Normative language contracts: <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Experimental query-first profile: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>

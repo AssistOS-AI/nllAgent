@@ -23,6 +23,15 @@ Read `docs/specs/DS004-artifacts-releases.md`, `DS012-benchmarks-release-gate.md
 8. Reject a candidate that claims an unsupported query-first dialect. When the host advertises support, require normalized query/table artifacts, QueryContracts, source maps, static diagnostics, generated graph digests, and the differential evidence mandated by that profile.
 9. Reject a candidate that collides with a foundation circuit identifier, overstates a foundation observation's
    open-world meaning, or silently depends on core while claiming foundation-off compatibility.
+10. Require `capability-gap-report.json` when scope identified an applicable serious issue. Check every entry against
+    its reproducer and evidence. `resolved` requires executable acceptance evidence; `mitigated` requires an explicit
+    guarantee or output limitation and regression case; `blocked` must prevent the unsupported claim. Reject a
+    candidate that merely removes the triggering case or copies unrelated repository limitations. Require the manifest
+    to name it through `capabilityGapReport`; the host validates the declared report's schema but cannot infer relevance.
+11. Treat `inputs.<name>` as observation bindings. Validate their local `where` matchers and cardinality, and reject
+    their use as joins, unsafe negation, semantic identity, or hidden callbacks. An installed runtime extension requires
+    structured input and output schemas, exact digest lock, independent verifier, focused host tests, and an end-to-end
+    CNL case with rule basis and support anchors.
 
 ## Authority boundary
 

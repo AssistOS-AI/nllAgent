@@ -45,7 +45,7 @@
     "benchmark:example": "node bin/nllagent.mjs benchmark --agent editorial-demo --json",
     "check:exports": "node -e \"import('./src/index.mjs').then(() => console.log('Package exports load successfully.'))\"",
     "docs:matrix": "node scripts/generate_specs_matrix.mjs",
-    "docs:verify": "node --check docs/circuit-tutorial.js && node scripts/verify_docs_links.mjs && node scripts/verify_static_site.js docs --path /index.html --path /quick-tutorial.html --path /circuits-in-practice.html --path /foundation.html --path /concepts.html --path /circuit-tutorial.html --path /query-first.html --path /query-first-tutorial.html --path /cli.html --path /circuit-tutorial.js --path /specsLoader.html?spec=matrix.md --path /specs-data.js && node scripts/verify_specs_browser.mjs",
+    "docs:verify": "node --check docs/circuit-tutorial.js && node scripts/verify_docs_links.mjs && node scripts/verify_static_site.js docs --path /index.html --path /quick-tutorial.html --path /circuits-in-practice.html --path /advanced-circuit-tutorial.html --path /foundation.html --path /concepts.html --path /circuit-tutorial.html --path /query-first.html --path /query-first-tutorial.html --path /cli.html --path /circuit-tutorial.js --path /specsLoader.html?spec=matrix.md --path /specs-data.js && node scripts/verify_specs_browser.mjs",
     "check:sizes": "bash fileSizesCheck.sh",
     "check": "npm test && npm run docs:verify && npm run check:sizes && npm run check:exports && npm run benchmark:example"
   },

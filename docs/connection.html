@@ -29,12 +29,14 @@ flowchart LR
     </pre>
     <p class="diagram-caption"><strong>One contract, two checks.</strong> Release alignment establishes a valid production path in general. Run compatibility establishes that the concrete source, observations, statuses, resources, and coverage satisfy that path.</p>
 
-    <div class="callout"><strong>Foundation circuits use the same joint.</strong> In <code>core</code> mode, the platform materializer contributes its own typed observations and capabilities, and the analyzer runs its ordinary port–operator–verifier circuits before the agent release. Their open-world token proves only the documented pattern scan, not exhaustive semantic knowledge. In <code>off</code> mode the overlay is absent by explicit selection.</div>
+    <div class="callout"><strong>Foundation circuits use the same joint.</strong> In <code>core</code> mode, the platform materializer contributes its own typed observations and capabilities, and the analyzer runs ordinary binding–operator–verifier circuits before the agent release. Their open-world token proves only the documented pattern scan, not exhaustive semantic knowledge. In <code>off</code> mode the overlay is absent by explicit selection.</div>
 
     <h2 id="contract">What the contract contains</h2>
-    <p>For each external input port that can affect an output, the contract records the nominal types, version,
+    <p>For each external observation binding that can affect an output, the contract records the nominal types, version,
       cardinality, accepted epistemic statuses, required coverage, criticality, scope relation, and guarantee
-      requirements. The default logical-consistency circuit compiles to this contract:</p>
+      requirements. A binding may also contain safe local field matchers. The persisted version-1 contract retains the
+      historical <code>ports</code> key for compatibility; it describes bindings, not network sockets. The default
+      logical-consistency circuit compiles to this contract:</p>
     <pre><code>{
   "kind": "ObservationContract",
   "schemaVersion": 1,
@@ -52,17 +54,17 @@ flowchart LR
 }</code></pre>
 
     <h3 id="query-contract">Experimental QueryContract extension</h3>
-    <p>DS020 keeps this <code>ObservationContract</code> and the compiler now derives a <code>QueryContract</code> for fields that ordinary ports do not expose: exact fields read, LongTextJS relations, selected observation types and statuses, total order, exact coverage signature, criticality, and conservative row/intermediate budgets. It is an additive analysis artifact; generated observation ports remain the compatibility authority used by the ordinary graph.</p>
+    <p>DS020 keeps this <code>ObservationContract</code> and derives a <code>QueryContract</code> for work beyond local binding matchers: joins, projected fields, total order, exact absence coverage, and conservative row/intermediate budgets. It is additive; generated observation bindings remain the compatibility boundary used by the ordinary graph.</p>
     <p>The important difference is coverage precision. The implemented <code>antiJoin</code> cannot accept a token merely because it mentions the same nominal type: source revision, scope, channels, type, producer/method, exclusions, completeness mode, verification, an empty failure set, and producer status capability must match exactly. Broader subsumption, correlated <code>notExists</code>, domain-specific failure matching, and world-aware signatures remain future work. <a href="query-first-tutorial.html#absence">See the closed-world and unknown executions.</a></p>
     <p>The ordinary contract says more than “the circuit reads states.” It accepts only extracted foundation
-      assertions and treats the port as critical, while its open-world coverage prevents the circuit from claiming
+      assertions and treats the binding as critical, while its open-world coverage prevents the circuit from claiming
       that every implicit state in the document was discovered. A query-authored domain rule can add exact fields,
-      order, and coverage obligations through its QueryContract without weakening this port contract.</p>
+      order, and coverage obligations through its QueryContract without weakening this binding contract.</p>
 
     <h2 id="four-moments">The connection is checked at four moments</h2>
     <ol class="step-list">
-      <li><strong>Circuit compilation derives actual demand.</strong> <code>src/circuit/compiler.mjs</code> walks backward from declared outputs through <code>emit</code>, <code>verify</code>, calls, joins, and derivations. Only external ports that can influence the result enter the contract. A circuit cannot hide an undeclared premise on a dead side path.</li>
-      <li><strong>Manual publication links producers.</strong> <code>src/release/manager.mjs</code> builds a producer-consumer matrix. Built-in Markdown structure, published extraction profiles, and approved adapters are compared with each critical port’s type, statuses, coverage, and guarantee. A critical port without a compatible producer rejects the candidate.</li>
+      <li><strong>Circuit compilation derives actual demand.</strong> <code>src/circuit/compiler.mjs</code> walks backward from declared outputs through <code>emit</code>, <code>verify</code>, calls, joins, and derivations. Only external bindings that can influence the result enter the contract. A circuit cannot hide an undeclared premise on a dead side path.</li>
+      <li><strong>Manual publication links producers.</strong> <code>src/release/manager.mjs</code> builds a producer-consumer matrix. Built-in Markdown structure, published extraction profiles, and approved adapters are compared with each critical binding’s type, statuses, coverage, and guarantee. A critical binding without a compatible producer rejects the candidate.</li>
       <li><strong>Production checks materialization.</strong> <code>src/runtime/compatibility.mjs</code> evaluates the actual LongTextJS program. It checks observations, cardinality, statuses, capabilities, gaps, channels, structures, coverage, operational resources, and profile limits. A declared producer cannot manufacture evidence that this document did not yield.</li>
       <li><strong>Execution verifies a witness.</strong> A ready circuit may compute candidates, but its finding contract still controls publication. The registered verifier checks the precise witness against source and released policy. Compatibility answers “may this theory run?”; verification answers “does this candidate support this claim?”</li>
     </ol>
@@ -74,7 +76,7 @@ flowchart LR
         and “The north door is not open at noon.”</li>
       <li>The selected foundation materializer creates two extracted <code>foundation.state-assertion@1</code>
         observations, with opposite polarity but the same normalized subject, state, time, frame, and source world.</li>
-      <li>The circuit port asks for exactly that type and status. Compatibility confirms the producer capability and
+      <li>The circuit observation binding asks for exactly that type and status. Compatibility confirms the producer capability and
         its explicit open-world pattern-scan coverage.</li>
       <li>The state-conflict operator compares the bounded contexts and constructs a candidate containing both
         observation identities and anchors.</li>
@@ -92,7 +94,7 @@ flowchart LR
       <tbody>
         <tr><td>No producer</td><td>A circuit consumes <code>normative.notification@2</code>, but the release ships neither a structural producer nor an extraction profile.</td><td>Manual publication rejects the candidate.</td></tr>
         <tr><td>Wrong semantics</td><td>A dramatic “scene” is mapped to a narrative scene type only because their names match.</td><td>Adapter or semantic probe is required; the circuit remains blocked.</td></tr>
-        <tr><td>Wrong status</td><td>A critical port requires <code>human-confirmed</code>, but the run has only <code>proposed</code> observations.</td><td>Run compatibility blocks the port.</td></tr>
+        <tr><td>Wrong status</td><td>A critical binding requires <code>human-confirmed</code>, but the run has only <code>proposed</code> observations.</td><td>Run compatibility blocks the binding.</td></tr>
         <tr><td>Insufficient coverage</td><td>A rule concludes that no notification exists from a few retrieved emails.</td><td>The negative conclusion is forbidden; the run stops or reports narrower limits.</td></tr>
         <tr><td>Missing context</td><td>A deadline circuit knows the timestamp type but lacks the required jurisdiction calendar.</td><td>Operational incompatibility produces a precise gap.</td></tr>
       </tbody>

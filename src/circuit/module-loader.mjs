@@ -2,7 +2,9 @@ import { Script, createContext } from 'node:vm';
 import { extname } from 'node:path';
 import { readJson, readUtf8Strict } from '../core/io.mjs';
 import { NllError } from '../core/errors.mjs';
-import { circuit, node, port, queryFirstCircuit } from './dsl.mjs';
+import {
+  binding, circuit, node, observationBinding, port, queryFirstCircuit
+} from './dsl.mjs';
 
 const FORBIDDEN_SOURCE = [
   ['module imports', /\b(?:import|require)\b/u],
@@ -16,7 +18,9 @@ const FORBIDDEN_SOURCE = [
   ['imperative control flow', /\b(?:if|else|switch|case|for|while|do|try|catch|throw|return|with|delete)\b/u]
 ];
 
-const ALLOWED_CALLS = new Set(['circuit', 'node', 'port', 'queryFirstCircuit']);
+const ALLOWED_CALLS = new Set([
+  'binding', 'circuit', 'node', 'observationBinding', 'port', 'queryFirstCircuit'
+]);
 
 function lexicalView(source, options = {}) {
   let state = 'code';
@@ -150,7 +154,7 @@ function evaluateCircuitModule(source, options = {}) {
   const path = options.path || '<circuit.mjs>';
   const expression = moduleExpression(source, path);
   const sandbox = Object.create(null);
-  Object.assign(sandbox, { circuit, node, port, queryFirstCircuit });
+  Object.assign(sandbox, { binding, circuit, node, observationBinding, port, queryFirstCircuit });
   const context = createContext(sandbox, {
     name: `CircuitJS:${path}`,
     codeGeneration: { strings: false, wasm: false }

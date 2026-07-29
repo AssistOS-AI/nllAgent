@@ -1,4 +1,5 @@
 import { STATUS_CEILINGS, guaranteeSatisfies } from './guarantees.mjs';
+import { matchesObservationBinding } from './observation-bindings.mjs';
 
 function availableTypes(program) {
   const capabilities = new Map();
@@ -66,8 +67,7 @@ function evaluateCompatibility(program, compiledCircuits, profile = {}) {
       const types = port.types || [port.type];
       const producers = types.filter(Boolean).flatMap((type) => capabilities.get(type) || []);
       const observations = program.observations.filter((observation) =>
-        types.includes(observation.type)
-        && (!port.statuses?.length || port.statuses.includes(observation.status)));
+        matchesObservationBinding(observation, port));
       const critical = port.critical !== false;
       let status = producers.length ? 'satisfied' : critical ? 'missing' : 'partially-satisfied';
       if (port.statuses?.length && !producers.some((producer) =>
@@ -100,9 +100,10 @@ function evaluateCompatibility(program, compiledCircuits, profile = {}) {
       if (blockingProducerGaps.length) status = critical ? 'missing' : 'partially-satisfied';
       else if (status === 'satisfied' && qualityGaps.length) status = 'satisfied-with-limits';
       circuitObligations.push({
-        kind: 'observation-port', port: name, requirement: types,
+        kind: 'observation-binding', binding: name, port: name, requirement: types,
         status, critical, evidence: {
           producers, observations: observations.length, cardinality,
+          matchers: port.where || [],
           coverageCertificates: coverageCertificates.map((coverage) => coverage.id),
           producerGaps, blockingProducerGaps, qualityGaps
         }

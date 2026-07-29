@@ -29,11 +29,19 @@ Read the paths named by the learning prompt. Then read `docs/specs/DS000-vision.
    copy a platform circuit or treat the bounded foundation as domain authority. Record whether the domain release can
    still operate when the caller deliberately selects `--foundation off`.
 9. Write unresolved policy choices as blocking questions. Never choose one merely to make a deterministic circuit possible.
-10. Produce `scope-contract.json` and `authority-map.json` in the learning-run folder and an agent-facing Markdown summary beside them.
+10. Compare the use case with every entry in `serious_issues.md`. Record only applicable limitations. For each one,
+    name the concrete rule or document feature that triggers it, the smallest missing capability, and one route: use an
+    installed capability; narrow the claim honestly; create an agent-local producer, circuit, or benchmark change; or
+    create a platform proposal and block the unsupported claim.
+11. Define one executable resolution slice for every capability gap: a natural reproducer, required observation or
+    registry contract, expected behavior before the fix, acceptance evidence after the fix, and owner boundary.
+    Current-world claims use a sourced knowledge-pack proposal; cross-passage identity uses explicit mention and entity
+    hypotheses. Neither is repaired by an unsourced constant or string equality.
+12. Produce `scope-contract.json` and `authority-map.json` in the learning-run folder and an agent-facing Markdown summary beside them.
 
 ## Output contracts
 
-Use plain canonicalizable JSON. Each authority-map entry must contain `source`, `anchorDescription`, `role`, `authority`, `effectiveScope`, and `status`. The scope contract must contain `intendedUse`, `excludedUses`, `documentProfiles`, `languages`, `findingFamilies`, `guaranteeCeilings`, `coveragePromises`, `sourceDataNeeds`, `semanticFormHypotheses`, `operationalDependencies`, and `blockingQuestions`.
+Use plain canonicalizable JSON. Each authority-map entry must contain `source`, `anchorDescription`, `role`, `authority`, `effectiveScope`, and `status`. The scope contract must contain `intendedUse`, `excludedUses`, `documentProfiles`, `languages`, `findingFamilies`, `guaranteeCeilings`, `coveragePromises`, `sourceDataNeeds`, `semanticFormHypotheses`, `operationalDependencies`, `applicableSeriousIssues`, `capabilityGaps`, `resolutionSlices`, and `blockingQuestions`.
 
 ## Safety boundary
 

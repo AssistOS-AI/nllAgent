@@ -25,7 +25,8 @@ self-contained `.mjs` file through `loadRuntimeExtension()` and install it into 
 module may contain real JavaScript functions because it is reviewed host code, not an agent-authored circuit or source
 artifact. The loader rejects module imports and re-exports so the recorded entry digest identifies the complete extension
 source. Installation requires explicit operator or verifier schemas, determinism, effects, cost, limits, failures, checked
-properties, and execution functions. The wrapper passes frozen plain-data copies and rejects non-plain output. The module
+properties, and execution functions. Input and output schemas are structured value schemas, not labels alone; the
+compiler checks graph wiring where types are known, and the wrapper validates actual input and output values. The module
 runs with host authority and therefore must have no import-time side effects; it is not a sandbox for untrusted code.
 
 ## Layout
@@ -102,6 +103,12 @@ Response: The programmer implements an exact operator and, where publication dep
 trusted runtime-extension module. The host loads and registers that module explicitly. A CircuitJS node then names the
 versioned registry entry and passes plain data to it. This keeps algorithm code testable as ordinary JavaScript without
 giving an untrusted document, learned circuit, or query callback code authority.
+
+### Question #8: Which name should direct CircuitJS use for LongTextJS inputs?
+
+Response: New author code uses `observationBinding({...})` for the selector declaration and `binding(name)` for the
+graph reference. `port(name)` remains a compatibility alias that creates the same canonical `$port` data. This naming
+keeps matching separate from dataflow without rewriting published graph artifacts.
 
 # Conclusion
 

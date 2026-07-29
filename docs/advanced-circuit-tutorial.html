@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advanced Circuit Tutorial — NaturalLanguageLinterAgent</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="partials-loader.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</head>
+<body>
+<div class="layout">
+  <aside data-include="partials/nav.html"></aside>
+  <main>
+    <div class="breadcrumbs"><a href="index.html">Documentation</a> / CircuitJS / Advanced tutorial</div>
+    <p class="kicker">One executable scenario · four rule outcomes · final CNL</p>
+    <h1>Combine observation matching, custom code, foundation circuits, and CNL</h1>
+    <p class="lead">This tutorial runs a real repository example that combines three mechanisms without hiding their
+      boundaries. A direct observation binding selects ordinary paragraphs. A trusted JavaScript extension computes a
+      word-count rule. The default foundation independently checks explicit logic and arithmetic. The analyzer merges
+      accepted findings into the actual <code>CNL/Audit-1</code> report.</p>
+    <p class="callout"><strong>Scope.</strong> This is an integration tutorial for programmers. It does not teach how
+      to publish arbitrary host extensions from the CLI; host code remains explicitly installed through the ESM API.
+      Query-First joins and absence semantics are shown by contrast and linked to their executable tutorial.</p>
+
+    <h2 id="run">1. Run the complete scenario</h2>
+    <pre><code>node examples/advanced-circuit/run.mjs</code></pre>
+    <p>The command exits successfully and writes a CNL audit to standard output. The integration test runs the same
+      function and asserts the terminal status, exact rule set, dialogue exclusion, support anchors, rule basis, and
+      rendered explanation:</p>
+    <pre><code>node --test tests/integration/advanced-circuit-example.test.mjs</code></pre>
+    <pre class="mermaid">
+flowchart LR
+  M[Markdown] --> L[LongTextJS + foundation observations] --> B[observation binding]
+  B --> J[JavaScript operator] --> V[independent verifier] --> C[CNL/Audit-1]
+  L -- foundation circuits --> C
+    </pre>
+    <p class="diagram-caption"><strong>Two theories share one source world.</strong> The agent circuit and foundation
+      circuits do not call one another. They consume different typed observations, verify their own witnesses, and meet
+      only when accepted findings are assembled into CNL.</p>
+
+    <h2 id="source">2. Four source cases in one document</h2>
+    <pre><code># Combined review
+
+This deliberately long narrative paragraph contains enough separate words to cross the configured maximum and produce one review warning.
+
+— This deliberately long dialogue paragraph also crosses the maximum but the observation binding excludes dialogue candidates.
+
+The north door is open at noon.
+
+The north door is not open at noon.
+
+2 times 3 equals 7.</code></pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Source case</th><th>Mechanism</th><th>Observed result</th></tr></thead>
+      <tbody>
+        <tr><td>Long ordinary paragraph</td><td>Binding selects it; extension counts 19 words; verifier recounts.</td><td><code>EXAMPLE-PARAGRAPH-LENGTH-001</code></td></tr>
+        <tr><td>Long dialogue candidate</td><td>Local matcher excludes its structural role before the operator.</td><td>No paragraph-length candidate.</td></tr>
+        <tr><td>Door open and not open at noon</td><td>Foundation state observations share subject, state, time, and world.</td><td><code>FOUNDATION-LOGIC-001</code></td></tr>
+        <tr><td><code>2 times 3 equals 7</code></td><td>Foundation exact rational replay computes 6.</td><td><code>FOUNDATION-MATH-001</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="binding">3. The selector is not the graph reference</h2>
+    <pre><code>inputs: {
+  narrativeParagraphs: observationBinding({
+    type: 'document.paragraph@1',
+    statuses: ['extracted'],
+    cardinality: 'many',
+    coverage: 'closed-world',
+    critical: true,
+    where: [{
+      path: 'payload.structuralRole',
+      operator: 'eq',
+      value: 'paragraph'
+    }]
+  })
+}</code></pre>
+    <p>This declaration performs selection. It filters type, status, and the local field, then checks cardinality.
+      The node reference below performs no matching:</p>
+    <pre><code>inputs: {
+  paragraphs: binding('narrativeParagraphs'),
+  maximumWords: 12
+}</code></pre>
+    <p><code>binding()</code> produces the canonical <code>$port</code> graph reference. The older
+      <code>port()</code> helper is an exact compatibility alias. The distinction matters: changing a matcher changes
+      which LongTextJS rows enter the graph; changing a node reference changes dataflow among already constructed
+      values.</p>
+
+    <h2 id="choice">4. Choose the smallest mechanism that preserves meaning</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Question</th><th>Use</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Does this one observation have a known local field value?</td><td><code>observationBinding.where</code></td><td>One scan, AND-only comparisons, no hidden epistemics.</td></tr>
+        <tr><td>Which rows match another relation, decision row, or covered absence?</td><td>Query-First</td><td>Joins, dependencies, unknown, and coverage remain explicit.</td></tr>
+        <tr><td>Does the rule need parsing, dynamic programming, state, a solver, or numerical work?</td><td>Registered operator or runtime extension</td><td>Real code has schemas, limits, tests, and a verifier.</td></tr>
+        <tr><td>Does the algorithm iterate?</td><td><code>fixpoint</code>, <code>maintain</code>, or <code>search</code> operator</td><td>The graph stays acyclic while termination lives in one budgeted contract.</td></tr>
+      </tbody>
+    </table></div>
+    <p>For example, “ordinary paragraphs” is a local matcher. “Obligations without a qualifying notice” is not: it
+      needs a join and exact closed-world coverage, so it belongs in the
+      <a href="query-first-tutorial.html">Query-First tutorial</a>. “Count words using a published tokenization policy”
+      is executable work and belongs behind an operator.</p>
+
+    <h2 id="schemas">5. The JavaScript node has executable contracts</h2>
+    <p>The extension declares structured schemas. This shortened fragment is still real syntax:</p>
+    <pre><code>inputSchema: {
+  type: 'object',
+  required: ['paragraphs', 'maximumWords'],
+  additionalProperties: false,
+  properties: {
+    paragraphs: { type: 'array', items: OBSERVATION },
+    maximumWords: { type: 'integer', minimum: 0 }
+  }
+},
+outputSchema: {
+  type: 'array',
+  items: CANDIDATE
+}</code></pre>
+    <p>Compilation rejects a missing <code>maximumWords</code>, an unknown input, or a string threshold. Runtime then
+      validates the resolved observations and every returned candidate. The verifier has separate input/output schemas
+      and independently reconstructs the count and source anchor. The release locks the extension source digest, so
+      changing function bytes without changing the graph cannot reuse publication or cache identity.</p>
+
+    <h2 id="cnl">6. Inspect the public result, not only the candidate</h2>
+    <p>The command prints three findings. This is an exact excerpt of the first finding apart from omitted header and
+      the two later findings:</p>
+    <pre><code>### 1. EXAMPLE-PARAGRAPH-LENGTH-001
+
+- Verdict: `paragraph-too-long`
+- Circuit: `example.advanced-review@1.0.0`
+- Guarantee: `mechanically-certified`
+- Verifier: `example.paragraph-length@1` (`accept`)
+- Certificate: `ParagraphLengthCertificate`
+- Support anchors: `anchor:block:paragraph:...`
+- Rule basis: example:narrative-paragraphs-have-at-most-twelve-words
+
+The paragraph contains 19 words; the configured maximum is 12.</code></pre>
+    <p>The support-anchor id is shortened here and explicitly marked with an ellipsis because it is content-derived;
+      run the example for the exact id and source digest. The test does not compare that abbreviation. It asserts that
+      the real report contains a paragraph anchor and authority reference. This end-to-end check caught and fixed an
+      earlier custom candidate that had a main anchor but omitted support anchors and rule basis.</p>
+
+    <h2 id="experiments">7. Useful experiments</h2>
+    <ol class="step-list">
+      <li>Change <code>maximumWords</code> to <code>20</code>. The custom finding disappears; the two foundation findings remain.</li>
+      <li>Change the matcher value to <code>dialogue-line-candidate</code>. The dialogue paragraph becomes the selected custom subject.</li>
+      <li>Remove one door assertion. The logic finding disappears without changing the custom circuit.</li>
+      <li>Replace the arithmetic sentence with <code>2 times 3 equals 6.</code>. Exact replay produces no math finding.</li>
+      <li>Replace <code>maximumWords: 12</code> with a string. Compilation fails with <code>circuit-schema-mismatch</code> before JavaScript executes.</li>
+    </ol>
+    <p>These are changes to source or candidate authoring files. Do not edit a published release in place. The test suite
+      uses fresh data and immutable compilation to preserve that boundary.</p>
+
+    <nav class="page-nav" aria-label="Advanced tutorial reading path">
+      <strong>Continue by mechanism</strong>
+      <a href="circuits-in-practice.html">Return to the simpler dataflow explanation</a>
+      <a href="query-first-tutorial.html">Build joins and evidence-aware decisions</a>
+      <a href="operators.html#runtime-extensions">Review the complete extension API</a>
+      <a href="benchmark.html">Turn these cases into release evidence</a>
+    </nav>
+
+    <footer>Runnable files: <code>examples/advanced-circuit/</code>. Normative contracts:
+      <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>,
+      <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, and
+      <a href="specsLoader.html?spec=DS017-testing-operations.md">DS017</a>.</footer>
+  </main>
+</div>
+</body>
+</html>

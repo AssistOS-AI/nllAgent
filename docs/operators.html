@@ -22,7 +22,7 @@
 
     <h2 id="why-operators">Why circuits call a registry</h2>
     <p>Different rules need genuinely different algorithms. Phrase linting needs exact source scanning. Continuity needs ordered events and state transitions. Normative deadlines need temporal calculation and explicit exception policy. Technical consistency may need unit conversion or constraint comparison. Flattening all of these into a single generic “reason” operation would hide the real semantics and make independent verification impossible.</p>
-    <p>A circuit therefore refers to an exact versioned operator identifier. DS009 requires the trusted registry to bind that identifier to input and output shapes, determinism, effects, capabilities, resource limits, cost, sandbox policy, and witness requirements. The current registry enforces identity, implementation presence, determinism, and effects, while the richer machine-typed contract remains a concrete prerequisite in <a href="../serious_issues.md">serious issue 4</a>. Static compilation already fails when an identifier is absent; it does not yet prove every primitive-specific input or witness shape.</p>
+    <p>A circuit therefore refers to an exact versioned operator identifier. DS009 requires the trusted registry to bind that identifier to input and output shapes, determinism, effects, capabilities, resource limits, cost, sandbox policy, and witness requirements. Trusted runtime extensions now enforce structured input/output schemas at compilation and execution. Older standard entries still enforce identity, implementation presence, determinism, and effects without one uniform rich schema contract; that remaining migration is tracked in <a href="../serious_issues.md">serious issue 4</a>.</p>
 
     <h2 id="simplest-form">Choose the simplest correct representation</h2>
     <div class="table-wrap"><table>
@@ -48,7 +48,7 @@ flowchart LR
 
     <h2 id="scheduler">How the scheduler executes a circuit</h2>
     <ol>
-      <li><strong>Bind external ports.</strong> The runtime selects LongTextJS observations by nominal type and version, accepted epistemic statuses, scope, and cardinality. It propagates the weakest premise guarantee.</li>
+      <li><strong>Evaluate observation bindings.</strong> The runtime selects LongTextJS observations by nominal type, accepted status, safe local matchers, and cardinality. It propagates the weakest premise guarantee.</li>
       <li><strong>Build a dependency plan.</strong> Node references form a directed graph. Filters can move ahead of expensive joins only when equivalence is preserved. Ready pure nodes may run concurrently without changing deterministic output order.</li>
       <li><strong>Resolve every executable node.</strong> Relational and control primitives use built-in semantics; <code>call</code>, state, temporal, search, judge, and verification nodes resolve exact registry entries and declared capabilities.</li>
       <li><strong>Execute with immutable values.</strong> Nodes receive plain-data inputs and return plain-data outputs with provenance. A node cannot mutate LongTextJS, release data, or another node’s result.</li>
@@ -123,13 +123,17 @@ flowchart LR
     <p>The implemented host API is <code>loadRuntimeExtension()</code> plus
       <code>installRuntimeExtension()</code>, or the combined <code>loadAndInstallRuntimeExtension()</code>. It accepts one
       reviewed, self-contained, regular <code>.mjs</code> file. The extension declares executable operator/verifier
-      functions and complete metadata; installation records its source digest. Inputs and context are frozen plain-data
-      copies, output must be plain data, cache identity includes the digest, and releases that use it lock the same
+      functions, structured value schemas, and complete metadata; installation records its source digest. Inputs and context are frozen plain-data
+      copies, resolved input and output are schema-validated, cache identity includes the digest, and releases that use it lock the same
       descriptor.</p>
     <p>Run <code>node examples/runtime-extension/run.mjs</code> to execute the included paragraph-length operator and
       replay verifier. <a href="circuits-in-practice.html#javascript">Circuits in practice</a> shows its function, graph,
       inputs, candidate, verifier, and output together. The extension is trusted in-process code; it is not selected by
       a document, learned circuit, or ordinary CLI option.</p>
+    <p>Run <code>node examples/advanced-circuit/run.mjs</code> for the final CNL report that combines this extension
+      with local observation matching and the foundation circuits. The
+      <a href="advanced-circuit-tutorial.html">advanced tutorial</a> explains the three accepted findings and the
+      deliberately excluded dialogue record.</p>
 
     <h3 id="extension-api">Runtime-extension API and fields</h3>
     <div class="table-wrap"><table>
@@ -151,21 +155,41 @@ flowchart LR
         <tr><td>Operator definition</td><td><code>id</code>, <code>description</code>, <code>primitives</code>,
           <code>inputSchema</code>, <code>outputSchema</code>, <code>deterministic</code>, <code>effects</code>,
           <code>capabilities</code>, <code>cost</code>, <code>limits</code>, <code>failureCodes</code>, and
-          <code>execute</code>. Ordering, coverage, guarantee, and witness metadata are optional until used.</td><td>The
+          <code>execute</code>. <code>inputSchema</code> and <code>outputSchema</code> are structured value schemas, not
+          identifier strings. Ordering, coverage, guarantee, and witness metadata are optional until used.</td><td>The
           exact JavaScript implementation behind a compatible non-verify node.</td></tr>
         <tr><td>Verifier definition</td><td><code>id</code>, <code>description</code>, <code>candidateSchema</code>,
-          <code>witnessSchema</code>, <code>checkedProperties</code>, <code>outcomes</code>,
+          <code>witnessSchema</code>, structured <code>inputSchema</code>/<code>outputSchema</code>,
+          <code>checkedProperties</code>, <code>outcomes</code>,
           <code>guaranteeContribution</code>, <code>limits</code>, <code>execute</code>.</td><td>The exact checker behind
           a <code>verify</code> node.</td></tr>
         <tr><td><code>execute(inputs, context)</code></td><td><code>inputs</code> is the resolved named node input;
           <code>context</code> contains <code>program</code>, <code>circuit</code>, <code>node</code>, and
           <code>operationalContext</code>.</td><td>Both arguments are frozen plain-data copies. The returned promise or
-          value must normalize to finite JSON-compatible plain data.</td></tr>
+          value must normalize to finite JSON-compatible plain data and satisfy the declared output schema.</td></tr>
         <tr><td>Release lock</td><td><code>runtimeExtensions: [{ id, digest }]</code> for every referenced custom
           entry.</td><td>Publication rejects missing, mismatched, duplicate, or unused locks; runtime rejects a digest
           mismatch.</td></tr>
       </tbody>
     </table></div>
+
+    <h3 id="value-schema">Structured value-schema subset</h3>
+    <p>Extension schemas are finite plain data. Every schema has <code>type</code>; supported values are
+      <code>any</code>, <code>null</code>, <code>boolean</code>, <code>string</code>, <code>number</code>,
+      <code>integer</code>, <code>array</code>, and <code>object</code>. Optional <code>id</code> and
+    <div class="table-wrap"><table>
+      <thead><tr><th>Schema field</th><th>Where valid</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>properties</code>, <code>required</code>, <code>additionalProperties</code></td><td><code>object</code></td><td>Named child schemas, mandatory names, and whether undeclared names are accepted.</td></tr>
+        <tr><td><code>items</code>, <code>minItems</code>, <code>maxItems</code></td><td><code>array</code></td><td>One schema for every element and optional finite size bounds.</td></tr>
+        <tr><td><code>minimum</code>, <code>maximum</code></td><td><code>number</code>, <code>integer</code></td><td>Inclusive finite numeric bounds.</td></tr>
+        <tr><td><code>enum</code></td><td>Every type</td><td>Finite accepted canonical values.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Compilation reports <code>circuit-schema-mismatch</code> for bad graph wiring. Direct or scheduled execution
+      reports <code>runtime-extension-input-invalid</code> or <code>runtime-extension-output-invalid</code> when actual
+      values violate the contract. These schemas validate data shape; they do not sandbox the JavaScript function or
+      prove its domain semantics.</p>
 
     <h2 id="next">Where to go next</h2>
     <p>Read <a href="circuitjs.html">The CircuitJS theory program</a> for graph authoring, <a href="benchmark.html">Benchmarks and publication checks</a> for testing operator use through natural text, <a href="artifacts.html#run-directory">Artifacts</a> for plans and verifier records, and <a href="security.html#runtime-capabilities">Runtime boundaries</a> for capability control.</p>

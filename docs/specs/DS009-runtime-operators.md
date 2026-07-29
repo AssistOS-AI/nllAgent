@@ -14,7 +14,7 @@ The CircuitJS runtime executes published graphs against LongTextJS materializati
 
 ## Scheduling
 
-The scheduler must construct a plan from graph dependencies, materialized ports, effects, cost estimates, cache state, and budgets. Ready pure nodes may execute concurrently. The observed semantic result of a deterministic circuit must not depend on scheduling order. Node inputs and outputs are immutable and content-addressed. Before execution, external port materialization filters nominal types and accepted statuses, enforces cardinality, and bounds the resulting guarantee by all accepted premises.
+The scheduler must construct a plan from graph dependencies, observation bindings, effects, cost estimates, cache state, and budgets. Ready pure nodes may execute concurrently. The observed semantic result of a deterministic circuit must not depend on scheduling order. Node inputs and outputs are immutable and content-addressed. Before execution, each binding filters nominal types and accepted statuses, applies its safe local `where` matchers in source order, enforces cardinality, and bounds the resulting guarantee by all accepted premises. This local selection is not a join, a coverage proof, or an absence query.
 
 Filters should be pushed before expensive joins when semantic equivalence is proven. Shared subgraphs and materializations may be memoized. A node cache key must include the complete LongTextJS semantic program and operational context in addition to circuit, node, operator, and resolved inputs, so two documents cannot collide merely because their selected observation arrays are equal. Optimization must not change provenance, error routing, limit behavior, or externally visible selection order.
 
@@ -29,11 +29,13 @@ The standard deterministic registry includes literal lexical matching, relationa
 Registry metadata must be machine-checkable rather than descriptive prose alone. Every operator declares its permitted CircuitJS primitives, versioned input and output schemas, witness or dependency behavior, determinism, effects, capabilities, cost class and bound, failure codes, ordering behavior, coverage behavior, guarantee ceiling, and test-vector identity. Every verifier declares candidate and witness schemas, checked properties, completeness access, possible outcomes, guarantee contribution, and limits. The registry and compiler now enforce permitted primitive names, and the experimental query/table entries expose additional schema, cost, coverage, ordering, witness, and checked-property metadata. Equivalent rich metadata is still incomplete for older general operators and remains a tracked issue.
 
 The public runtime API also accepts an explicitly installed `NllRuntimeExtension`. Its self-contained ESM entry is
-content-addressed before execution. Operator inputs and the context exposed to extension code are cloned, normalized,
-and frozen; results are normalized and rejected unless they are finite JSON-compatible plain data. Registry descriptions
-record extension identity and implementation digest. The scheduler includes that digest in deterministic cache keys,
-and release compilation checks it against `runtimeExtensions`. Extension code executes in process with host authority;
-only reviewed host applications may load it, and effect metadata is not a security sandbox.
+content-addressed before execution. Every extension operator and verifier provides structured value schemas rather
+than schema-name strings alone. Compilation rejects missing or unknown input fields, invalid literals, and incompatible
+typed node references when the referenced contract is available. Runtime validates resolved input and actual output,
+while input and context values remain cloned, normalized, and frozen. Registry descriptions record extension identity
+and implementation digest. The scheduler includes that digest in deterministic cache keys, and release compilation
+checks it against `runtimeExtensions`. Extension code executes in process with host authority; only reviewed host
+applications may load it, and schemas or effect metadata are not a security sandbox.
 
 ## Relational regime
 
@@ -67,7 +69,7 @@ Budgets are enforced per run, circuit, node, dynamic-demand round, search, model
 
 ## Trace interpretation
 
-The runtime trace must be teachable as explicit dataflow. For each executed node it records node identity, primitive, exact operator or verifier when present, input and output digests, cache status, and duration. Full node values remain separately inspectable in the circuit result. Documentation must explain how `$port` references resolve to LongTextJS observations, how `$node` references resolve to immutable prior outputs, how guarantee ceilings propagate, and how static verification dominance combines with runtime acceptance filtering.
+The runtime trace must be teachable as explicit dataflow. For each executed node it records node identity, primitive, exact operator or verifier when present, input and output digests, cache status, and duration. Full node values remain separately inspectable in the circuit result. Documentation must explain how an observation binding selects LongTextJS rows, how `binding()` produces the canonical `$port` reference to that collection, how `$node` references resolve to immutable prior outputs, how guarantee ceilings propagate, and how static verification dominance combines with runtime acceptance filtering.
 
 The current local executor follows the compiler's deterministic topological order. Parallel ready-node scheduling, checkpoints beyond the current run artifacts, and richer incremental planning remain contract directions unless implemented and tested. Tutorial material must not present those directions as current runtime behavior.
 
@@ -111,11 +113,19 @@ Response: No. It may change only the access algorithm. The complete program and 
 
 ### Question #10: What exactly does a custom operator receive and return?
 
-Response: It receives the named plain-data object obtained after resolving every `port()` and `node()` reference. Its
+Response: It receives the named plain-data object obtained after resolving every `binding()`/legacy `port()` and `node()` reference. Its
 second argument contains read-only plain-data snapshots of the current LongTextJS program, compiled circuit, node, and
 declared operational context. It returns plain data that becomes that node's immutable output. A thrown exception,
 mutation attempt, non-plain result, missing budget, or verifier rejection remains a structured failure rather than an
 implicit finding.
+
+### Question #11: Is an observation binding a general pattern matcher?
+
+Response: No. It is the graph boundary's small deterministic selector: type, status, an AND of safe local field
+comparisons, and cardinality. This is enough to avoid a redundant filter node for ordinary scope distinctions. A query
+is required as soon as selection depends on another relation, grouping, ordering semantics, unknown propagation, or
+closed-world absence. Keeping that boundary small prevents a second undocumented query language from growing inside
+input declarations.
 
 # Conclusion
 

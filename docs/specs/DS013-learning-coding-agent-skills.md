@@ -16,7 +16,7 @@ Learning compiles Markdown rules, examples, reviewer feedback, and accumulated i
 
 `nllagent learn --agent <name> --rules <folder>` must validate the agent and rule folder, snapshot Markdown rules, selected open issues, requested benchmark suites, the active release manifest, relevant DS contracts, serious-issue register, and operator/verifier catalogs into a learning-run record. The original rule folder is always copied into the run before the Coding Agent starts.
 
-The learning job progresses through triage, authority mapping, scope confirmation, rule cards, vocabulary, observation contracts, semantic-form selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, and summary. Form selection chooses the smallest correct representation: an existing operator wrapper, a supported query and decision table, an aggregate or ordered-pattern operator, or a direct graph for recursive, stateful, search, solver, or argumentation behavior. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
+The learning job progresses through triage, authority mapping, scope confirmation, capability-gap mapping, rule cards, vocabulary, observation contracts, semantic-form selection, restricted MJS CircuitJS synthesis, witness design, benchmark construction, candidate build, local validation, and summary. Form selection chooses the smallest correct representation: an existing operator wrapper, a supported query and decision table, an aggregate or ordered-pattern operator, or a direct graph for recursive, stateful, search, solver, or argumentation behavior. Intermediate artifacts remain in `learning-runs/<id>/` and candidate outputs in `candidates/<version>/`.
 
 ## Coding Agent adapter
 
@@ -43,6 +43,14 @@ Learning skills are self-contained Anthropic-style skill folders. The minimum se
 Each skill must use imperative instructions, concise progressive disclosure, `agents/openai.yaml` with implicit invocation disabled, local references where needed, and no imports from the host `src/`. Skills may call documented CLI commands, which are stable host interfaces.
 
 The compile, benchmark, issue-repair, and release-preparation skills must understand stable query, table, row, authority, witness, coverage, and verifier identities when a supported query-first profile is present. They may use only the experimental subset advertised by the host compiler and must fall back to direct CircuitJS for unsupported joins, aggregates, patterns, recursion, state, search, solvers, or argumentation. Compact syntax is never a reason to bypass neutral observation demand, closed-world coverage, differential evidence, or an exact verifier.
+
+Every learning job maps `serious_issues.md` to its selected use case rather than copying a generic disclaimer. An
+applicable entry produces a minimal reproducer, owner boundary, executable resolution slice, and
+`capability-gap-report.json` status of `resolved`, `mitigated`, or `blocked`. Resolved means acceptance evidence exists;
+mitigated means a narrower claim and regression case make the limit explicit; blocked means the unsupported conclusion
+cannot be published. Learning can improve agent-owned schemas, producers, circuits, queries, benchmarks, and candidates.
+It can propose protected platform code or a runtime extension with structured contracts and tests, but cannot install
+that code, weaken publication, or mark a platform gap resolved by avoiding its reproducer.
 
 ## Permitted changes
 
@@ -97,6 +105,14 @@ Response: The shortest serialization is not always the simplest semantics. A thr
 ### Question #9: Can learning add a new universal fact to the default foundation?
 
 Response: No. It may create a repository-level proposal with authority, scope, counterexamples, and benchmark evidence. Platform maintainers decide whether the claim is a stable invariant, an optional dated knowledge item, or agent-specific theory.
+
+### Question #10: How should a Coding Agent proceed when a concrete use case reaches a known platform limitation?
+
+Response: It first preserves the case and expected safe behavior, then repairs the lowest layer it owns. If an installed
+operator or query form is sufficient, it uses and tests it. If agent observations or theory are missing, it changes only
+the candidate and benchmark. If trusted code, identity infrastructure, live evaluation, or a knowledge-pack loader is
+required, it writes a typed proposal with acceptance cases and keeps the affected claim mitigated or blocked. The known
+limitation guides the repair; it never authorizes a fabricated result or automatic platform edit.
 
 # Conclusion
 

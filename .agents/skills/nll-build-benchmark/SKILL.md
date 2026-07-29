@@ -21,7 +21,15 @@ Read the exact DS006 and DS007 files present in `docs/specs/`, plus `DS012-bench
 6. Produce a coverage matrix over rules, exceptions, observation types, document profiles, guarantees, and terminal states.
 7. Propose CircuitJS and LongTextJS mutations: lost negation, merged identities, false closed-world coverage, removed exceptions, inverted comparisons, changed scope, bypassed verification, and unbounded search. When a supported query or table is present, also mutate field paths, accepted statuses, join sides and keys, threshold boundaries, unknown policy, coverage domain, hit policy, priority, witness, and verifier route.
 8. Address structured assertions by stable query, table, row, authority, candidate, coverage, and verifier identities when those values exist. Add open-world-empty, closed-world-empty, present-row, overlap, priority-tie, and deterministic-order cases for completeness-sensitive tables.
-9. Run available local checks for candidates under `candidates/`; the later manual publication command reruns all agent-local suites through the same runtime. Do not claim differential or mutation results unless the corresponding independent paths or mutants were actually executed.
+9. For every entry in `capability-gap-report.json`, add or link a smallest natural case. A resolved entry needs a
+   positive case, close negative, and prior failure mode. A mitigated or blocked entry must assert the honest stopped,
+   unknown, or guarantee-limited result so later changes cannot silently fabricate a verdict. Identity gaps need
+   ambiguous same/different candidates; knowledge-pack gaps need unavailable, stale, jurisdiction, and conflicting-source cases.
+10. When a custom operator or verifier contributes a finding, assert the final CNL layer as well as node output: rule
+    basis, main and support anchors, verifier and acceptance, certificate, guarantee, limitation, and deterministic
+    order. Add wiring cases for missing required input, wrong literal type, unknown input, malformed output, and forged
+    witness when the host test surface permits them.
+11. Run available local checks for candidates under `candidates/`; the later manual publication command reruns all agent-local suites through the same runtime. Do not claim differential or mutation results unless the corresponding independent paths or mutants were actually executed.
 
 ## Independence and authority
 

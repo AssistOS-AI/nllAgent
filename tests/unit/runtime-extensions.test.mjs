@@ -18,6 +18,11 @@ import { executeCircuit } from '../../src/runtime/scheduler.mjs';
 import { createStandardRegistries } from '../../src/runtime/standard-operators.mjs';
 
 const EXAMPLE_ROOT = resolve('examples/runtime-extension');
+const STRING_ARRAY_INPUT = {
+  type: 'object', required: ['records'], additionalProperties: false,
+  properties: { records: { type: 'array', items: { type: 'string' } } }
+};
+const STRING_ARRAY = { type: 'array', items: { type: 'string' } };
 
 test('a trusted JavaScript extension supplies real CircuitJS operator and verifier code', async () => {
   const registries = createStandardRegistries();
@@ -60,6 +65,18 @@ test('extension contracts require explicit execution and verification metadata',
     operators: [{ id: 'example.invalid@1', description: 'Missing contracts.', execute() { return []; } }],
     verifiers: []
   }), (error) => error.code === 'invalid-runtime-extension' && /inputSchema/u.test(error.message));
+
+  assert.throws(() => defineRuntimeExtension({
+    kind: 'NllRuntimeExtension', id: 'example.invalid-schema@1.0.0', description: 'Invalid schema.',
+    operators: [{
+      id: 'example.invalid-schema@1', description: 'Array schema without item semantics.',
+      primitives: ['call'], inputSchema: { type: 'array' }, outputSchema: STRING_ARRAY,
+      deterministic: true, effects: [], capabilities: [], cost: 'constant', limits: {},
+      failureCodes: ['runtime-extension-failed'], execute() { return []; }
+    }],
+    verifiers: []
+  }), (error) => error.code === 'invalid-runtime-extension'
+    && error.details.causeCode === 'invalid-value-schema');
 });
 
 test('extension execution receives immutable plain data and must return plain data', async () => {
@@ -67,7 +84,7 @@ test('extension execution receives immutable plain data and must return plain da
     kind: 'NllRuntimeExtension', id: 'example.mutation@1.0.0', description: 'Mutation probe.',
     operators: [{
       id: 'example.mutation@1', description: 'Attempt to mutate inputs.', primitives: ['call'],
-      inputSchema: 'records@1', outputSchema: 'records@1', deterministic: true, effects: [],
+      inputSchema: STRING_ARRAY_INPUT, outputSchema: STRING_ARRAY, deterministic: true, effects: [],
       capabilities: [], cost: 'constant', limits: {}, failureCodes: ['runtime-extension-failed'],
       execute(inputs) { inputs.records.push('forbidden'); return inputs.records; }
     }],
@@ -88,7 +105,8 @@ test('extension execution receives immutable plain data and must return plain da
     kind: 'NllRuntimeExtension', id: 'example.invalid-output@1.0.0', description: 'Output probe.',
     operators: [{
       id: 'example.invalid-output@1', description: 'Return a non-plain value.', primitives: ['call'],
-      inputSchema: 'none@1', outputSchema: 'invalid@1', deterministic: true, effects: [],
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      outputSchema: STRING_ARRAY, deterministic: true, effects: [],
       capabilities: [], cost: 'constant', limits: {}, failureCodes: ['runtime-extension-failed'],
       execute() { return new Date(0); }
     }],
@@ -103,6 +121,58 @@ test('extension execution receives immutable plain data and must return plain da
   await assert.rejects(() => second.operators.get('example.invalid-output@1').execute(
     {}, { program: compileMarkdown('Text.'), circuit: {}, node: {}, options: {} }
   ), (error) => error.code === 'runtime-extension-failed');
+});
+
+test('structured extension schemas reject bad graph wiring before execution', async () => {
+  const registries = createStandardRegistries();
+  await loadAndInstallRuntimeExtension(registries, resolve(EXAMPLE_ROOT, 'paragraph-length.extension.mjs'));
+  const source = await loadCircuitSource(resolve(EXAMPLE_ROOT, 'paragraph-length.circuit.mjs'));
+
+  const missingThreshold = structuredClone(source);
+  delete missingThreshold.nodes[0].inputs.maximumWords;
+  assert.throws(() => compileCircuit(missingThreshold, registries),
+    (error) => error.code === 'circuit-schema-mismatch' && /maximumWords/u.test(error.message));
+
+  const wrongThreshold = structuredClone(source);
+  wrongThreshold.nodes[0].inputs.maximumWords = 'twelve';
+  assert.throws(() => compileCircuit(wrongThreshold, registries),
+    (error) => error.code === 'circuit-schema-mismatch' && /type differs/u.test(error.message));
+
+  const unknownInput = structuredClone(source);
+  unknownInput.nodes[0].inputs.unreviewedFlag = true;
+  assert.throws(() => compileCircuit(unknownInput, registries),
+    (error) => error.code === 'circuit-schema-mismatch' && /unreviewedFlag/u.test(error.message));
+});
+
+test('structured schemas protect direct extension calls and returned values at runtime', async () => {
+  const registries = createStandardRegistries();
+  await loadAndInstallRuntimeExtension(registries, resolve(EXAMPLE_ROOT, 'paragraph-length.extension.mjs'));
+  const operator = registries.operators.get('example.paragraph-length@1');
+  const context = { program: compileMarkdown('Text.'), circuit: {}, node: {}, options: {} };
+  await assert.rejects(() => operator.execute({ paragraphs: [], maximumWords: -1 }, context),
+    (error) => error.code === 'runtime-extension-input-invalid');
+
+  const wrongTypedOutput = defineRuntimeExtension({
+    kind: 'NllRuntimeExtension', id: 'example.wrong-typed-output@1.0.0',
+    description: 'Output-schema probe.',
+    operators: [{
+      id: 'example.wrong-typed-output@1', description: 'Returns a plain value with the wrong item type.',
+      primitives: ['call'],
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+      outputSchema: STRING_ARRAY, deterministic: true, effects: [], capabilities: [], cost: 'constant',
+      limits: {}, failureCodes: ['runtime-extension-output-invalid'], execute() { return [3]; }
+    }],
+    verifiers: []
+  });
+  const second = createStandardRegistries();
+  installRuntimeExtension(second, wrongTypedOutput, {
+    id: wrongTypedOutput.id, digest: `sha256:${'3'.repeat(64)}`, entry: 'in-memory-test'
+  });
+  await assert.rejects(() => second.operators.get('example.wrong-typed-output@1').execute({}, context),
+    (error) => error.code === 'runtime-extension-output-invalid' && /\$\[0\]/u.test(error.message));
+  await assert.rejects(() => second.operators.get('example.wrong-typed-output@1').execute(
+    { $node: 'attempted-schema-bypass' }, context
+  ), (error) => error.code === 'runtime-extension-input-invalid');
 });
 
 test('node cache identity includes the extension implementation digest', async () => {

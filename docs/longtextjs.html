@@ -160,7 +160,7 @@ flowchart LR
 
     <h2 id="query-world">A queryable world, not a database claim</h2>
     <p>These constructions can be mounted as read-only logical relations. Singular <code>source</code> and <code>task</code> become one-row relations; the anchor map is enumerated by stable id; arrays retain only their declared semantic order. A query result is derived data with references back to canonical ids. Type/status, anchor, scope, source-order, and coverage indexes may accelerate repeated access, but they are disposable caches and never evidence.</p>
-    <div class="callout warning"><strong>Experimental execution.</strong> <a href="query-first.html">Query-first authoring</a> now exposes every canonical construction through a deterministic reference adapter. Observation scans also become generated CircuitJS ports, so the existing producer, status, and compatibility gate remains active. Benchmark execution compares direct query/table evaluation with the lowered graph. Native indexes are not implemented.</div>
+    <div class="callout warning"><strong>Experimental execution.</strong> <a href="query-first.html">Query-first authoring</a> now exposes every canonical construction through a deterministic reference adapter. Observation scans also become generated CircuitJS observation bindings, so the existing producer, status, and compatibility gate remains active. Benchmark execution compares direct query/table evaluation with the lowered graph. Native indexes are not implemented.</div>
 
     <h2 id="source">Source, anchor, observation</h2>
     <div class="table-wrap"><table>
@@ -178,7 +178,7 @@ flowchart LR
     <p>This matters downstream. A deterministic state replay over model-proposed events can verify that the replay follows the released transition policy; it cannot retroactively prove that each event was semantically classified with mechanical certainty.</p>
 
     <h2 id="demand">LongTextJS is selective, not total</h2>
-    <p>The runtime compiles structure and the selected foundation, then loads the release’s circuits. Release input ports determine the additional domain observation types to materialize. A lexical circuit may need only <code>document.paragraph@1</code>. A continuity circuit may additionally need object events, identity, order, modality, and an intervening-scope search. nllAgent does not attempt to formalize every possible fact in every document.</p>
+    <p>The runtime compiles structure and the selected foundation, then loads the release’s circuits. Output-reachable observation bindings determine the additional domain observation types to materialize. A lexical circuit may need only <code>document.paragraph@1</code>. A continuity circuit may additionally need object events, identity, order, modality, and an intervening-scope search. nllAgent does not attempt to formalize every possible fact in every document.</p>
     <p>No unrestricted built-in profile runs merely because a sentence contains a person-like name or verb. The
       foundation is limited to its documented forms. Rich semantic requests go through extraction profiles listed by the selected release and the backend-neutral translation
       gateway, and a profile runs only when an output-reachable circuit demands its exact <code>outputType</code>.

@@ -52,7 +52,8 @@ A newly authored release manifest has kind `NaturalLanguageLinterRelease`. A rel
 - semantic diff from its parent;
 - the statically derived observation contracts and producer-consumer alignment report;
 - known limitations and publication record;
-- reproduction recipe.
+- when scope found an applicable serious issue, the manifest field `capabilityGapReport` and that report linking issues to concrete reproducers, mitigations, blocks, or resolution evidence;
+- reproduction recipe;
 - exact runtime-extension ids and digests for any non-standard operator or verifier code used by the circuits.
 
 When a release uses a declarative authoring profile beyond direct CircuitJS, it must additionally lock the normalized profile values, derived observation and query contracts, generated canonical graph, source map, static diagnostics, exact compiler and registry semantics, and differential evidence required by that profile. The experimental query-first subset persists its compiler-produced bundle as `query-first-artifacts.json`, and benchmark execution rejects reference-to-graph drift. An optional physical optimization plan is runtime metadata, not release meaning. An unsupported profile cannot appear in a publishable candidate merely as an unvalidated dialect label.
@@ -104,6 +105,14 @@ Response: The normalized declarative query and decision values plus the canonica
 Response: A registry id states semantic intent but does not prove which local bytes implement it. The source digest
 prevents a different function body from satisfying the same published id or reusing a deterministic cache entry. The
 lock does not make the extension untrusted code safe; it makes trusted code identity explicit and replayable.
+
+### Question #9: Must every candidate copy every repository serious issue?
+
+Response: No. A candidate records only issues applicable to its scoped use case. Each applicable item links a minimal
+reproducer and is classified as resolved, mitigated, or blocked with evidence. Repository-wide issues remain visible in
+their own register; candidate-specific mapping prevents both generic disclaimer dumping and silent unsupported claims.
+The host validates a report named by `capabilityGapReport`, but it cannot infer domain relevance; scope and maintainer
+review remain responsible for deciding whether the manifest should declare one.
 
 # Conclusion
 

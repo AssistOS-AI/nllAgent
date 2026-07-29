@@ -24,7 +24,7 @@
       boundary; it is not a catalogue of every possible ontology.</p>
 
     <h2 id="generalization">How the platform generalizes</h2>
-    <p>A universal set of fields such as <code>Entity</code>, <code>Fact</code>, and <code>Constraint</code> looks simple until all meaningful semantics move into opaque payloads and prompts. nllAgent keeps a smaller common kernel: sources, anchors, versioned types, scope, time, alternatives, epistemic status, provenance, coverage, ports, budgets, witnesses, and publication rules. Domains extend the nominal vocabularies and compose the reasoning regimes they actually need.</p>
+    <p>A universal set of fields such as <code>Entity</code>, <code>Fact</code>, and <code>Constraint</code> looks simple until all meaningful semantics move into opaque payloads and prompts. nllAgent keeps a smaller common kernel: sources, anchors, versioned types, scope, time, alternatives, epistemic status, provenance, coverage, observation bindings, budgets, witnesses, and publication rules. Domains extend the nominal vocabularies and compose the reasoning regimes they actually need.</p>
     <p>This design resembles a platform with specialized theories rather than one giant classifier. The same scheduler can coordinate lexical matching, state timelines, deadlines, constraints, graph search, or model judgments because every component declares typed inputs, effects, limits, and verification. It does not imply that any operator understands arbitrary natural language.</p>
 
     <div class="callout"><strong>What is shared by default?</strong> <code>foundation-core@1.1.0</code> recognizes the
@@ -48,7 +48,7 @@ flowchart LR
       <tbody>
         <tr><td>Authority map and rule cards</td><td>Fix source version, priority, scope, trigger, exceptions, outcomes, and maximum guarantee.</td><td>The Coding Agent invents policy or file order resolves a conflict.</td></tr>
         <tr><td>LongTextJS schemas</td><td>Name the minimum observable concepts, fields, status, anchors, identity, time, and coverage.</td><td>Circuits depend on free-form prompts or semantically overloaded types.</td></tr>
-        <tr><td>Producers and adapters</td><td>Materialize observations neutrally from supported source profiles and declare losses.</td><td>Ports compile nominally but cannot be satisfied on real documents.</td></tr>
+        <tr><td>Producers and adapters</td><td>Materialize observations neutrally from supported source profiles and declare losses.</td><td>Bindings compile nominally but cannot be satisfied on real documents.</td></tr>
         <tr><td>CircuitJS theory</td><td>Encode reusable selection, state, exception, priority, search, verification, and finding behavior.</td><td>The rule changes between runs or extraction is contaminated by the desired verdict.</td></tr>
         <tr><td>Operators and verifiers</td><td>Provide approved algorithms and replay checks for domain computations.</td><td>A complex claim has no inspectable witness or guarantee boundary.</td></tr>
         <tr><td>Natural benchmark</td><td>Define positives, close negatives, exceptions, ambiguity, coverage, adversarial inputs, and long composition.</td><td>A plausible but wrong theory passes convenient examples.</td></tr>

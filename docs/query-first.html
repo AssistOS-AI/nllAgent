@@ -106,7 +106,7 @@ flowchart LR
         <tr><td>Query identity</td><td><code>kind</code>, <code>schemaVersion</code>, <code>id</code></td><td>Must identify <code>LongTextQuery@1</code> and a unique stable query id.</td></tr>
         <tr><td>Query relation</td><td><code>from</code>, <code>joins</code></td><td>One base relation and optional ordered <code>innerJoin</code>, <code>semiJoin</code>, or <code>antiJoin</code> specifications.</td></tr>
         <tr><td>Relation specification</td><td><code>relation</code>, <code>as</code>, <code>type</code>, <code>statuses</code>, <code>fields</code></td><td><code>as</code> creates lexical scope. Observation scans require one exact nominal type; nonstructural schemas must declare every readable field until registry-owned schemas exist.</td></tr>
-        <tr><td>Port/coverage refinements</td><td><code>coverage</code>, <code>critical</code>, <code>scopeRelation</code></td><td>Observation scans generate ordinary ports with these compatibility properties. They do not change relation filtering by themselves.</td></tr>
+        <tr><td>Binding/coverage refinements</td><td><code>coverage</code>, <code>critical</code>, <code>scopeRelation</code></td><td>Observation scans generate ordinary observation bindings with these compatibility properties. They do not change relation filtering by themselves.</td></tr>
         <tr><td>Join</td><td><code>kind</code>, <code>from</code>, <code>on</code>, <code>requiresCoverage</code></td><td><code>on</code> is typed three-valued data. Only anti-join accepts and requires exact verified closed-world coverage.</td></tr>
         <tr><td>Query transformation</td><td><code>where</code>, <code>select</code>, <code>orderBy</code></td><td>Optional filter; non-empty named projection; mandatory total order with <code>expr</code> and <code>asc</code>/<code>desc</code>. A stable row id resolves remaining ties.</td></tr>
         <tr><td>Query budgets</td><td><code>rowsRead</code>, <code>intermediateRows</code></td><td>Non-negative limits; defaults are 100,000 each. Exhaustion is a typed failure, never an empty result.</td></tr>
@@ -191,11 +191,17 @@ flowchart LR
 
     <div class="callout"><strong>Current practical rule.</strong> Learning may emit the implemented subset only when a shared relational decision family is clearer than an exact operator wrapper. Unsupported forms stay direct CircuitJS or exact registered operators. The published editorial demonstration remains direct because its three-node graph is already simpler.</div>
 
+    <p>A direct CircuitJS <code>observationBinding()</code> can already apply a short AND-list of local field matchers.
+      Choose it for one relation and no derived rows. Query-first starts where the problem needs lexical aliases,
+      projection, joins, deterministic ordering, evidence-aware decisions, or coverage-sensitive absence. The two forms
+      therefore share a data boundary without pretending that a binding is a general query engine.</p>
+
     <nav class="page-nav" aria-label="Query-first reading path">
       <strong>Continue by layer</strong>
       <a href="longtextjs.html#data-dictionary">Review every LongTextJS construction</a>
       <a href="circuitjs.html#primitive-semantics">Review every CircuitJS primitive</a>
       <a href="query-first-tutorial.html">Execute query-first lowering level by level</a>
+      <a href="advanced-circuit-tutorial.html">Compare local matching, custom code, foundation, and CNL</a>
       <a href="operators.html#simplest-form">Choose the simplest current representation</a>
       <a href="benchmark.html">Design the differential and mutation evidence</a>
     </nav>
