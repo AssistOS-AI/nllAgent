@@ -1,6 +1,0 @@
-interface:
-  display_name: "Prepare NaturalLanguageLinterAgent Candidate"
-  short_description: "Prepare a candidate for manual publication."
-  default_prompt: "Use $nll-prepare-release to validate a candidate without publishing it."
-policy:
-  allow_implicit_invocation: false

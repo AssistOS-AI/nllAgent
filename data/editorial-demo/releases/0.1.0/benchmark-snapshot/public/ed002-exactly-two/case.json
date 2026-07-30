@@ -1,7 +1,0 @@
-{
-  "kind": "NaturalLanguageLinterBenchmarkCase",
-  "rule": "ED-002",
-  "family": "boundary",
-  "validationStatus": "mechanically-derived",
-  "reportComparison": "structured"
-}

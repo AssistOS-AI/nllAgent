@@ -16,7 +16,7 @@ LONG_LINE_THRESHOLD=120
 VERY_LONG_LINE_THRESHOLD=300
 
 # Extensions to scan (space-separated, without dots)
-EXTENSIONS="${FILE_EXTENSIONS:-js mjs sys2 md html css json sh}"
+EXTENSIONS="${FILE_EXTENSIONS:-mjs md html css sh}"
 
 # Color definitions
 if [[ -t 1 ]]; then

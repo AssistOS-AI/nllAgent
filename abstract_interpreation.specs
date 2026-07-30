@@ -1,0 +1,930 @@
+NLLAGENT
+Ingineria circuitelor
+multi-semantice
+Specificație completă pentru alegerea metodelor, compoziția circuitelor, skill-urile coding agents și execuția runtime
+Extensie self-contained a arhitecturii OntologyJS–LongTextJS–CircuitJS
+Fără dependențe externe · toate componentele și artefactele executabile sunt module ESM .mjs · fără JSON și fără TypeScript
+
+
+
+
+Versiunea 2.0 · Iulie 2026
+OntologyJS · LongTextJS · CircuitJS · Multi-Semantics Runtime · NaturalLinterAgent
+
+Rezumat executiv
+Această specificație reface integral propunerea pentru runtime-ul multi-semantic și închide o ambiguitate importantă: un circuit nu are o singură „metodă”. Circuitul are o responsabilitate semantică principală, un contract tipat și o execuție concretă; în interiorul lui pot fi compuse mai multe metode algoritmice, iar peste același CircuitModel pot fi aplicate interpretări abstracte, simbolice, concolice sau de verificare. Alegerea nu este lăsată unei intuiții vagi a coding agentului. Ea este materializată într-un `CircuitArchitecturePlan`, verificată de un `MethodCatalog` nativ și transformată într-o compoziție explicită de primitive, subcircuite și assurance circuits.
+Documentul presupune că arhitectura de bază este implementată: OntologyJS definește vocabularul și constructorii, LongTextJS materializează documentele ca termeni ground și claims ancorate, CircuitJS exprimă reguli și algoritmi peste SemanticStore, iar runtime-ul dinamic oferă capabilități, instanțe, tranzacții, trace și execuție incrementală. Nu există migrare, compatibilitate cu vechile reprezentări sau obligația de a păstra artefacte JSON. Sistemul este un experiment curat și toate sursele semantice sunt module `.mjs`.
+Extensia introduce un lifecycle de authoring precis. Regula în limbaj natural este mai întâi analizată în obligații semantice; ontologia este verificată; regula este descompusă în subprobleme; pentru fiecare subproblemă este aleasă metoda minimă adecvată; se reutilizează primitive și circuite existente; se creează doar componentele lipsă; se construiește profilul de materializare LongTextJS; se adaugă semanticile auxiliare cerute de profilul de assurance; se generează benchmark-uri; iar un integrator asamblează și verifică întregul RulePack. Fiecare etapă are un skill, tool-uri deterministe, output-uri multi-fișier, o poartă de ieșire și o rută de repair.
+Metodele de bază sunt: query/dataflow pentru selecție și join-uri finite; decision tables pentru condiții și excepții finite; ConstraintKernel pentru egalități, cantități, deadline-uri și relații temporale; RelationEngine pentru closure și recurență; EGraphLite pentru normalizare și echivalență; abstract interpretation pentru rezultate must/may/cannot și preflight; symbolic/concolic execution pentru witnesses, boundary cases și acoperire semantică; CEGAR pentru refinare țintită; ProofKernel pentru obligații locale; SynthesisEngine pentru reparații și CNLFrames; și macro-noduri JavaScript pentru algoritmi neregulați ori foarte specifici. O singură regulă poate folosi simultan mai multe dintre ele.
+CircuitJS rămâne JavaScript expresiv. Funcțiile, clasele, buclele, recursia, `async/await` și apelurile de tool pot fi utilizate. Sandboxing-ul este o problemă separată. Disciplina semantică nu este obținută prin interzicerea sintaxei JavaScript, ci prin frontiere tipate: un circuit citește prin `ExecutionContext`, publică prin porturi și tranzacții, iar obiectele admise în SemanticStore sunt termeni construiți prin primitivele ontologice. Codul procedural poate rămâne opac pentru analizele auxiliare sau poate publica summaries și encodere atunci când precizia este importantă.
+Skill-urile coding agents nu sunt simple prompturi. Fiecare skill definește momentul invocării, fișierele obligatoriu de citit, deciziile permise, comenzile native care trebuie rulate, fișierele deținute, diagnosticele care trebuie rezolvate, condițiile de oprire și handoff-ul către skill-ul următor. Orchestratorul nu rescrie domeniul în locul skill-urilor; el menține starea build-ului, delegează pe ownership și reia exact stratul indicat de diagnostics.
+În runtime, target-ul și profilul de assurance determină ce se compune. Un `Finding` necesită execuție concretă. Un `WitnessedFinding` adaugă witness simbolic și replay. Un `CertifiedFinding` adaugă proof obligations locale. Un `CNLRepair` adaugă sinteză și validare round-trip. Abstract preflight poate rula înaintea execuției pentru a identifica statusuri posibile, lipsuri de coverage și puncte de imprecizie. CEGAR se activează numai când o concluzie posibilă nu poate fi încă concretizată. Nu se rulează toate metodele asupra fiecărui document.
+Decizia centrală: circuitul spune ce responsabilitate semantică are; `CircuitArchitecturePlan` spune cum este descompus și ce metode utilizează; interpreții spun în ce mod este analizat; skill-urile spun când și cum sunt create artefactele. Aceste patru niveluri sunt separate explicit.
+
+Figura 1. Authoring-ul și runtime-ul folosesc aceleași ontologii, contracte și capabilități; skill-urile construiesc un RulePack, iar runtime-ul îl compune numai pentru target-ul cerut.
+Harta documentului
+Capitol	Rol în specificație
+1. Contractul arhitectural	Definește sistemul de bază, RulePack-ul și diferența dintre circuit, metodă, interpreter, skill și tool.
+2. Alegerea metodelor și compoziția	Introduce MethodCatalog, CircuitArchitecturePlan, criteriile de decompoziție și modurile de compunere a circuitelor.
+3. Runtime-ul multi-semantic	Specifică primitivele multi-semantice, abstract interpretation, symbolic/concolic, ConstraintKernel, CEGAR, RelationEngine, EGraphLite, ProofKernel și SynthesisEngine.
+4. Lifecycle-ul de authoring	Descrie porțile, toolchain-ul `.mjs`, ownership-ul multi-fișier și rutarea diagnostics.
+5. Skill-uri pentru analiză și proiectare	Detaliază skill-urile de analiză a regulilor, ontologie, planificare și authoring de primitive.
+6. Skill-uri pentru implementare și validare	Detaliază authoring-ul circuitelor, materializarea LongTextJS, assurance, benchmark, integrare, review și repair.
+7. Execuția unui RulePack	Fixează ordinea runtime, target-urile de assurance, compoziția din registry, refinement și output-urile.
+8. Exemple și criterii de acceptare	Prezintă cazuri complete și închide ambiguitățile de proiectare prin decizii normative.
+Anexe	Conțin API-uri, structura repository-ului, șablonul SKILL.md, matricea de selecție a metodelor, diagnostics și algoritmi de referință.
+
+1. Contractul arhitectural și vocabularul exact
+Această extensie este implementată peste arhitectura deja stabilită, dar documentul reintroduce toate conceptele necesare pentru a putea fi citit independent. Precizia terminologică este importantă deoarece confuzia dintre circuit, metodă, interpreter și skill conduce direct la code generation incoerent.
+1.1 Baza OntologyJS–LongTextJS–CircuitJS
+OntologyJS definește identitatea semantică: concepte, sorturi, roluri, relații, cardinalități, subtipuri, incompatibilități, lexicalizări și constructori. Constructorii nu întorc obiecte anonime convenționale, ci termeni opaci, validați și inspectabili. Aceeași identitate este folosită de LongTextJS pentru instanțe concrete și de CircuitJS pentru pattern-uri, variabile, derivări și rezultate.
+LongTextJS este fragmentul ground al familiei de limbaje. Un program `.longtext.mjs` descrie entități, evenimente, states, claims, modalitate, negație, timp, scope, alternative, identity candidates, coverage și ancore către text. Codul poate utiliza JavaScript normal pentru organizare, iterație și compoziție, însă numai termenii creați prin API-ul ontologic intră în SemanticStore. Prin urmare, libertatea sintactică nu produce un al doilea model semantic.
+CircuitJS este limbajul de interogare, derivare, decizie, verificare și generare construit peste aceeași algebră. El poate fi declarativ, procedural sau hibrid. Un modul poate construi un graf de primitive, poate importa subcircuite, poate defini un macro-nod JavaScript complex și poate cere capabilități din registry. Execuția concretă lucrează exclusiv prin `ExecutionContext`, care furnizează query, transactions, subcircuits, tools, model calls, trace și emit.
+SemanticStore este singurul model logic al documentului. El poate avea intern indecși după tip, rol, span, timp, scope sau interpretare, dar circuitele nu cunosc structura fizică. `match`, `exists`, `notExists`, `before`, `same`, `withinScope`, `derive`, `evidenceOf` și celelalte primitive formează algebra publică. Abstract states, symbolic terms și e-classes sunt structuri temporare de analiză, nu baze de date concurente.
+CircuitModel este modelul de calcul rezultat după evaluarea modulului CircuitJS. El conține noduri declarative, macro-noduri, porturi, contracte, subcircuite, schedules și hooks de assurance. CircuitInstance leagă CircuitModel de input-uri concrete și de un interpretation context. ExecutionPlan este compoziția aleasă pentru target-ul curent, iar ExecutionTrace este înregistrarea efectivă a evaluării. Separarea acestor patru obiecte elimină confuzia dintre codul sursă, model, instanță și execuție.
+1.2 Circuit, metodă, interpreter, engine, skill și tool
+Tabelul 1. Vocabularul operațional al sistemului
+Termen	Definiție normativă
+Circuit	Componentă semantică reutilizabilă cu responsabilitate principală, porturi, contract `requires/provides`, execuție concretă și eventual hooks de assurance. Un circuit poate combina mai multe metode.
+Metodă	Familie algoritmică folosită pentru o subproblemă: query, decision table, constraints, fixed point, rewrite, symbolic, proof, synthesis sau JavaScript procedural. Metoda descrie „cum”, nu „ce produce” circuitul în ansamblu.
+Interpreter	Mod de evaluare al aceluiași CircuitModel: concret, abstract, simbolic, concolic, prove sau synthesize. Interpreterul nu este un circuit alternativ al regulii.
+Engine	Implementare internă specializată utilizată de primitive sau interpreți: ConstraintKernel, RelationEngine, EGraphLite, ProofKernel, SynthesisEngine.
+Skill	Procedură de lucru pentru coding agent. Spune când se invocă, ce citește, ce decide, ce tool-uri rulează, ce fișiere produce și ce poartă trebuie să treacă.
+Tool	Comandă deterministă implementată în `tools/nll.mjs`. Verifică, construiește, rulează, raportează sau materializează; nu înlocuiește deciziile semantice ale agentului.
+
+Un circuit de retenție, de exemplu, are responsabilitatea `RetentionAssessment`. În interior poate folosi query/dataflow pentru selectarea claims, ConstraintKernel pentru compararea duratei, un decision table pentru status și un SynthesisCircuit pentru repair. AbstractInterpreter poate calcula may/must, SymbolicInterpreter poate genera boundary cases, iar ProofKernel poate verifica exhaustivitatea tabelei. Niciuna dintre aceste metode nu redefinește identitatea circuitului.
+Această distincție este reflectată în cod. `primaryRole(Assessment)` este metadată semantică; `usesMethod(DecisionTable)` și `usesMethod(ConstraintSolving)` descriu implementarea; `supports(Abstract)` și `supports(Symbolic)` descriu analizabilitatea; `produces(RetentionFinding)` descrie capabilitatea. Coding agentul nu trebuie să inventeze o taxonomie nouă pentru fiecare regulă.
+
+Figura 2. Regula este descompusă în forme de subproblemă, metodele sunt alese local, iar subcircuitele sunt reunite într-un root circuit. Modurile abstract, symbolic și proof sunt aplicate ulterior.
+1.3 Decizii normative ale experimentului
+Tabelul 2. Angajamentele care nu trebuie reinterpretate de skill-uri
+Decizie	Consecință concretă
+Implementare curată, fără migrare	Nu se păstrează vechile JSON-uri, adaptoare de compatibilitate sau etape de tranziție. Repository-ul este organizat direct în jurul modulelor `.mjs`.
+Fără dependențe externe	Se utilizează numai Node.js și module standard. Solverele, relation engine-ul, e-graph-ul, proof checker-ul și toolchain-ul sunt implementate în repository.
+JavaScript expresiv	Nu se interzic funcții, clase, loops, recursie, async sau structuri auxiliare. Sandboxing-ul este separat. Autoritatea semantică este controlată la frontieră, prin termeni, porturi și ExecutionContext.
+Concrete execution este autoritatea operațională	Abstract, symbolic și proof pot ghida, verifica sau refuta, dar nu pot suprascrie rezultatul concret fără un protocol explicit de witness ori certificate.
+Noțiunea de soundness este relativă la snapshot	Analiza supraaproximează toate execuțiile compatibile cu LongTextJS acceptat. Nu demonstrează adevărul textului și nici fidelitatea absolută a LLM-ului.
+Capabilitățile sunt pin-uite într-un RulePack	Plannerul poate alege dintre provideri autorizați, dar un pack validat nu își schimbă semanticile prin descoperirea arbitrară a unui provider nou la runtime.
+Rapoartele sunt `.md`, artefactele sunt `.mjs`	Nu se folosesc fișiere JSON ca DSL, contract, benchmark sau trace autoritativ. Cache-urile pot fi efemere și reconstruibile.
+
+Output validation înlocuiește restricția sintactică. Un modul OntologyJS este acceptat dacă exportă o ontologie validă. Un modul LongTextJS este acceptat dacă produce termeni ground ancorați și trece checker-ele. Un modul CircuitJS este acceptat dacă produce un CircuitModel tipat, cu contract și effects declarate. Codul poate construi aceste obiecte prin helper functions, loops sau clase fără ca runtime-ul să pretindă că poate analiza static întreaga sintaxă JavaScript.
+Pentru macro-nodurile procedurale, effects sunt declarate și verificate la runtime. `reads`, `writes`, `callsTool`, `callsModel` și `emits` fac parte din contract. ExecutionContext înregistrează accesul real și raportează orice effect nedeclarat. Astfel, sistemul păstrează auditabilitatea fără a limita algoritmul intern.
+1.4 RulePack-ul ca unitate de proiectare și execuție
+Unitatea completă nu este un singur circuit, ci un `RulePack`. El reunește sursele de autoritate, ontologiile, analiza regulilor, planurile de circuit, primitivele, root circuits, profilul de materializare, semanticile auxiliare, benchmark-urile, grammar/lexicon CNL și configurația de assurance. `pack.mjs` importă explicit versiunile și providerii acceptați.
+Exemplul 1. RulePack-ul pin-uiește semantica experimentului
+export default rulePack("privacy.retention@1")
+  .sources(authority("sources/retention-policy.md"))
+  .ontology(useOntology(privacyCore), useOntology(timeCore))
+  .plan(usePlan(retentionArchitecturePlan))
+  .materialization(useProfile(retentionObservationProfile))
+  .circuits(
+    selectRetentionClaims,
+    normalizeRetentionDuration,
+    resolveLegalExceptions,
+    assessRetention,
+    retentionRootCircuit
+  )
+  .assurance(
+    defaultProfile(ANALYZED, WITNESSED),
+    optionalProfile(LOCALLY_CERTIFIED, GENERATIVE)
+  )
+  .benchmarks(retentionBenchmark)
+  .providers(pinAuthorizedProviders())
+  .seal();
+RulePack-ul rezolvă trei probleme. În primul rând, stabilește ce înseamnă „regula” în mod reproductibil. În al doilea rând, oferă coding agents o frontieră de ownership și un index de fișiere. În al treilea rând, permite runtime-ului să compună numai componente validate împreună. O modificare a ontologiei sau a unui primitive descriptor cere rerularea benchmark-ului pack-ului, dar nu implică o infrastructură de migrare.
+Regula de autoritate, ontologia și circuitul nu pot evolua independent în interiorul unui RulePack acceptat. Skill-ul de integrare publică împreună exact versiunile care au trecut benchmark-ul și quality gates.
+2. Alegerea metodelor și compoziția circuitelor
+Această secțiune definește mecanismul prin care coding agentul decide ce să implementeze. Agentul nu pornește de la numele unei tehnici și nu atașează arbitrar „abstract interpretation” unei reguli. El descompune regula în subprobleme semantice, consultă MethodCatalog, reutilizează capabilități existente și scrie un CircuitArchitecturePlan verificabil.
+2.1 Responsabilitatea principală și decompoziția semantică
+Prima decizie este ce rezultat semantic trebuie produs. Exemplele sunt `RetentionAssessment`, `ContinuityFinding`, `DefinitionConflict`, `CNLRepair` sau `ScientificClaimConsistency`. Acest rezultat definește responsabilitatea root circuit-ului. Regula este apoi descompusă în pași cu input-uri și output-uri tipate, nu în funcție de forma propoziției sau de ordinea cuvintelor.
+Un pas este o subproblemă suficient de autonomă pentru a putea fi testată și, eventual, reutilizată. Selecția candidaților, normalizarea unităților, rezoluția unei excepții, closure-ul unei relații, calculul unui deadline, clasificarea statusului și construirea unei explicații sunt limite naturale. Un pas nu trebuie creat doar pentru a fragmenta codul; el trebuie să aibă o responsabilitate și o interfață semantică clară.
+Coding agentul clasifică fiecare pas printr-un `ProblemShape`. Clasificarea este explicită: finite pattern matching, finite decision, quantitative constraint, temporal constraint, recursive relation, equivalence/normalization, ambiguity requiring witness, repair/synthesis sau irregular procedure. Un pas poate avea mai multe shape-uri; atunci este descompus sau primește o compoziție de metode.
+Tabelul 3. Politica de selecție a metodelor
+Forma subproblemei	Metoda implicită și motivul
+Selecție, filtrare, join finite	Query primitives și dataflow. Indecșii SemanticStore pot executa direct pattern-urile și păstra provenance.
+Condiții și excepții finite	Decision table multivaluat. Obligația de a enumera `UNKNOWN`, `CONFLICT` și `NOT_APPLICABLE` face regula inspectabilă.
+Egalități, cantități, deadline-uri, relații temporale	ConstraintKernel. Produce model, conflict sau `UNKNOWN` și poate fi utilizat concret, abstract și simbolic.
+Closure, reachability, propagare recursivă	RelationEngine cu punct fix semi-naiv. Evită rerularea integrală și oferă derivation trace.
+Forme echivalente și canonicalizare	Rewrite theory și EGraphLite. Aplică numai teorii autorizate și extrage forma canonică.
+Finding posibil, dar insuficient concretizat	Abstract preflight urmat de symbolic witness și, dacă este necesar, CEGAR/RefinementDemand.
+Invariant local important	ProofObligationCircuit și ProofKernel. Se verifică un certificat mic, nu întregul sistem.
+Reparație sau generare controlată	SynthesisCircuit peste o gramatică tipată, urmat de execuție concretă și round-trip CNL.
+Algoritm neregulat, I/O sau logică domenială complexă	Macro-nod JavaScript. Publică effects și, dacă este pe o cale critică de analiză, summary abstract ori encoder simbolic.
+
+Ordinea preferințelor este concretă. Se reutilizează mai întâi un circuit existent cu contract compatibil. Dacă nu există, se compun primitive existente. Se creează o primitivă nouă numai când operația este atomică, reutilizabilă sau trebuie să aibă semantici abstracte și simbolice proprii. Se utilizează un macro-nod pentru algoritmi specifici care nu justifică extinderea vocabularului de primitive.
+Aceasta nu înseamnă că metodele declarative sunt întotdeauna superioare. Un algoritm global de coreferință sau un parser specializat poate fi mai simplu și mai eficient în JavaScript procedural. Decizia corectă este să păstrăm frontiera sa semantică și să nu pretindem că AbstractInterpreter îi cunoaște intern comportamentul fără summary.
+2.2 MethodCatalog și regula deterministă de alegere
+MethodCatalog este un registru de descriptori `.method.mjs` implementat în core. Fiecare descriptor declară shape-urile acceptate, precondițiile, tipurile de input/output, engine-ul utilizat, semanticile auxiliare disponibile, diagnosticele caracteristice și tipurile de compoziție compatibile. Tool-ul `methods suggest` nu inventează designul; el filtrează și ordonează metodele care satisfac descrierea făcută de agent.
+Exemplul 2. Un descriptor de metodă poate fi verificat și consultat de tooling
+export default method("finite-decision-table")
+  .appliesTo(finiteBranching(), explicitUnknowns(), boundedExceptions())
+  .requires(predicateValues(), decisionStatuses())
+  .provides(DecisionResult, DecisionTrace)
+  .supports(CONCRETE, ABSTRACT, SYMBOLIC, PROVE)
+  .preferWhen(reviewabilityRequired())
+  .rejectWhen(unboundedProceduralState())
+  .diagnostics(
+    UNREACHABLE_ROW,
+    OVERLAPPING_INCOMPATIBLE_ROWS,
+    UNHANDLED_UNKNOWN
+  )
+  .seal();
+Selecția urmează o procedură stabilă. Agentul descrie pasul; tool-ul elimină metodele cu precondiții nesatisfăcute; registry-ul caută implementări existente; metodele rămase sunt ordonate după exactitate semantică, reutilizare, compatibilitate cu assurance-ul cerut și simplitatea compoziției. Agentul alege una dintre variante și scrie motivul arhitectural în plan. O alegere în afara recomandărilor este permisă, dar trebuie să treacă `methods check` și să declare explicit motivul.
+MethodCatalog nu conține euristici opace și nici scoruri învățate. Este cod `.mjs` cu predicate explicite. Astfel, coding agentul primește ajutor fără ca designul să devină dependent de un alt LLM. Catalogul poate fi extins cu o metodă nouă doar împreună cu exemple, diagnostics și tool support.
+Alegerea assurance-ului este separată de alegerea metodei concrete. Un decision table poate fi executat fără symbolic execution. Dacă RulePack-ul cere acoperirea tuturor rândurilor, planul adaugă `symbolicDecisionCoverage`. Dacă regula este critică, poate adăuga și `decisionRowsAreDisjoint` ca proof obligation. Nu există o obligație universală de a aplica toate semanticile.
+2.3 CircuitArchitecturePlan: artefactul care explică „ce, cum și de ce”
+`CircuitArchitecturePlan` este artefactul obligatoriu produs înaintea authoring-ului circuitelor. El nu este private chain-of-thought și nu încearcă să înregistreze deliberarea internă a agentului. Conține numai deciziile arhitecturale verificabile: obiectiv, subprobleme, input/output, metodă aleasă, componente reutilizate, fișiere de creat, contracts, assurance, benchmark goals și ownership.
+Exemplul 3. Planul face selecția metodelor și compoziția inspectabile
+export default circuitArchitecturePlan("privacy.retention.rule@1")
+  .sourceRule(ruleRef("RET-001", authoritySpan("retention-policy.md", 120, 344)))
+  .goal(produce(RetentionFinding))
+  .assurance(defaultAssurance(ANALYZED, WITNESSED))
+
+  .step("select-retention-claims",
+    problemShape(finitePatternMatching()),
+    input(DocumentClaims),
+    output(RetentionClaimSet),
+    choose(queryDataflow()),
+    reuse(circuitRef("claims.select-retention@1")))
+
+  .step("normalize-duration",
+    problemShape(quantityNormalization()),
+    input(RetentionClaimSet),
+    output(NormalizedRetention),
+    choose(primitiveComposition()),
+    reuse(primitiveRef("time.duration.normalize@1")))
+
+  .step("evaluate-limit-and-exception",
+    problemShape(quantitativeConstraint(), finiteDecision()),
+    input(NormalizedRetention, LegalExceptionClaims, CoverageState),
+    output(RetentionAssessment),
+    choose(constraintKernel(), decisionTable()),
+    create("circuits/assess-retention.circuit.mjs"))
+
+  .step("repair",
+    conditionalOn(targetIncludes(CNLRepair)),
+    problemShape(typedSynthesis()),
+    choose(synthesisCircuit(), cnlRoundTrip()))
+
+  .compose(rootCircuit("circuits/retention-root.circuit.mjs"))
+  .deriveMaterializationProfile("materialization/retention.profile.mjs")
+  .benchmarkGoals(decisionRows(), boundaryValues(), openVsClosedCoverage())
+  .seal();
+Planul are trei funcții. Pentru coding agent, delimitează exact ce trebuie implementat și ce nu trebuie reinventat. Pentru toolchain, permite verificarea exhaustivității: fiecare obligație a regulii trebuie mapată la un pas și fiecare pas trebuie să aibă input/output, metodă și owner. Pentru review, permite compararea regulii NL cu arhitectura înainte ca detaliile codului să ascundă o eroare de interpretare.
+`plan check` verifică: existența conceptelor ontologice; compatibilitatea tipurilor între pași; capabilitățile reutilizate; providers pin-uiți; ciclurile; metodele aplicabile; coverage requirements; effects ale macro-nodurilor; assurance goals; benchmark goals și ownership-ul fișierelor. Un circuit care introduce cerințe neplanificate produce `PLAN_IMPLEMENTATION_DRIFT`. Agentul trebuie fie să corecteze codul, fie să actualizeze planul și să reruleze review-ul semantic.
+Planul poate conține o decompoziție multi-fișier foarte mare. Nu este necesar ca un singur agent să implementeze toate fișierele. Fiecare step are un owner și un dependency slice. Orchestratorul poate delega subcircuite în paralel, dar numai integratorul poate modifica root assembly și pack index.
+2.4 Modurile de compoziție ale circuitelor
+Circuitele se compun în cinci moduri distincte. Compoziția statică importă subcircuite în root circuit și leagă porturile. Compoziția prin capabilități permite plannerului să satisfacă `requires` cu provideri pin-uiți. Instanțierea dinamică creează câte o CircuitInstance pentru fiecare match. Compoziția de assurance atașează preflight, witness, proof sau synthesis în funcție de target. Compoziția de refinement reintroduce fapte sau summaries noi și reia numai subgraful dependent.
+Exemplul 4. Root circuit-ul compune subcircuite cu metode diferite
+export default compositeCircuit("privacy.retention.root@1")
+  .primaryRole(Assessment)
+  .include(
+    selectRetentionClaims,
+    normalizeRetentionDuration,
+    resolveLegalExceptions,
+    assessRetention,
+    aggregateRetentionFindings
+  )
+  .bind(selectRetentionClaims.claims, normalizeRetentionDuration.claims)
+  .bind(normalizeRetentionDuration.items, assessRetention.retentionItems)
+  .bind(resolveLegalExceptions.exceptions, assessRetention.exceptions)
+  .instantiateEach(
+    normalizeRetentionDuration.items,
+    assessRetention
+  )
+  .schedule(
+    parallel(normalizeRetentionDuration, resolveLegalExceptions),
+    after(assessRetention, normalizeRetentionDuration, resolveLegalExceptions),
+    after(aggregateRetentionFindings, assessRetention)
+  )
+  .provide(RetentionFinding)
+  .seal();
+Capability planner-ul nu este liber să aleagă orice implementare din repository. RulePack-ul declară `allowedProviders`; planul poate pin-ui un provider exact sau poate permite un set de alternative echivalente. Dacă mai mulți provideri satisfac contractul, ordinea este deterministă: provider pin-uit, provider cu garanțiile cerute, provider local pack-ului, apoi costul declarat. Alegerea este inclusă în trace.
+Ciclurile de capabilități sunt clasificate, nu interzise generic. Un ciclu pozitiv și monoton poate deveni `fixedPointGroup` și este evaluat de RelationEngine. Un ciclu procedural deliberat poate fi încapsulat într-un macro-nod cu condiție de oprire și trace. Un ciclu accidental între providers produce `UNCLASSIFIED_CAPABILITY_CYCLE` și blochează integrarea.
+Compoziția de assurance este declanșată de target. `RetentionFinding` rulează pipeline-ul concret. `WitnessedRetentionFinding` adaugă SymbolicInterpreter pentru condițiile de decizie și replay concret. `CertifiedRetentionFinding` adaugă obligations declarate. `RetentionRepair` adaugă SynthesisCircuit și CNL round-trip. Același root circuit rămâne centrul semantic; assurance circuits îl analizează ori consumă output-ul.
+Un circuit are un rol primar, dar nu este închis într-o „clasă de metodă”. Metodele se combină local; circuitele se combină prin porturi și capabilități; assurance-ul se compune în funcție de target.
+3. Runtime-ul multi-semantic și primitivele puternice
+Multi-Semantics Runtime oferă aceleași tehnici descrise în propunerea anterioară, dar le leagă explicit de plan, de skill-uri și de momentele de execuție. Niciun engine nu este obligatoriu pentru toate circuitele; fiecare este activat acolo unde forma subproblemei și profilul de assurance îl justifică.
+3.1 Primitive descriptor, defaults și macro-noduri
+Primitiva este unitatea atomică reutilizabilă. Descriptorul ei conține tipuri, concrete handler, transfer abstract, symbolic encoder, proof checker opțional, effects și laws. Semantica concretă este obligatorie. Semantica abstractă poate lipsi și atunci runtime-ul întoarce `top` conservator. Encoderul simbolic poate lipsi și atunci nodul devine funcție neinterpretată sau `UNSUPPORTED`. Proof checker-ul lipsește implicit și nu se inventează certificate.
+Exemplul 5. Aceeași primitivă participă la mai multe semantici
+export default primitive("quantity.greater-than@1")
+  .input(input("left", Quantity))
+  .input(input("right", Quantity))
+  .output(output("result", EvidenceTruth))
+  .concrete(greaterThanConcrete)
+  .abstract(greaterThanIntervalTransfer)
+  .symbolic(greaterThanSymbolicEncoder)
+  .proof(greaterThanProofStep)
+  .law(deterministic())
+  .law(monotoneInKnowledge())
+  .law(preservesProvenance())
+  .seal();
+Planul decide când un default conservator este acceptabil. Dacă primitiva este în afara căii care decide finding-ul, `top` poate fi suficient. Dacă ea controlează un rând decizional pe care benchmark-ul trebuie să îl acopere, symbolic encoder-ul devine obligatoriu. Dacă un summary este folosit pentru a declara că un status nu poate apărea, planul poate cere `summaryOverapproximatesConcrete` ca proof obligation.
+Macro-nodul procedural este un circuit node cu implementare JavaScript arbitrară. El declară input-uri, output-uri, effects și eventual un `CircuitSummary`. Summary-ul nu descrie toate instrucțiunile; descrie transformarea relevantă pentru compoziție: ce tipuri citește, ce poate emite, ce coverage necesită și ce invariants păstrează. Coding agentul nu trebuie să scrie summary pentru orice helper, ci pentru macro-nodurile care afectează preflight-ul, symbolic coverage sau proof.
+Exemplul 6. Libertate procedurală la interior, contract semantic la frontieră
+export const inspectGlobalTimeline = macroNode("timeline.inspect-global@1")
+  .input(EventSet)
+  .output(TimelineAssessment)
+  .effects(reads(Event, TemporalRelation), emits(TimelineFinding))
+  .execute(async (ctx, events) => {
+    // JavaScript complet: loops, recursie, clase, async și tool calls sunt permise.
+    return runTimelineAlgorithm(ctx, events);
+  })
+  .summary(
+    circuitSummary("timeline.inspect-global.summary@1")
+      .reads(Event, TemporalRelation)
+      .mayEmit(TimelineFinding)
+      .requiresCoverage(TemporalRelation, documentScope())
+      .preserves(SourceGrounding)
+  )
+  .seal();
+3.2 Interpretarea abstractă și preflight-ul
+AbstractInterpreter execută CircuitModel peste domenii abstracte și calculează ce rezultate sunt obligatorii, posibile sau imposibile pentru toate materializările compatibile cu snapshot-ul. Domeniile de bază acoperă EvidenceTruth, FiniteChoice, OntologyTypeSet, AliasDomain, NumericInterval, TemporalDomain, CollectionShape, CoverageDomain, ScopeDomain și InterpretationDomain. Ele formează un produs redus care propagă informație între tip, identitate, timp, scope și coverage.
+Preflight-ul are două momente de utilizare. La authoring, rulează pe input-uri abstracte definite de plan și detectează rânduri inaccesibile, statuses imposibile, condiții suprapuse, noduri opace și negație fără closure. La runtime, poate rula pe snapshot pentru a identifica rapid statusuri posibile și demands înaintea execuției concrete. Preflight-ul nu emite finding final de unul singur.
+Tabelul 4. Preflight-ul este un instrument de authoring, nu doar o optimizare runtime
+Diagnostic de preflight	Acțiunea skill-ului responsabil
+UNREACHABLE_DECISION_ROW	`nll-author-circuits` corectează condiția sau elimină rândul, apoi rerulează benchmark-ul.
+OVERLAPPING_INCOMPATIBLE_ROWS	Skill-ul de circuit introduce prioritate explicită, separă scope-ul sau schimbă modelul decizional.
+OPAQUE_NODE_PRECISION_LOSS	`nll-author-primitives` ori `nll-build-assurance` adaugă summary numai dacă nodul este pe calea critică.
+ABSENCE_WITHOUT_COVERAGE	`nll-plan-circuits` și `nll-design-materialization` adaugă capabilitatea și profilul de closure.
+DECLARED_STATUS_NOT_PRODUCIBLE	Contractul sau implementarea sunt corectate; benchmark-ul nu este modificat pentru a ascunde problema.
+NON_MONOTONE_ABSTRACT_TRANSFER	Skill-ul de primitive corectează ordinea abstractă, reducerul sau widening-ul.
+
+Fixpoint-ul abstract folosește worklist și SCC. Widening este aplicat numai în componente recursive pentru care domeniul poate forma lanțuri crescătoare; narrowing recuperează precizie după stabilizare. Coding agentul nu alege manual widening pentru fiecare circuit. Domain registry furnizează defaults după tip; o alegere custom apare numai într-un plan care justifică necesitatea.
+`CircuitSummary` poate fi inferat pentru subcircuitele declarative prin compoziția transferurilor. Agentul scrie summary explicit doar pentru macro-noduri sau pentru a furniza o abstracție mai precisă decât inferența standard. Tool-ul `circuit summary check` compară summary-ul cu rulări concrete și cu proof obligations declarate.
+3.3 Execuția simbolică, ConstraintKernel și CEGAR
+SymbolicInterpreter înlocuiește input-urile desemnate de plan cu termeni simbolici și păstrează condițiile de cale. El nu încearcă să simbolizeze întregul JavaScript al repository-ului. Primitivele cu encoder participă exact; macro-nodurile fără encoder sunt funcții neinterpretate sau opresc acea ramură cu `SYMBOLIC_UNSUPPORTED_NODE`. Planul selectează discriminanții: durată, modalitate, coverage, identitate, relație temporală ori excepție.
+Concolic execution pornește de la cazurile concrete existente. La fiecare decizie, runtime-ul păstrează valoarea concretă și predicatul simbolic. Generatorul neagă un predicat neacoperit și cere ConstraintKernel-ului un model. Modelul este transformat într-un micro-caz LongTextJS și reexecutat concret. Acoperirea urmărită este semantică: rows, statuses, exceptions, closure paths și incompatibilități, nu simplă line coverage.
+ConstraintKernel este implementat integral în `.mjs`. BoolSolver utilizează Tseitin encoding, unit propagation și backtracking. EqualityTheory folosește union-find și disequalities. FiniteDomainTheory restrânge mulțimi finite și cardinalități. IntervalTheory folosește intervale raționale și unități compatibile. DifferenceTheory rezolvă constrângeri `x - y <= c`. TemporalTheory folosește bitsets pentru relațiile Allen și path consistency. Rezultatul este `SAT(model)`, `UNSAT(conflict, proofTrace)` sau `UNKNOWN(unsupportedAtoms)`.
+CEGAR semantic pornește de la un may-finding. SymbolicInterpreter încearcă să construiască un witness. Dacă modelul reproduce finding-ul prin concrete replay, concluzia este concretă. Dacă toate căile sunt imposibile în fragmentul suportat, finding-ul abstract este spurious și abstracția poate fi rafinată. Dacă există atomi nesuportați, rezultatul rămâne unresolved; nu este declarat spurious.
+Exemplul 7. RefinementDemand este și contract de rutare către skill-ul corect
+export default refinementDemand("continuity.phone-use@1")
+  .because(possibleFinding("object-used-without-retrieval"))
+  .need(resolveIdentity(phoneMentionA, phoneMentionB))
+  .need(establishTemporalOrder(leaveEvent, useEvent))
+  .need(materializeCoverage(
+    Retrieve,
+    between(leaveEvent, useEvent)
+  ))
+  .route(
+    identityDemandTo("nll-materialize-longtext"),
+    temporalDemandTo("nll-materialize-longtext"),
+    ontologyDemandTo("nll-design-ontology"),
+    summaryDemandTo("nll-build-assurance")
+  )
+  .onSuccess(recheck(continuityCircuit))
+  .seal();
+RefinementManager deduplică demands după semnătură și verifică dacă noua materializare modifică starea abstractă. Dacă nu apare informație nouă, procesul se oprește cu `REFINEMENT_STALLED` și păstrează `UNKNOWN`. Această regulă nu limitează circuitele; împiedică doar repetarea fără progres a aceleiași solicitări.
+3.4 RelationEngine, EGraphLite, ProofKernel și SynthesisEngine
+RelationEngine este backend-ul pentru relații recursive tipate. CircuitJS exprimă relațiile prin apeluri de funcții; compilatorul produce RelationIR în memorie. Evaluarea semi-naivă păstrează relația totală și delta de tuples noi. Negația este permisă stratificat în fragmentul relațional. Un circuit general poate folosi în continuare JavaScript procedural pentru politici non-monotone, dar nu poate pretinde semantică de least fixed point fără contract explicit.
+EGraphLite oferă hash-consing, union-find, congruence rebuild, pattern matching tipat, saturation și extraction. Este utilizat pentru normalizarea timpului, unităților, negației, ordinii conjunctelor, condițiilor și CNLFrames. Rewrite theories sunt versionate și autorizate de RulePack. O regulă de rewrite trebuie să păstreze tipul, scope-ul și modalitatea; altfel este respinsă.
+ProofKernel separă căutarea de verificare. Un coding agent, tactic circuit sau solver poate propune un proof object; kernelul reexecută pașii dintr-un vocabular mic. Obligațiile utile sunt locale: exhaustivitatea și disjuncția decision tables, implicații aritmetice/temporale, evidence before emit, validitatea unui summary, equivalence round-trip și imposibilitatea unui status. Rezultatele sunt `ESTABLISHED`, `REFUTED` sau `UNDETERMINED`.
+SynthesisEngine caută termeni într-o gramatică tipată. Hole-urile au domenii finite sau constrângeri; cost model-ul preferă conservarea informației sursă, minimalitatea patch-ului și lexicalizările canonice. Orice candidat este executat concret prin circuitele de regulă, iar textul CNL este reanalizat. Un candidat care doar „sună corect” nu este acceptat.
+Tabelul 5. Engine-urile sunt alese pe subproblemă și target, nu global
+Engine	Când este invocat de plan sau runtime
+RelationEngine	Când pasul declară recurență, closure ori reachability și semantica dorită este least fixed point.
+EGraphLite	Când trebuie comparate sau canonicalizate forme semantice echivalente în baza unei teorii de rescriere autorizate.
+ProofKernel	Când target-ul cere garanție locală sau quality gate-ul include obligations explicite.
+SynthesisEngine	Când output-ul cerut este repair, CNLFrame, patch ori exemplu care trebuie să satisfacă reguli și costuri.
+Macro JavaScript	Când algoritmul este neregulat, domenial, model-assisted sau I/O; concrete execution rămâne deplină, iar analyses folosesc summaries dacă sunt disponibile.
+
+4. Lifecycle-ul de authoring, toolchain-ul și diagnosticele
+Skill-urile trebuie să transforme reguli lungi și exemple în proiecte multi-fișier fără ca un agent să țină întregul repository în context. Lifecycle-ul de mai jos este o procedură de authoring și validare, nu un plan de migrare. Fiecare poartă produce artefacte concrete și poate fi reluată independent.
+4.1 Porțile și starea build-ului
+Orchestratorul menține un `build.state.mjs` generat de toolchain. Starea nu conține reasoning privat; enumeră artefactele, hash-urile surselor, gate-urile trecute și diagnostics nerezolvate. Un skill pornește numai când precondițiile sale sunt satisfăcute. Dacă un fișier upstream se schimbă, tool-ul marchează gate-urile dependente ca stale.
+Tabelul 6. Porțile sunt contracte de authoring, nu milestones administrative
+Poartă	Criteriu de trecere
+G1 — Rule Analysis	Fiecare regulă are ID, authority span, scope, modality, premises, exceptions, outputs, unknown conditions și exemple.
+G2 — Ontology Adequacy	Toate conceptele ground și rolurile cerute sunt reprezentabile; conceptele derivate sunt separate de ontologie.
+G3 — Architecture Plan	Fiecare obligație este mapată la steps, metode, contracts, providers, assurance, materialization requirements și owners.
+G4 — Primitive Readiness	Primitivele noi au concrete semantics, type checks, effects, tests și semanticile auxiliare cerute de plan.
+G5 — Circuit Composition	Subcircuitele și root circuit-ul compilează, contracts se satisfac, cycles sunt clasificate și trace-ul este complet.
+G6 — Materialization Compatibility	Profilul LongTextJS poate produce conceptele, relations, coverage și anchors cerute; documentele de calibrare trec checker-ele.
+G7 — Assurance Completeness	Preflight, symbolic goals, proofs, rewrites, refinements și synthesis cerute de profil sunt implementate sau marcate explicit not required.
+G8 — Benchmark and Pack	Benchmark-urile trec, mutanții relevanți eșuează, providers sunt pin-uiți, imports sunt curate și pack-ul rulează end-to-end.
+
+
+Figura 3. Skill-urile sunt ordonate prin porți, dar repair-ul poate reveni direct la stratul care deține diagnosticul.
+Un gate nu se marchează manual. Tool-ul corespunzător scrie rezultatul după verificare. Agentul poate opri un skill doar dacă gate-ul este passed sau dacă există un blocker cu code, file, authority span și owner. Formulări precum „pare suficient” sau „probabil corect” nu sunt stări valide ale build-ului.
+4.2 Toolchain-ul nativ
+Toate tool-urile sunt subcomenzi ale `node tools/nll.mjs`. Ele încarcă module `.mjs`, rulează checkere și scriu rapoarte Markdown sau artefacte `.mjs`. Comenzile nu necesită npm packages. Skills le apelează într-o ordine fixă, iar output-ul este citit înainte de orice modificare următoare.
+Tabelul 7. Toolchain-ul pe care îl folosesc skill-urile
+Familie de comenzi	Responsabilitate
+source / rules	Indexează surse, verifică authority spans, normalizează IDs și validează analiza regulilor.
+ontology	Caută concepte, verifică types/cardinalities, calculează impact și generează constructor documentation.
+methods / plan	Sugerează metode aplicabile, verifică CircuitArchitecturePlan, dependency graph, ownership și cycles.
+primitive	Scaffold, type/effect check, concrete tests, abstract transfer tests, symbolic encoder tests și laws.
+circuit	Build CircuitModel, check contracts, compose, preflight, run, trace, summarize și compare versions.
+longtext	Index source, split, verify spans, assemble modules, check coverage, resolve identity/time și generate compatibility report.
+symbolic / constraint / relation / rewrite / proof	Rulează engine-urile auxiliare, scrie witnesses, cores, derivations și certificates.
+benchmark	Generează, minimizează, rulează, măsoară semantic coverage și mutation score.
+pack / review / repair	Integrează RulePack, pin-uiește providers, rulează end-to-end, compară regula cu implementarea și rutează diagnostics.
+
+Exemplul 8. Comenzile canonice ale unei bucle de authoring
+node tools/nll.mjs rules check rules/rule-analysis.mjs
+node tools/nll.mjs ontology check ontologies/index.ontology.mjs
+node tools/nll.mjs methods suggest plans/retention.plan.mjs --report reports/methods.md
+node tools/nll.mjs plan check plans/retention.plan.mjs
+node tools/nll.mjs primitive check primitives/
+node tools/nll.mjs circuit compose circuits/retention-root.circuit.mjs
+node tools/nll.mjs circuit preflight circuits/retention-root.circuit.mjs
+node tools/nll.mjs benchmark run benchmarks/retention/index.mjs
+node tools/nll.mjs pack check pack.mjs
+4.3 Organizarea multi-fișier și ownership-ul
+Regulile și documentele lungi sunt împărțite semantic, nu arbitrar după numărul de tokeni. Reguli care folosesc aceeași ontologie și produc aceeași familie de findings pot împărți primitive și subcircuite. Documentele LongTextJS sunt împărțite după secțiuni, capitole ori unități de discurs, iar module separate rezolvă legăturile cross-section: identitate, temporalitate, definitions și references.
+`CircuitArchitecturePlan` conține un `ownershipMap`. Agentul de ontologie deține namespace-urile și constructorii. Agentul de primitive deține operațiile atomice. Agentul de circuit deține subcircuitele unei familii de reguli. Agentul LongText deține modulele documentului și poate propune, dar nu aproba singur, extensii ontologice. Benchmark agentul nu poate schimba expected outputs pentru a face implementarea să treacă. Integratorul deține root imports, `pack.mjs` și provider pins.
+Tool-ul `pack slice` produce un dependency slice pentru un task: plan step, ontology concepts, primitive descriptors, related circuits, diagnostics și source spans. Subagentul lucrează pe acest slice și lasă cod, tests, reports și comenzi rulate. Handoff-ul nu este un rezumat informal; repository-ul și diagnostics sunt autoritatea.
+Exemplul 9. Un RulePack complet rămâne navigabil și fără fișiere JSON
+rule-packs/privacy-retention/
+  sources/
+    retention-policy.md
+  rules/
+    rule-index.mjs
+    rule-analysis.mjs
+  ontologies/
+    privacy-core.ontology.mjs
+    retention-domain.ontology.mjs
+    index.ontology.mjs
+  plans/
+    retention.plan.mjs
+    ownership.plan.mjs
+  primitives/
+    duration-normalize.primitive.mjs
+    duration-normalize.abstract.mjs
+    duration-normalize.symbolic.mjs
+  circuits/
+    select-retention.circuit.mjs
+    resolve-exceptions.circuit.mjs
+    assess-retention.circuit.mjs
+    retention-root.circuit.mjs
+  materialization/
+    retention.profile.mjs
+    refinements.mjs
+  assurance/
+    retention.obligations.mjs
+    retention.rewrites.mjs
+    retention.symbolic-goals.mjs
+  benchmarks/
+    index.mjs
+    cases/
+  cnl/
+    frames.mjs
+    grammar.mjs
+  reports/
+  pack.mjs
+4.4 Diagnostics și repair la stratul corect
+Fiecare diagnostic include code, severity, file, location, semantic subject, expected, received, authority span, trace slice și owner skill. Repair-ul nu se face la fișierul cel mai apropiat, ci la stratul cu autoritate. Dacă un circuit nu găsește un actor deoarece ontologia nu definește rolul, adăugarea unui regex în circuit este o reparație greșită. Dacă lipsa este coverage, expected benchmark nu trebuie schimbat în `SATISFIED`.
+Tabelul 8. Rutarea repairs evită patch-uri locale care distrug arhitectura
+Clasa diagnosticului	Skill-ul către care este rutat
+MISSING_ONTOLOGY_CONCEPT / ROLE_TYPE_MISMATCH	`nll-design-ontology` sau, dacă termenul este doar derived, `nll-plan-circuits`.
+MATERIALIZATION_GAP / INVALID_SPAN / IDENTITY_UNRESOLVED	`nll-materialize-longtext` în mod normal sau refinement.
+METHOD_NOT_APPLICABLE / UNCLASSIFIED_CYCLE	`nll-plan-circuits`.
+MISSING_ABSTRACT_TRANSFER / SYMBOLIC_UNSUPPORTED_ATOM	`nll-author-primitives` ori `nll-build-assurance`, în funcție de ownership.
+PORT_TYPE_MISMATCH / UNSATISFIED_CAPABILITY / EFFECT_DRIFT	`nll-author-circuits`.
+UNREACHABLE_ROW / UNHANDLED_UNKNOWN	`nll-author-circuits`, apoi `nll-build-benchmarks` rerulează coverage.
+PROOF_UNDISCHARGED / REWRITE_UNSOUND	`nll-build-assurance`; dacă obligația contrazice regula, revine la plan.
+BENCHMARK_ORACLE_CONFLICT	`nll-review-rule-pack`; expected output nu se modifică fără revalidarea authority span-ului.
+PACK_PROVIDER_AMBIGUITY / DUPLICATE_ID	`nll-integrate-rule-pack`.
+
+`nll-repair-from-diagnostics` nu este un agent general care poate modifica orice. El citește owner-ul, invocă skill-ul corespunzător, limitează write scope-ul la fișierele deținute și rerulează toate gate-urile downstream. Dacă diagnosticul implică o schimbare a regulii interpretate, repair-ul se oprește și cere review semantic, nu modifică silent circuit-ul.
+5. Skill-urile pentru analiză, ontologie, planificare și primitive
+Fiecare skill este descris prin același contract: moment de invocare, input-uri, decizii, tool-uri, output-uri, completion gate, condiții de revenire și handoff. Aceste specificații trebuie implementate ca `SKILL.md` și folosite de coding agents fără prompturi monolitice.
+5.1 `nll-build-rule-pack` și `nll-analyze-rules`
+`nll-build-rule-pack` este skill-ul orchestrator. Se invocă la crearea unui nou RulePack sau la schimbarea authority rules. El nu proiectează direct ontologia ori circuitele. Creează workspace-ul, indexează sursele, inițializează `build.state.mjs`, delegă skill-urile și verifică handoff-urile. Doar orchestratorul și integratorul pot modifica `pack.mjs` și ownership map.
+`nll-analyze-rules` se invocă înaintea oricărui design. Citește regulile originale și exemplele de calibrare, păstrează authority spans și construiește o analiză semantică. El identifică actorii, obiectele, acțiunile, modality, scope, quantifiers, temporal conditions, exceptions, priorities, outputs, evidence requirements și condițiile sub care răspunsul trebuie să fie `UNKNOWN`, `CONFLICT` sau `NOT_APPLICABLE`.
+Tabelul 9. Contractul skill-ului de analiză a regulilor
+Element operațional	Specificația skill-ului
+Când	La un RulePack nou, la modificarea textului de autoritate sau când review-ul raportează că implementarea nu acoperă o clauză.
+Citește	Fișierele sursă, rule index existent, exemple și eventualul report de semantic drift.
+Decide	Granițele regulilor, authority spans, relațiile dintre regulă/excepție/prioritate și outputs așteptate. Nu decide metode algoritmice.
+Tool-uri	`source index`, `rules scaffold`, `rules check`, `rules coverage`.
+Scrie	`rules/rule-index.mjs`, `rules/rule-analysis.mjs`, `reports/rule-analysis.md` și benchmark intentions inițiale.
+Poarta	G1 trece numai dacă fiecare regulă este adresabilă și toate stările semantice relevante sunt explicite.
+Handoff	Către `nll-design-ontology` și `nll-plan-circuits`.
+Revine când	Authority source se schimbă sau review-ul găsește o interpretare greșită; nu revine pentru un bug pur de cod.
+
+Exemplul 10. Rule analysis descrie semantica, nu implementarea
+export default ruleAnalysis("RET-001")
+  .authority(authoritySpan("retention-policy.md", 120, 344))
+  .scope(policySection("data-retention"))
+  .subject(PersonalData)
+  .modality(prohibition())
+  .condition(retentionDurationGreaterThan(years(5)))
+  .exception(documentedLegalObligationRequiresLongerPeriod())
+  .outcomes(
+    VIOLATED,
+    SATISFIED,
+    ACCEPTED_EXCEPTION,
+    UNKNOWN,
+    BLOCKED_ONTOLOGY,
+    CONFLICT
+  )
+  .evidenceRequirement(sourceSpan(), scopeClosureForAbsence())
+  .seal();
+Skill-ul nu completează goluri de politică. Dacă regula nu precizează ce înseamnă „documented”, analiza păstrează un requirement deschis sau îl tratează ca termen ontologic separat. Coding agentul nu inventează un prag de documentare doar pentru a putea scrie circuitul.
+5.2 `nll-design-ontology`
+Skill-ul se invocă după G1 sau ca răspuns la un blocker ontologic. El compară rule analysis cu ontologiile existente și decide ce este ground ontology și ce trebuie să rămână derived concept în circuite. Entitățile, evenimentele, rolurile, stările și relațiile care trebuie materializate din document apar în OntologyJS. Concluziile contextuale precum `RetentionViolation` sau `UnexplainedUse` rămân în CircuitJS.
+Skill-ul caută mai întâi concepte existente. Sinonimele textuale nu justifică identități ontologice noi. Dacă este necesar un concept nou, agentul definește sortul, rolurile, cardinalitățile, subtipurile, incompatibilitățile, lexicalizările și constructorii. Behaviors ontologice sunt limitate la validare, canonicalizare locală și metadata; regulile normative nu sunt ascunse în constructori.
+Tabelul 10. Contractul skill-ului de ontologie
+Element operațional	Specificația skill-ului
+Când	După analiza regulilor, când un plan cere concepte absente sau când runtime-ul emite `BLOCKED_ONTOLOGY`.
+Citește	Rule analysis, ontology registry, usage reports, materialization gaps și circuits care consumă conceptele.
+Decide	Reuse versus extension, ground versus derived, namespace, sort, roles, cardinalities și lexicalizations.
+Tool-uri	`ontology search`, `ontology scaffold`, `ontology check`, `ontology usage`, `ontology impact`.
+Scrie	Module `.ontology.mjs`, tests, constructor exports și documentație generată.
+Poarta	G2: toate cerințele ground sunt reprezentabile, iar type/cardinality checks trec.
+Handoff	Către planning, primitive authoring și materialization profile.
+Revine când	Apare un concept realmente nereprezentabil; nu pentru un query greșit sau un span absent.
+
+Exemplul 11. Ontologia definește ce poate fi observat, nu verdictul
+export const Retain = O.event("Retain",
+  requires(actor, DataControllerOrProcessor),
+  requires(theme, DataAsset),
+  allows(duration, Duration),
+  allows(purpose, Purpose),
+  allows(authority, LegalAuthority),
+  allows(scope, Scope)
+);
+
+export const LegalObligation = O.claimType("LegalObligation",
+  requires(source, EvidenceSource),
+  requires(appliesTo, EventOrPolicy),
+  allows(validityInterval, TimeInterval)
+);
+`ontology impact` enumeră circuitele și materialization profiles afectate de o modificare. Pentru că proiectul este experimental, nu se creează migrări; se rerulează build-ul pack-ului și benchmark-urile. Versionarea rămâne necesară pentru replay și trace, nu pentru compatibilitatea cu un sistem în producție.
+5.3 `nll-plan-circuits`
+Acesta este skill-ul care rezolvă direct întrebarea „ce metodă folosim?”. Se invocă după G1 și G2. Citește rule analysis, ontologia și registry-ul de primitive/circuite. Produce CircuitArchitecturePlan, decomposition graph, materialization requirements, assurance profile și ownership. Nu scrie implementarea finală înainte ca `plan check` să treacă.
+Workflow-ul este fix. Agentul extrage subproblemele; le clasifică prin ProblemShape; caută capabilități și primitive existente; rulează `methods suggest`; decide circuit boundaries; compune metodele; clasifică orice ciclu; derivă conceptele și coverage necesare LongTextJS; alege assurance-ul; stabilește benchmark goals; alocă fișiere și owners; apoi rulează `methods check` și `plan check`.
+Tabelul 11. Contractul skill-ului care alege metodele
+Element operațional	Specificația skill-ului
+Când	După G2, la o regulă nouă, la schimbarea semanticii regulii sau când diagnosticul indică method/cycle/composition error.
+Citește	Rule analysis, ontology index, MethodCatalog, capability registry, primitive registry și pack constraints.
+Decide	Decompoziția, rolul fiecărui circuit, metoda fiecărui step, reuse/new code, assurance, composition, providers și ownership.
+Tool-uri	`methods suggest`, `methods check`, `capabilities search`, `plan graph`, `plan check`, `plan derive-materialization`.
+Scrie	`plans/*.plan.mjs`, `plans/ownership.plan.mjs`, skeleton-uri de root circuit și `materialization/*.profile.mjs` inițial.
+Poarta	G3: nicio obligație fără step, nicio metodă neaplicabilă, nicio capabilitate fără provider și niciun ciclu neclasificat.
+Handoff	Către primitive authoring, circuit authoring, materialization design și assurance.
+Revine când	Codul deviază de la plan, benchmark-ul arată o decompoziție greșită sau review-ul găsește semantic drift.
+
+Skill-ul trebuie să prefere un set mic de subcircuite cu contracts clare, nu un microcircuit pentru fiecare expresie. Limita recomandată este semantică: o componentă se separă când are output reutilizabil, poate fi testată independent, are un engine distinct, poate fi rutată ca capability sau are un owner diferit. Un helper local nu devine automat circuit.
+Dacă nicio metodă din catalog nu acoperă exact pasul, skill-ul nu blochează sistemul. Alege un macro-nod procedural, declară effects și output, apoi decide dacă este necesar summary. Aceasta este calea normală pentru algoritmi complecși; nu este un fallback rușinos.
+5.4 `nll-author-primitives`
+Skill-ul creează primitive numai pentru steps marcate astfel în plan. Criteriul este atomicitatea semantică și reutilizarea, nu numărul de linii. O comparație de intervale, o normalizare de durată, un operator de scope, un unifier de identitate sau un constructor de evidence sunt primitive. O regulă completă de retenție este subcircuit.
+Concrete handler-ul este obligatoriu și trebuie să lucreze exclusiv cu tipurile declarate. Skill-ul adaugă abstract transfer dacă planul cere preflight precis, symbolic encoder dacă pasul controlează coverage goals, proof checker dacă există obligations și laws pentru proprietăți structurale. Semanticile auxiliare pot fi în fișiere separate pentru a menține contextul agentului mic.
+Tabelul 12. Contractul skill-ului de primitive
+Element operațional	Specificația skill-ului
+Când	Când planul cere o operație atomică nouă sau când un macro-nod critic trebuie extras pentru analizabilitate/reutilizare.
+Citește	Plan step, ontology types, primitive registry, diagnostics și benchmark goals.
+Decide	API-ul minim, concrete semantics, effects, defaults și ce semantică auxiliară este obligatorie.
+Tool-uri	`primitive scaffold`, `primitive check`, `primitive run-tests`, `primitive abstract-check`, `primitive symbolic-check`, `primitive laws`.
+Scrie	`*.primitive.mjs`, opțional `*.abstract.mjs`, `*.symbolic.mjs`, `*.proof.mjs`, `*.laws.mjs`, tests.
+Poarta	G4: concrete tests trec, types/effects sunt stabile, iar toate semanticile cerute de plan sunt disponibile sau diagnosticate explicit.
+Handoff	Către circuit authoring și assurance.
+Revine când	Preflight pierde precizie pe această primitivă, symbolic coverage o cere sau law/proof eșuează.
+
+Skill-ul nu trebuie să implementeze un solver general în interiorul fiecărei primitive. Primitivele de constraint construiesc atoms pentru ConstraintKernel; cele relaționale construiesc RelationIR; cele de rewrite construiesc patterns și replacements. Engine-urile sunt comune și testate separat.
+6. Skill-urile pentru circuite, LongTextJS, assurance și integrare
+După ce planul și primitivele sunt stabile, coding agents pot implementa circuitele, profilul de materializare, semanticile auxiliare și benchmark-urile. Această parte este deliberat operațională: fiecare skill are write scope și criterii de finalizare explicite.
+6.1 `nll-author-circuits`
+Skill-ul se invocă pentru fiecare family of rules sau root circuit definit în plan. El poate crea mai multe fișiere și poate utiliza JavaScript complet. Totuși, trebuie să păstreze contractul: typed inputs/outputs, `requires/provides`, `reads/writes`, evidence, statuses, subcircuits și schedules. Un circuit nu publică direct obiecte anonime; emite termeni și results creați prin API-urile înregistrate.
+Agentul implementează întâi subcircuitele leaf și le rulează pe micro-cazuri, apoi compune root circuit-ul. Pentru decision tables verifică `UNKNOWN`, overlap și exhaustiveness. Pentru absence folosește coverage explicit. Pentru macro-noduri declară effects și, dacă planul cere, summary. După fiecare circuit rulează `circuit check`, `circuit preflight` și `circuit trace` pe cel puțin un caz.
+Tabelul 13. Contractul skill-ului de circuit
+Element operațional	Specificația skill-ului
+Când	După G3 și după ce primitivele dependente sunt ready; revine la orice composition/effect/status diagnostic.
+Citește	CircuitArchitecturePlan, ontology exports, primitive descriptors, providers, materialization profile și cases de calibrare.
+Decide	Structura internă a circuitului, helper functions, schedules și implementarea concretă în limitele planului.
+Tool-uri	`circuit scaffold`, `circuit check`, `circuit compose`, `circuit preflight`, `circuit run`, `circuit trace`, `circuit compare-plan`.
+Scrie	Subcircuite `.circuit.mjs`, root circuit, local helpers, summaries pentru macro-noduri și tests.
+Poarta	G5: ports/contracts/effects sunt valide, composition plan este satisfăcut, trace-ul explică fiecare output și nu există drift neaprobat.
+Handoff	Către materialization, assurance și benchmark.
+Revine când	Runtime-ul găsește capability/effect drift, preflight sau benchmark-ul indică o eroare a regulii executabile.
+
+Exemplul 12. Circuitul declară rol și methods, dar rămâne o singură responsabilitate semantică
+export default circuit("privacy.assess-retention@1")
+  .primaryRole(Assessment)
+  .requires(NormalizedRetention, LegalExceptionSet, CoverageState)
+  .provides(RetentionAssessment)
+  .usesMethod(ConstraintSolving, DecisionTable)
+
+  .stage("compare-limit", ({ retention }) =>
+    compare(retention.duration, years(5)))
+
+  .stage("decide", ({ comparison, exceptions, coverage }) =>
+    decisionTable("retention-decision",
+      row(exceeds(comparison), noException(exceptions, coverage), VIOLATED),
+      row(exceeds(comparison), hasDocumentedException(exceptions), ACCEPTED_EXCEPTION),
+      row(withinLimit(comparison), SATISFIED),
+      row(unknown(comparison, exceptions, coverage), UNKNOWN)
+    ))
+
+  .emit(assessmentWithEvidence())
+  .seal();
+Skill-ul nu adaugă abstract/symbolic/proof code în body-ul regulii dacă poate fi atașat prin primitive descriptors sau assurance modules. Această separare păstrează concrete execution lizibilă. Excepția este un macro-nod care are nevoie de summary colocat pentru a nu diverge de implementare.
+6.2 `nll-design-materialization` și `nll-materialize-longtext`
+`nll-design-materialization` se invocă în timpul build-ului RulePack. El derivă din plan ce trebuie să poată produce LongTextJS: concepte, roluri, relations, identity links, temporal ordering, coverage, contexts, evidence levels și gaps. Output-ul este un `MaterializationProfile`; el nu conține prompturi opace, ci un contract semantic pe care coding agents îl folosesc pentru documente și benchmark-uri.
+Exemplul 13. Profilul de materializare este derivat din circuits, nu inventat separat
+export default materializationProfile("privacy.retention.profile@1")
+  .observe(Retain, actor, theme, duration, purpose, authority, scope)
+  .observe(LegalObligation, source, appliesTo, validityInterval)
+  .resolve(entityIdentity(), temporalAnchors())
+  .coverage(
+    requireComplete(LegalObligation, within(policyScope())),
+    allowPartial(Purpose)
+  )
+  .groundEveryClaimWith(sourceSpan())
+  .preserveAlternatives(coreference(), modality(), authorityClassification())
+  .seal();
+`nll-materialize-longtext` are trei moduri. În calibration mode creează micro-cazuri și module LongTextJS mici. În document mode împarte un text lung pe secțiuni și produce un root module care le compune. În refinement mode primește un SemanticDemand sau RefinementDemand și procesează numai spanurile și conceptele discriminatorii. Același skill folosește ontologia și profilul, dar outputs diferă ca granularitate.
+Tabelul 14. Contractul skill-ului LongTextJS
+Element operațional	Specificația skill-ului
+Când	La crearea benchmark-urilor, la analizarea unui document nou sau ca răspuns la demand de refinare.
+Citește	Source text, source index, active ontologies, MaterializationProfile, existing LongText modules și demands.
+Decide	Chunk boundaries, terms, claims, alternatives, identity candidates, temporal links, coverage și gaps. Nu decide verdicturi.
+Tool-uri	`longtext split`, `longtext scaffold`, `longtext check`, `longtext verify-spans`, `longtext assemble`, `longtext coverage`, `longtext reconcile`.
+Scrie	Section modules `.longtext.mjs`, cross-section relation modules, root document module, compatibility report și coverage report.
+Poarta	G6: spans sunt valide, types/cardinalities trec, alternatives nu sunt colapsate, iar coverage statements sunt justificate.
+Handoff	Către concrete runtime, assurance și benchmark.
+Revine când	RefinementDemand cere informație nouă, source text se schimbă sau checker-ul găsește materialization error.
+
+Pentru texte lungi, fiecare modul de secțiune poate fi generat de un agent diferit. `longtext reconcile` construiește tasks separate pentru identity, temporal ordering, definitions și references. Root module importă modulele, nu repetă textul. Spanurile sunt adresate prin source revision și interval, iar un tool verifică faptul că fragmentele nu au fost deplasate.
+Skill-ul nu trebuie recompensat pentru completarea agresivă a sloturilor. Unknown, alternative și gap sunt outputs valide. Un LongTextJS incomplet, dar corect ancorat, este preferabil unei interpretări fabricate care face circuitul să emită un verdict.
+6.3 `nll-build-assurance` și modurile sale
+`nll-build-assurance` este un skill orchestrator pentru semanticile auxiliare. Planul indică ce assurance este necesar pe fiecare step. Skill-ul invocă numai modurile relevante: abstract, symbolic/concolic, constraints, relations, rewrites, proofs, refinements sau synthesis. El nu adaugă automat toate engines unui circuit.
+Tabelul 15. Submodurile skill-ului de assurance
+Modul skill-ului	Când și ce produce
+abstract	Când planul cere preflight precis. Produce custom domains, transfers, reducers, summaries și preflight expectations.
+symbolic	Când trebuie acoperite branches/statuses ori construit witness. Produce encoders, symbolic goals și concretizers.
+constraints	Când apar atoms noi pentru quantity/time/equality. Produce theory adapters și tests; nu creează solver separat.
+relations	Când planul conține fixed point. Produce relation declarations, stratification și semi-naive plans.
+rewrites	Când canonicalization/equivalence este necesară. Produce rewrite theories, guards, cost models și obligations.
+proofs	Când profilul cere local certification. Produce obligations și proof tactics/certificates replayabile.
+refinement	Când may-findings necesită CEGAR. Produce demand constructors, routing și progress measures.
+synthesis	Când target-ul include repair/generation. Produce typed grammar, holes, costs, validators și round-trip hooks.
+
+Abstract transfer este cerut dacă un nod controlează un status și `top` ar face preflight-ul inutil. Symbolic encoder este cerut dacă nodul apare într-un symbolic goal. Proof checker este cerut numai pentru un proof step declarat. Aceste reguli împiedică atât subimplementarea, cât și formalizarea inutilă a întregului repository.
+Skill-ul rulează `assurance coverage`, care compară planul cu implementarea. Report-ul arată pentru fiecare step: concrete semantics, abstract precision, symbolic support, proof obligations, refinement triggers și synthesis relevance. Un gap permis este marcat `OPAQUE_ACCEPTED` cu motiv și efect; un gap neplanificat blochează G7.
+Exemplul 14. Assurance-ul este cerut granular, pe step și target
+export default assurancePlan("privacy.retention.assurance@1")
+  .forStep("select-retention-claims",
+    require(abstractTransfer()),
+    optional(symbolicEncoder()))
+  .forStep("evaluate-limit-and-exception",
+    require(abstractTransfer()),
+    require(symbolicBranchCoverage()),
+    require(proof(decisionTableIsExhaustive())),
+    require(proof(decisionRowsAreDisjoint())))
+  .forTarget(CNLRepair,
+    require(synthesisGrammar()),
+    require(cnlRoundTrip()))
+  .seal();
+6.4 `nll-build-benchmarks`, integrare, review și repair
+`nll-build-benchmarks` pornește de la benchmark intentions din rule analysis și goals din plan. Creează caz normal, violation, valid exception, incomplete exception, open coverage, closed coverage, ambiguity, ontology blocker și conflict. Symbolic/concolic generation adaugă boundary cases și paths neacoperite. Fiecare caz are LongTextJS, expected result, expected evidence și expected trace properties.
+Benchmark-ul verifică motivul, nu doar statusul. Un circuit care produce `VIOLATED` dintr-un claim greșit eșuează. Mutation testing inversează comparatori, elimină exceptions, schimbă scope closure, promovează candidate facts sau alterează identity. Mutanții semantic relevanți trebuie detectați.
+Tabelul 16. Skill-urile finale ale lifecycle-ului
+Skill	Responsabilitate și poartă
+`nll-build-benchmarks`	Generează și minimizează cases, rulează concrete/symbolic coverage, evidence checks și mutations. Nu modifică expected outputs fără authority review.
+`nll-integrate-rule-pack`	Asamblează imports, pin-uiește providers, verifică duplicate IDs, rulează toate gates și scrie `pack.mjs` și report.
+`nll-review-rule-pack`	Agent independent compară authority rules, RuleAnalysis, CircuitArchitecturePlan, LongText profile, circuits și benchmark. Emite semantic-drift diagnostics.
+`nll-repair-from-diagnostics`	Rutează fiecare diagnostic la owner skill, limitează write scope-ul și rerulează gates downstream până la G8.
+
+Integratorul nu repară silently semantica. Dacă imports sau providers sunt greșite, le corectează. Dacă review-ul arată că circuitul interpretează greșit o excepție, task-ul revine la `nll-analyze-rules` ori `nll-plan-circuits`. Această separare previne ca build-ul să devină verde prin ajustarea locală a benchmark-ului.
+Exemplul 15. Finalizarea RulePack-ului este o secvență verificabilă
+node tools/nll.mjs benchmark generate benchmarks/retention/synthesis.mjs
+node tools/nll.mjs benchmark run benchmarks/retention/index.mjs
+node tools/nll.mjs benchmark mutations benchmarks/retention/index.mjs
+node tools/nll.mjs pack integrate pack.mjs
+node tools/nll.mjs review semantic-diff pack.mjs
+node tools/nll.mjs pack check pack.mjs
+7. Execuția unui RulePack complet
+După G8, coding agents nu mai aleg metode la fiecare document. RulePack-ul conține circuitele, providers și assurance profiles. Runtime-ul primește documentul, target-ul și nivelul de garanție cerut și construiește ExecutionPlan-ul corespunzător.
+7.1 Request, target și assurance profile
+Cererea runtime conține RulePack, document revision, target, scope, interpretation policy și assurance flags. Target-ul este semantic, nu un nume de comandă UI. `AllFindings`, `WitnessedFinding`, `CertifiedAssessment`, `CNLRepair` și `GeneratedClause` cer compoziții diferite. Dacă utilizatorul nu specifică assurance, pack-ul folosește default-ul validat.
+Exemplul 16. Request-ul runtime determină ce assurance circuits sunt compuse
+const result = await runtime.analyze(
+  usePack(privacyRetentionPack),
+  documentRevision("policy-17@r3"),
+  target(AllFindings),
+  assurance(ANALYZED, WITNESSED),
+  interpretationPolicy(robustThenConditional()),
+  scope(documentScope())
+);
+Tabelul 17. Profilele sunt flags compozabile, nu niveluri de maturitate
+Profil	Componente activate
+EXECUTE_ONLY	Materialization compatibility, concrete circuit execution, trace și benchmark-validated contracts.
+ANALYZED	Adaugă abstract preflight și precision report. Poate genera SemanticDemand înainte de verdict.
+WITNESSED	Adaugă symbolic/concolic witness pentru findings selectate și concrete replay.
+LOCALLY_CERTIFIED	Adaugă ProofKernel pentru obligations declarate și certificate în output.
+GENERATIVE	Adaugă SynthesisCircuit, CNL renderer/parser și round-trip validation.
+
+Default-ul recomandat pentru linting este `ANALYZED + WITNESSED`; pentru simple extraction este `EXECUTE_ONLY`; pentru repair se adaugă `GENERATIVE`; pentru reguli cu impact ridicat pack-ul poate declara `LOCALLY_CERTIFIED`. Agentul poate recomanda un profil la authoring, dar RulePack-ul pin-uiește decizia finală.
+7.2 Ordinea execuției și plannerul de capabilități
+Runtime-ul încarcă pack-ul și versiunile, materializează LongTextJS, verifică compatibility, rulează preflight-ul dacă este cerut, rezolvă capabilitățile, construiește ExecutionPlan, instanțiază subcircuitele pe matches și execută concret. Witness/proof/synthesis sunt apoi atașate conform target-ului. Ordinea este deterministă pentru aceleași artefacte și aceeași materializare acceptată.
+
+Figura 4. Preflight-ul și plannerul pregătesc execuția; concrete execution rămâne centrul, iar witness, proof, refinement și synthesis sunt activate condițional.
+Plannerul folosește `requires/provides`, guarantees și provider pins. Backward planning pornește de la target, iar forward activation instanțiază subcircuitele pe facts concrete. Dacă un provider lipsă poate fi materializat din document, plannerul emite SemanticDemand. Dacă lipsește implementarea, rezultatul este `BLOCKED_CAPABILITY`.
+Paralelismul este permis pentru subcircuite fără conflicts de write. Fiecare rulează într-o tranzacție semantică; commit-ul publică terms și provenance canonic. Dacă două subcircuite produc facts incompatibile, runtime-ul nu alege după race; produce conflict sau aplică politica explicită de merge a pack-ului.
+7.3 Abstract, witness, proof și refinement în runtime
+Abstract preflight poate elimina chains imposibile, poate identifica un must-finding sau poate arăta că mai multe statuses sunt posibile. Chiar dacă obține `must(VIOLATED)`, finding-ul final este produs de execuția concretă ori de un protocol explicit de certificate. Beneficiul este că plannerul știe ce branches și demands sunt relevante.
+Pentru `WITNESSED`, runtime-ul simbolizează numai discriminanții declarați de plan. Modelul găsit este reexecutat concret. Witness-ul păstrează facts, spans și path conditions. Dacă symbolic engine nu suportă un atom, finding-ul concret poate rămâne valid, dar output-ul nu primește garanția `witnessed`.
+Refinement se activează când statusul sau finding-ul depinde de informație materializabilă suplimentar. Demand-ul este rutat după tip către LongText, ontology, primitive summary sau capability provider. După commit, numai subgraful dependent este reevaluat. Dacă demand-ul nu produce progres, rezultatul final rămâne `UNKNOWN` ori `BLOCKED`, nu este forțat.
+ProofKernel rulează numai obligations declarate pentru output-ul cerut. Un finding poate fi concret și valid fără certificate dacă target-ul nu le cere. Un proof failure nu transformă automat finding-ul în fals; îl degradează la nivelul de assurance disponibil și produce diagnostic pentru authoring.
+7.4 Output, trace, replay și continuare parțială
+Fiecare output include status, rule ID, evidence, interpretation context, circuit/version, provider choices, trace slice, assurance achieved și blockers. Explanation-ul pentru utilizator este derivat din această structură. Un LLM poate reformula, dar textul nu poate introduce premise inexistente.
+Blocarea este locală. O regulă juridică poate fi `BLOCKED_ONTOLOGY`, în timp ce un linter terminologic continuă. Totuși, un `ComplianceSummary` global este `BLOCKED` dacă o regulă obligatorie nu a fost evaluată. API-ul separă `completedResults`, `conditionalResults`, `blockedRules` și `finalAssessment`.
+Replay-ul reîncarcă exact RulePack, LongText revision, frozen model/tool artifacts și trace. Caches sunt optimizări și pot fi reconstruite. Pentru model calls, request-ul și response artifact sunt înghețate; runtime-ul nu reapelază modelul în replay decât dacă este solicitat un nou experiment.
+Runtime-ul nu mai „alege metoda” în sens de authoring. El alege numai providerii autorizați și modurile de assurance necesare target-ului, conform planului și RulePack-ului deja validat.
+8. Exemple end-to-end, criterii de acceptare și decizii închise
+Exemplele următoare arată cum skill-urile aleg și compun metodele. Accentul este pe fișierele produse și pe trecerea dintre stages, nu doar pe verdictul final.
+8.1 Politica de retenție
+Regula spune că datele personale nu pot fi păstrate peste cinci ani, exceptând o obligație legală documentată. `nll-analyze-rules` produce `RET-001`, authority span, scope, modality, exception și outcomes. `nll-design-ontology` confirmă `Retain`, `PersonalData`, `Duration` și `LegalObligation`. `nll-plan-circuits` descompune regula în select, normalize, exception resolution, decision, aggregate și optional repair.
+MethodCatalog recomandă query/dataflow pentru selectare, quantity normalization primitive pentru durată, ConstraintKernel pentru `duration > 5 years`, coverage-aware query pentru excepție, decision table pentru status și SynthesisCircuit pentru repair. Abstract preflight și symbolic boundary coverage sunt obligatorii; ProofKernel verifică exhaustivitatea și disjuncția tabelei. Root circuit compune toate acestea.
+`nll-design-materialization` cere observarea evenimentelor de retenție, duratei, obiectului, autorității și coverage complet pentru `LegalObligation` în policy scope. `nll-materialize-longtext` produce un claim de zece ani și coverage parțial. Runtime-ul obține `may(VIOLATED)` și `may(UNKNOWN)`, iar concrete result este `UNKNOWN`. RefinementDemand cere closure pentru exceptions. După scanarea completă, absence devine validă și finding-ul este `VIOLATED`.
+Symbolic benchmark generează exact limita de cinci ani, valori peste limită, excepție prezentă/absentă și coverage open/closed. ProofKernel verifică rows. Repair target activează synthesis și produce două CNLFrames: limita generală și excepția autorizată. Acest exemplu utilizează șase metode fără ca circuitul să își piardă identitatea de `RetentionAssessment`.
+8.2 Continuitate narativă și relații recursive
+Documentul afirmă că un personaj lasă telefonul în mașină și îl folosește ulterior la hotel. Rule analysis cere aceeași entitate, ordine `Leave < Use`, locații diferite și absența unui `Retrieve` într-un interval închis. Ontologia definește events și roles; planul alege query/dataflow, AliasDomain, TemporalTheory, RelationEngine pentru reachability narativă și CEGAR pentru discriminanții lipsă.
+LongTextJS produce două mentions `mayAlias`, ordinea temporală parțială și coverage incomplet între evenimente. Abstract preflight raportează un may-finding, nu must. SymbolicInterpreter explorează alias/non-alias și before/unknown. RefinementDemand cere identity resolution, temporal order și coverage. Dacă un `Retrieve` este găsit, finding-ul dispare; dacă nu și closure este complet, finding-ul devine witnessed.
+Coding agentul nu trebuie să implementeze un mega-algoritm de continuitate. Root circuit compune resolverul de identitate, temporal closure circuit, retrieve query și assessment. Un algoritm procedural poate fi folosit pentru coreference dacă este mai potrivit, dar publică AliasDomain summary pentru preflight.
+8.3 Consistență științifică și generare CNL
+Un raport prezintă 18% în abstract, 12% în results și 0,14 în tabel. Rule analysis cere compararea numai dacă metric, baseline, population și aggregation sunt compatibile. Planul alege query/dataflow pentru claims, EGraphLite pentru canonicalizarea metricilor, ConstraintKernel pentru quantities, decision table pentru conflict și ProofKernel pentru incompatibilitatea numerică sub premisele normalizate.
+Dacă 18% este reducere relativă și 12 puncte este diferență absolută, EGraphLite nu le unește, iar circuitul emite clarificare, nu conflict. Dacă toate premises coincid și intervalele nu se suprapun, ProofKernel poate produce un local conflict certificate. Pentru generarea unui rezumat, SynthesisEngine construiește un ClaimFrame numai din claims verificate, rendererul lexicalizează, iar LongTextJS reanalizează textul.
+Acest caz arată că e-graph-ul și proof-ul nu sunt circuite obligatorii pentru orice regulă. Ele sunt metode alese deoarece subproblema este equivalence plus constraint consistency. Skill-ul de planning înregistrează alegerea, iar benchmark-ul include mutații de metrică și baseline.
+8.4 Criterii de acceptare și ambiguități rezolvate
+Tabelul 18. Criteriul de acceptare al iterației
+Criteriu	Condiție verificabilă
+Method selection explicit	Fiecare plan step are ProblemShape, metodă, reuse/new component, owner și rationale arhitectural.
+Circuit composition completă	Root circuits au porturi și providers rezolvate; cycles sunt fixed point ori procedural explicit.
+Skill execution reproducibil	Fiecare skill are inputs, tools, outputs, gate, diagnostics și handoff; build.state reflectă rezultatul.
+Multi-semantics granular	Concrete este obligatoriu; abstract/symbolic/proof/synthesis sunt prezente exact unde planul le cere.
+LongText compatibility	MaterializationProfile este derivat din circuits, iar coverage/unknown/alternatives sunt explicite.
+Benchmark semantic	Rows, statuses, evidence, open/closed coverage, ambiguity și mutations sunt acoperite.
+No hidden formats	Niciun DSL, plan, contract, benchmark ori trace autoritativ nu este JSON sau TypeScript.
+No external dependencies	Toate engines și tool-urile rulează cu Node.js standard și module `.mjs` din repository.
+Repair la stratul corect	Diagnostics sunt rutate prin ownership; expected outputs nu sunt schimbate pentru a masca erori.
+
+Ambiguitatea principală este închisă: fiecare circuit nu are o metodă unică. El are rol principal și poate compune metode. Abstract/symbolic/proof sunt interpreters ori assurance circuits, nu versiuni concurente ale regulii. Coding agentul alege metodele la planning, cu MethodCatalog și CircuitArchitecturePlan; runtime-ul nu reface această decizie.
+Este închisă și granița JavaScript. Codul poate fi liber; output-urile și effects sunt validate. Nu se încearcă interpretarea statică a oricărui JavaScript. Macro-nodurile sunt opace implicit și devin analizabile prin summaries/encoders numai când assurance-ul o cere.
+Este închisă relația dintre circuits și providers. Pack-ul pin-uiește setul autorizat; plannerul poate alege determinist în interiorul acestuia. Ciclurile sunt fixed-point groups sau macro-noduri procedurale, nu dependențe ascunse.
+Este închisă relația dintre circuits și LongTextJS. CircuitArchitecturePlan derivă MaterializationProfile; LongText skill-ul materializează numai conceptele și coverage cerute; RefinementDemand revine țintit când un discriminant lipsește.
+Nu rămâne nicio decizie arhitecturală care să blocheze implementarea acestei iterații. Parametrii de performanță, cum ar fi pragurile de widening, dimensiunea cache-ului sau ordinea euristică a solverului, sunt detalii măsurabile ale implementării și nu schimbă semantica descrisă aici.
+Formula finală: regulile sunt analizate semantic, metodele sunt alese pe subprobleme, circuitele sunt compuse după contracts, skill-urile construiesc și verifică artefactele, iar runtime-ul activează numai interpreții și assurance circuits necesare target-ului.
+Anexa A. API public de referință
+A.1 Circuit, plan și RulePack
+circuit(id)
+  .primaryRole(role)
+  .requires(...capabilities)
+  .provides(...capabilities)
+  .reads(...types)
+  .writes(...types)
+  .usesMethod(...methods)
+  .stage(id, handlerOrPrimitiveGraph)
+  .include(...subcircuits)
+  .bind(outputPort, inputPort)
+  .schedule(...constraints)
+  .summary(optionalCircuitSummary)
+  .seal();
+
+circuitArchitecturePlan(id)
+  .sourceRule(ruleRef)
+  .goal(targetCapability)
+  .assurance(profile)
+  .step(id, ...descriptors)
+  .compose(rootCircuitRef)
+  .deriveMaterializationProfile(file)
+  .benchmarkGoals(...goals)
+  .ownership(...entries)
+  .seal();
+
+rulePack(id)
+  .sources(...authorityFiles)
+  .ontology(...ontologyModules)
+  .plan(...plans)
+  .materialization(...profiles)
+  .circuits(...circuits)
+  .assurance(...profiles)
+  .benchmarks(...suites)
+  .providers(...pins)
+  .seal();
+A.2 Primitive și interpreți
+primitive(id)
+  .input(input(name, type))
+  .output(output(name, type))
+  .effects(...effects)
+  .concrete(handler)
+  .abstract(transfer)
+  .symbolic(encoder)
+  .proof(checker)
+  .law(...laws)
+  .seal();
+
+runtime.execute(concreteRequest(circuit, snapshot));
+runtime.execute(abstractRequest(circuit, snapshot));
+runtime.execute(symbolicRequest(circuit, symbolicGoal));
+runtime.execute(concolicRequest(circuit, seedCases));
+runtime.execute(proofRequest(obligations, circuit));
+runtime.execute(synthesisRequest(grammar, constraints));
+A.3 Method descriptors și assurance
+method(id)
+  .appliesTo(...problemShapes)
+  .requires(...preconditions)
+  .provides(...outputs)
+  .supports(...interpreters)
+  .preferWhen(...conditions)
+  .rejectWhen(...conditions)
+  .diagnostics(...codes)
+  .seal();
+
+assurancePlan(id)
+  .forStep(stepId, ...requirements)
+  .forTarget(target, ...requirements)
+  .opaqueAccepted(nodeId, reason)
+  .seal();
+Anexa B. Structura completă a repository-ului
+nllAgent/
+  runtime/
+    semantic-store/
+    circuit-model/
+    interpreters/
+      concrete/
+      abstract/
+      symbolic/
+      concolic/
+      prove/
+      synthesize/
+    engines/
+      constraints/
+      relations/
+      egraph/
+      proofs/
+      synthesis/
+    planner/
+    trace/
+  dsl/
+    ontology/
+    longtext/
+    circuit/
+  registries/
+    methods/
+    primitives/
+    circuits/
+    capabilities/
+  tools/
+    nll.mjs
+    commands/
+  skills/
+    nll-build-rule-pack/
+    nll-analyze-rules/
+    nll-design-ontology/
+    nll-plan-circuits/
+    nll-author-primitives/
+    nll-author-circuits/
+    nll-design-materialization/
+    nll-materialize-longtext/
+    nll-build-assurance/
+    nll-build-benchmarks/
+    nll-integrate-rule-pack/
+    nll-review-rule-pack/
+    nll-repair-from-diagnostics/
+  rule-packs/
+    ...
+Cache-urile sunt reconstruibile și pot rămâne în afara surselor. Traces autoritative pot fi module `.mjs` dacă trebuie reimportate sau rapoarte Markdown dacă sunt destinate exclusiv review-ului. Nu se introduce un schema registry JSON.
+Anexa C. Șablonul complet al unui `SKILL.md`
+# Skill: <skill-id>
+
+## Goal
+Rezultatul semantic și gate-ul pe care skill-ul trebuie să îl satisfacă.
+
+## Trigger
+Evenimentele și diagnostics care permit invocarea skill-ului.
+
+## Preconditions
+Gate-urile upstream, artefactele și versiunile obligatorii.
+
+## Required reads
+Fișierele și dependency slices care trebuie inspectate înainte de editare.
+
+## Decisions owned by this skill
+Deciziile pe care agentul le poate lua și cele pe care nu le poate lua.
+
+## Native tools
+Comenzile `node tools/nll.mjs ...` în ordinea obligatorie.
+
+## Write ownership
+Pattern-urile de fișiere pe care skill-ul le poate crea sau modifica.
+
+## Mandatory workflow
+1. Inspectează inputs și diagnostics.
+2. Produce ori modifică artefactele deținute.
+3. Rulează checker-ele locale.
+4. Inspectează trace/report, nu doar exit code.
+5. Repară stratul deținut și repetă.
+6. Rulează gate-ul complet.
+
+## Completion gate
+Condițiile verificabile pentru `PASSED`.
+
+## Stop conditions
+Gate passed sau blocker explicit cu owner și evidence.
+
+## Handoff
+Skill-ul următor, fișierele produse, commands rulate și diagnostics rămase.
+
+## Repair routing
+Codurile pe care skill-ul le rezolvă și codurile pe care trebuie să le redirecționeze.
+Fiecare skill trebuie să includă exemple de fișiere și diagnostics specifice. Instrucțiunea nu trebuie să ceară agentului „să facă ce consideră potrivit”; deciziile sunt delimitate, iar tool-urile oferă feedback structural.
+Anexa D. Matricea extinsă de selecție a metodelor
+Tabelul D1. Matricea pe care `methods suggest` o implementează în formă executabilă
+Semnal observat în rule analysis / plan	Acțiune recomandată
+„toate claims de tip X care au rolul Y”	Query/dataflow; verifică type/role indexes și interpretation context.
+„dacă A și B, exceptând C” cu număr finit de ramuri	Decision table; enumeră UNKNOWN și overlap; adaugă proof dacă este critic.
+„mai mare decât”, „în maximum”, „între date”, „înainte de”	ConstraintKernel; folosește intervals/difference/temporal theories.
+„direct sau indirect”, „orice lanț”, „dependent tranzitiv”	RelationEngine; declară least fixed point și stratifică negația.
+„aceeași semnificație”, „formă canonică”, „echivalent după rescriere”	EGraphLite cu rewrite theory autorizată.
+„poate exista o încălcare sub una dintre interpretări”	Abstract preflight; dacă output-ul trebuie confirmat, symbolic witness + replay.
+„ce informație lipsește pentru a decide”	CEGAR/RefinementDemand rutat către materialization, ontology sau summary.
+„demonstrează că tabela nu are gap”	ProofKernel pe obligations locale.
+„găsește o modificare minimă care satisface regula”	SynthesisEngine cu typed grammar și cost model.
+Algoritm global, model call, I/O, heuristici complexe	Macro-nod JavaScript cu effects; summary/encoder numai dacă planul cere assurance pe acea frontieră.
+
+Anexa E. Coduri de diagnostic recomandate
+Tabelul E1. Diagnostics trebuie să indice stratul reparabil
+Cod	Semnificație și owner
+PLAN_UNMAPPED_RULE_OBLIGATION	O clauză din rule analysis nu are step. Owner: planning.
+METHOD_NOT_APPLICABLE	Metoda aleasă nu satisface precondițiile ProblemShape. Owner: planning.
+PLAN_IMPLEMENTATION_DRIFT	Circuitul introduce requirements/effects care nu apar în plan. Owner: circuit sau planning.
+UNCLASSIFIED_CAPABILITY_CYCLE	Ciclu care nu este fixed point ori procedural explicit. Owner: planning/integration.
+MISSING_ABSTRACT_TRANSFER	Un step critic pentru preflight cade la top. Owner: primitive/assurance.
+SYMBOLIC_UNSUPPORTED_NODE	Un branch goal traversează un nod fără encoder. Owner: primitive/assurance sau plan.
+ABSENCE_WITHOUT_COVERAGE	Negație prin absență fără closure. Owner: planning/materialization/circuit.
+REFINEMENT_STALLED	Demand-ul nu aduce precizie nouă. Owner: runtime report; rezultatul rămâne unknown.
+PROOF_UNDISCHARGED	Obligația nu este stabilită. Owner: assurance; poate implica circuit/plan.
+BENCHMARK_ORACLE_CONFLICT	Expected output și authority rule nu pot fi reconciliate. Owner: independent review.
+EFFECT_DRIFT	Macro-nodul citește/scrie/calls nedeclarat. Owner: circuit.
+PACK_PROVIDER_AMBIGUITY	Mai mulți provideri nepin-uiți pot schimba rezultatul. Owner: integration.
+
+Anexa F. Algoritmi de referință
+F.1 Selecția metodelor
+function chooseMethods(step, catalog, registry, assurance) {
+  const shapes = classifyProblemShapes(step);
+  const applicable = catalog
+    .filter(method => method.appliesTo(shapes, step.contract))
+    .filter(method => method.supportsRequiredAssurance(assurance));
+
+  const reusable = registry.findProviders(step.output, applicable);
+  if (reusable.hasExactProvider()) return reuse(reusable.bestPinnedProvider());
+
+  const cover = minimalMethodCover(shapes, applicable);
+  if (cover.isComplete()) return composeMethods(cover);
+
+  return macroNodeDecision({
+    effects: deriveEffects(step),
+    requiredSummary: assurance.requiresAnalysisAcross(step)
+  });
+}
+F.2 Compoziția root circuit-ului
+function assembleRoot(plan, implementedSteps) {
+  const graph = new CircuitAssembly();
+
+  for (const step of plan.topologicalSteps()) {
+    const component = implementedSteps.get(step.id);
+    graph.include(component);
+    graph.bindByTypedPorts(step.bindings);
+  }
+
+  graph.classifyCycles({
+    monotone: cycle => graph.fixedPointGroup(cycle),
+    procedural: cycle => graph.explicitController(cycle),
+    otherwise: cycle => diagnostics.add(UNCLASSIFIED_CAPABILITY_CYCLE, cycle)
+  });
+
+  graph.attachAssurance(plan.assuranceRequirements());
+  return graph.seal();
+}
+F.3 Orchestrarea skill-urilor după diagnostics
+function continueBuild(buildState, diagnostics) {
+  if (diagnostics.isEmpty()) return advanceToNextGate(buildState);
+
+  const groups = diagnostics.groupByOwnerSkill();
+  for (const [skillId, ownedDiagnostics] of groups) {
+    const slice = packSlice(buildState.pack, ownedDiagnostics);
+    invokeSkill(skillId, slice, ownedDiagnostics);
+    rerunAffectedGates(buildState, skillId);
+  }
+
+  return buildState;
+}
+Referințe conceptuale
+Cheie	Referință
+[ACA05]	Umut A. Acar. Self-Adjusting Computation. PhD thesis, Carnegie Mellon University, 2005.
+[AHV95]	Serge Abiteboul, Richard Hull, Victor Vianu. Foundations of Databases. Addison-Wesley, 1995.
+[ALL83]	James F. Allen. Maintaining Knowledge about Temporal Intervals. Communications of the ACM, 1983.
+[BEL77]	Nuel D. Belnap. A Useful Four-Valued Logic. In Modern Uses of Multiple-Valued Logic, 1977.
+[BN98]	Franz Baader, Tobias Nipkow. Term Rewriting and All That. Cambridge University Press, 1998.
+[CEGAR00]	Edmund Clarke, Orna Grumberg, Somesh Jha, Yuan Lu, Helmut Veith. Counterexample-Guided Abstraction Refinement. CAV, 2000.
+[COU77]	Patrick Cousot, Radhia Cousot. Abstract Interpretation: A Unified Lattice Model for Static Analysis. POPL, 1977.
+[CYC91]	Ron Cytron et al. Efficiently Computing Static Single Assignment Form and the Control Dependence Graph. ACM TOPLAS, 1991.
+[EGG21]	Max Willsey et al. egg: Fast and Extensible Equality Saturation. Proceedings of the ACM on Programming Languages, 2021.
+[KING76]	James C. King. Symbolic Execution and Program Testing. Communications of the ACM, 1976.
+[KLEE08]	Cristian Cadar, Daniel Dunbar, Dawson Engler. KLEE: Unassisted and Automatic Generation of High-Coverage Tests for Complex Systems Programs. OSDI, 2008.
+
+— sfârșitul specificației —

@@ -41,12 +41,11 @@ tutorial. A DS may include one small example when it removes semantic ambiguity.
 
 Teach one complete task through author-visible concepts. State what the reader will accomplish, why the example was
 chosen, prerequisites, and what the tutorial deliberately does not teach. Prefer real author DSL, source text, CLI
-commands, and observable results. Reveal compiler plans, canonical JSON, traces, or persistence shapes only when the
-reader is learning to inspect or debug that layer; label every such value as author source, canonical artifact,
-generated plan, or runtime trace.
+commands, and observable results. Reveal runtime plans, traces, or persistent ESM modules only when the reader is
+learning to inspect or debug that layer; label each value as author source, generated program, result module, or trace.
 
-Do not lead with intermediate JSON merely because the implementation stores it. Never abbreviate a canonical value in
-a way that resembles exact output. Link to a reference page for complete schemas and field dictionaries.
+Do not invent a parallel data representation for explanatory convenience. Never abbreviate a canonical value in a way
+that resembles exact output. Link to a reference page for complete constructor and method contracts.
 
 ### Concept or architecture page
 

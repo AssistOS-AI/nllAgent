@@ -1,129 +1,69 @@
-import { STATUS_CEILINGS, guaranteeSatisfies } from './guarantees.mjs';
-import { matchesObservationBinding } from './observation-bindings.mjs';
+import { SOURCE_FORM, quote } from '../core/canonical-source.mjs';
+import { MatchClause } from '../circuit/model.mjs';
+import { SemanticValue } from '../ontology/model.mjs';
 
-function availableTypes(program) {
-  const capabilities = new Map();
-  for (const capability of program.capabilities) {
-    if (!capabilities.has(capability.type)) capabilities.set(capability.type, []);
-    capabilities.get(capability.type).push(capability);
+class SemanticDemand extends SemanticValue {
+  constructor(concepts, capabilities, coverageSensitive) {
+    super('SemanticDemand', {
+      concepts: new Set(concepts),
+      capabilities: new Set(capabilities),
+      coverageSensitive: new Set(coverageSensitive)
+    });
   }
-  return capabilities;
+  get concepts() { return new Set(this.detail('concepts')); }
+  get capabilities() { return new Set(this.detail('capabilities')); }
+  get coverageSensitive() { return new Set(this.detail('coverageSensitive')); }
+  [SOURCE_FORM]() { return `semanticDemand(${[...this.concepts].sort().map(quote).join(',')})`; }
 }
 
-function evaluateCompatibility(program, compiledCircuits, profile = {}) {
-  const obligations = [];
-  const supportedFormats = profile.formats || ['text/markdown'];
-  obligations.push({
-    kind: 'format', requirement: program.source.mediaType,
-    status: supportedFormats.includes(program.source.mediaType) ? 'satisfied' : 'missing',
-    evidence: { supportedFormats }
-  });
-  for (const channel of profile.requiredChannels || []) {
-    obligations.push({
-      kind: 'source-channel', requirement: channel,
-      status: program.source.channels?.includes(channel) ? 'satisfied' : 'missing',
-      critical: true, evidence: { availableChannels: program.source.channels || [] }
+class CompatibilityReport extends SemanticValue {
+  constructor(status, missingConcepts, missingCapabilities, unknownCoverage) {
+    super('CompatibilityReport', {
+      status,
+      missingConcepts: Object.freeze([...missingConcepts]),
+      missingCapabilities: Object.freeze([...missingCapabilities]),
+      unknownCoverage: Object.freeze([...unknownCoverage])
     });
   }
-  for (const dialect of profile.requiredStructures || []) {
-    obligations.push({
-      kind: 'source-structure', requirement: dialect,
-      status: program.source.structure?.dialect === dialect ? 'satisfied' : 'missing',
-      critical: true, evidence: { actual: program.source.structure?.dialect || null }
-    });
-  }
-  const supportedLanguages = profile.languages || ['und'];
-  obligations.push({
-    kind: 'language', requirement: program.source.language,
-    status: supportedLanguages.includes(program.source.language) || supportedLanguages.includes('*') ? 'satisfied' : 'missing',
-    evidence: { supportedLanguages }
-  });
-  const size = Array.from(program.source.content).length;
-  obligations.push({
-    kind: 'source-size', requirement: `<=${profile.maxCodePoints ?? Number.MAX_SAFE_INTEGER}`,
-    status: size <= (profile.maxCodePoints ?? Number.MAX_SAFE_INTEGER) ? 'satisfied' : 'missing',
-    evidence: { actualCodePoints: size }
-  });
+  get status() { return this.detail('status'); }
+  get missingConcepts() { return this.detail('missingConcepts'); }
+  get missingCapabilities() { return this.detail('missingCapabilities'); }
+  get unknownCoverage() { return this.detail('unknownCoverage'); }
+}
 
-  const capabilities = availableTypes(program);
-  for (const gap of program.gaps || []) {
-    obligations.push({
-      kind: 'source-gap', requirement: gap.kind,
-      status: gap.critical ? 'missing' : 'semantically-uncertain',
-      critical: Boolean(gap.critical), evidence: gap
-    });
-  }
-  for (const type of profile.requiredObservationTypes || []) {
-    obligations.push({
-      kind: 'profile-observation', requirement: type,
-      status: capabilities.has(type) ? 'satisfied' : 'missing', critical: true,
-      evidence: { producers: capabilities.get(type) || [] }
-    });
-  }
-  const circuits = [];
-  for (const compiled of compiledCircuits) {
-    const circuitObligations = [];
-    for (const [name, port] of Object.entries(compiled.circuit.inputs)) {
-      const types = port.types || [port.type];
-      const producers = types.filter(Boolean).flatMap((type) => capabilities.get(type) || []);
-      const observations = program.observations.filter((observation) =>
-        matchesObservationBinding(observation, port));
-      const critical = port.critical !== false;
-      let status = producers.length ? 'satisfied' : critical ? 'missing' : 'partially-satisfied';
-      if (port.statuses?.length && !producers.some((producer) =>
-        (producer.statuses || []).some((producerStatus) => port.statuses.includes(producerStatus)))) {
-        status = critical ? 'missing' : 'partially-satisfied';
+function deriveSemanticDemand(circuits) {
+  const concepts = new Set();
+  const capabilities = new Set();
+  const coverageSensitive = new Set();
+  for (const circuit of circuits) {
+    for (const requirement of circuit.required) capabilities.add(requirement.id ?? String(requirement));
+    for (const rule of circuit.rules) {
+      for (const clause of rule.clauses) {
+        if (clause instanceof MatchClause) concepts.add(clause.pattern.concept.id);
+        if (clause.kind === 'NotExistsClause') coverageSensitive.add(clause.coverage.concept.id);
       }
-      const coverageCertificates = (program.coverage || []).filter((coverage) =>
-        coverage.mode === 'closed-world' && coverage.verified === true
-        && coverage.source === program.source.id
-        && coverage.revision === program.source.revision
-        && types.some((type) => coverage.types?.includes(type)));
-      if (port.coverage === 'closed-world' && !coverageCertificates.length) {
-        status = critical ? 'missing' : 'partially-satisfied';
-      }
-      const cardinality = port.cardinality || 'many';
-      const cardinalitySatisfied = cardinality === 'many'
-        || (cardinality === 'one' && observations.length === 1)
-        || (cardinality === 'optional' && observations.length <= 1)
-        || (['at-least-one', 'one-or-more'].includes(cardinality) && observations.length > 0);
-      if (!cardinalitySatisfied) status = critical ? 'missing' : 'partially-satisfied';
-      if (port.guarantee) {
-        const available = observations.some((observation) =>
-          guaranteeSatisfies(STATUS_CEILINGS[observation.status] || 'review-required', port.guarantee));
-        if (!available) status = critical ? 'missing' : 'partially-satisfied';
-      }
-      const producerGaps = (program.gaps || []).filter((gap) => types.includes(gap.type));
-      const blockingProducerGaps = producerGaps.filter((gap) =>
-        gap.critical || ['operational', 'insufficient-materialization'].includes(gap.kind));
-      const qualityGaps = producerGaps.filter((gap) => !blockingProducerGaps.includes(gap));
-      if (blockingProducerGaps.length) status = critical ? 'missing' : 'partially-satisfied';
-      else if (status === 'satisfied' && qualityGaps.length) status = 'satisfied-with-limits';
-      circuitObligations.push({
-        kind: 'observation-binding', binding: name, port: name, requirement: types,
-        status, critical, evidence: {
-          producers, observations: observations.length, cardinality,
-          matchers: port.where || [],
-          coverageCertificates: coverageCertificates.map((coverage) => coverage.id),
-          producerGaps, blockingProducerGaps, qualityGaps
-        }
-      });
     }
-    const blocked = circuitObligations.some((item) => item.critical && item.status === 'missing');
-    circuits.push({
-      id: compiled.circuit.id, status: blocked ? 'blocked' : 'ready',
-      obligations: circuitObligations
-    });
-    obligations.push(...circuitObligations.map((item) => ({ ...item, circuit: compiled.circuit.id })));
+    for (const stage of circuit.stages) {
+      for (const contract of stage.contracts.filter((item) => item.contractKind === 'reads')) {
+        for (const value of contract.values) concepts.add(value.definition?.id ?? value.id);
+      }
+    }
   }
-  const globalFailure = obligations.some((item) => item.status === 'missing' && (item.critical !== false));
-  return {
-    kind: 'CompatibilityReport', schemaVersion: 1,
-    status: globalFailure ? 'incompatible' : obligations.some((item) => item.status !== 'satisfied') ? 'compatible-with-limits' : 'compatible',
-    profile: profile.id || 'compatibility:default@1', obligations, circuits,
-    activeCircuits: circuits.filter((item) => item.status === 'ready').map((item) => item.id),
-    blockedCircuits: circuits.filter((item) => item.status === 'blocked').map((item) => item.id)
-  };
+  return new SemanticDemand(concepts, capabilities, coverageSensitive);
 }
 
-export { evaluateCompatibility };
+function evaluateCompatibility(demand, ontology, store, availableCapabilities = new Set()) {
+  const ontologyConcepts = new Set([...ontology.concepts.keys()]);
+  const missingConcepts = [...demand.concepts].filter((id) => !ontologyConcepts.has(id));
+  const missingCapabilities = [...demand.capabilities].filter((id) => !availableCapabilities.has(id));
+  const unknownCoverage = [...demand.coverageSensitive].filter((id) => {
+    const concept = ontology.concept(id);
+    return !concept || store.coverageFor(concept, store.snapshot()) !== 'closed';
+  });
+  const status = missingConcepts.length ? 'BLOCKED_ONTOLOGY'
+    : missingCapabilities.length ? 'BLOCKED_CAPABILITY'
+      : unknownCoverage.length ? 'UNKNOWN' : 'COMPATIBLE';
+  return new CompatibilityReport(status, missingConcepts, missingCapabilities, unknownCoverage);
+}
+
+export { CompatibilityReport, SemanticDemand, deriveSemanticDemand, evaluateCompatibility };

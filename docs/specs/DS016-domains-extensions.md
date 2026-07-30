@@ -1,94 +1,45 @@
 ---
 id: DS016
-title: Domain Modules, Solvers, and Research Extensions
-status: accepted
+title: Domain Ontologies, Algorithms, and Extensions
+status: implemented
 owner: nllAgent maintainers
-summary: Defines extension packaging for editorial, normative, technical, scientific, multilingual, multimodal, solver, repair, and formal-verification capabilities.
+summary: Defines domain packages, ordinary JavaScript algorithms, tools, models, solvers, multilingual adapters, and knowledge boundaries.
 ---
 
 # Introduction
 
-The core system must support radically different document theories without embedding each domain in the runtime. Extensions enter through common contracts and remain independently evaluated.
+Editorial, normative, scientific, technical, multilingual, and multimodal agents share runtime contracts without
+pretending to share one universal ontology.
 
 # Core Content
 
-## Extension package
+A domain project extends core OntologyJS, supplies neutral materializers, circuits, CNL dialects, benchmark cases, and
+optional named tools or models. It documents intended use, authority, scope, evidence policy, gaps, cost, and assurance.
+Changing or contested facts belong in sourced, dated project modules with effective interval and jurisdiction, not the
+foundation ontology.
 
-Every extension must provide versioned LongTextJS schemas, neutral producers or adapters, CircuitJS operators or patterns, verifier contracts, compatibility probes, benchmark families, security effects, cost model, explanation policy, and migration rules. A new prompt without these artifacts is not a platform extension.
+Graph algorithms, constraint solvers, parsers, simulations, numerical methods, and search may be ordinary `.mjs`
+functions inside a stage or imported helper. They remain macro-nodes whose semantic inputs, outputs, effects, witnesses,
+budgets, and versions are explicit. A new algorithm does not require inventing a generic declarative primitive.
 
-The implemented programmer surface for new algorithms is `NllRuntimeExtension`. A host-selected self-contained ESM
-module exports exact operator and verifier definitions with executable JavaScript plus machine-readable contracts. The
-host installs it before circuit compilation; circuits refer only to its versioned registry ids. A published release that
-uses it locks the module digest. Its structured input and output value schemas are checked against graph wiring where
-types are available and against actual runtime values on every call. This local single-file loader is appropriate for focused algorithms and examples. A
-larger external solver still belongs behind a controlled adapter and package-specific deployment contract rather than
-being smuggled through a circuit callback.
-
-DS021 distinguishes platform invariants from changing knowledge. A reusable political, social, economic, legal, or geographic `KnowledgePack` must additionally declare authoritative sources and digests, effective interval, jurisdiction, world, epistemic status, conflict policy, update process, guarantee ceiling, and expiry tests. No such loader is implemented yet; domain packages must not describe current facts as built-in common sense.
-
-## Editorial modules
-
-Editorial packages may cover lexical restrictions, sentence metrics, dialogue scope, focalization, mental-state access, repetition, chronology, object continuity, character knowledge, revelations, and rubric-based style suggestions. Exact rules may be mechanical. Semantic style judgments must remain evidence-certified, model-judgment, or human-confirmed.
-
-## Normative modules
-
-Normative packages must distinguish authority, effective version, trigger, bearer, action, object, deadline, evidence, exception, compensation, priority, permission, prohibition, and coverage. Outcomes include compliant, non-compliant, not-applicable, undetermined, and policy-conflict. Calendars and registries are versioned operational context.
-
-## Technical and scientific modules
-
-Technical packages may define quantities, units, tolerances, components, configurations, definitions, requirements, procedures, measurements, claims, evidence, datasets, and applicability conditions. Unit conversion, interval consistency, dependency impact, procedure state machines, claim-evidence alignment, and causal-language review use specialized operators and witnesses.
-
-## Solver integration
-
-SMT, CSP, MILP, symbolic algebra, graph algorithms, model checking, simulation, and theorem proving must remain external theories behind typed operators. Results must identify assumptions and return the appropriate model, unsat core, bound, path, trace, numerical tolerance, or proof term. The runtime must not call every result a proof.
-
-## Multilingual and multimodal support
-
-Multilingual materializations preserve original text, translation, alignment, concept identity, language-specific producer profile, and translation losses. Benchmarks include false friends, jurisdictional differences, and code-switching.
-
-Multimodal adapters preserve page or region anchors, OCR text, table geometry, diagram relationships, formula structure, crop digests, and model identity. Vision observations start as proposed unless a deterministic checker establishes a precise property.
-
-## Counterfactual remediation and active learning
-
-Repair search operates in alternative worlds and proposes minimal changes. It must preserve protected text, re-run affected circuits, and label model-authored edits as proposals. Active learning may rank questions by expected impact, but the ranking does not change authority or auto-approve an answer.
-
-## Formal assurance
-
-Critical runtime properties such as verification dominance, fixpoint monotonicity, certificate composition, and selected witness checkers may be mirrored in a proof assistant. Formal kernels reduce the trusted base but do not prove unformalized semantic extraction.
+Multilingual adapters preserve source language, offsets, aligned anchors, translation provenance, and uncertainty.
+Multimodal adapters preserve source coordinates and method. Neither silently converts model interpretation into
+mechanical evidence.
 
 # Decisions & Questions
 
-### Question #1: When should a repeated circuit pattern become a primitive?
+### Question #1: What replaced trusted runtime extensions?
 
-Response: Only after multiple evaluated circuits demonstrate stable semantics, a clear input, output, dependency and coverage contract, measurable complexity reduction, verifier support, and mutation tests. First test whether a normalized query, decision table, or exact operator wrapper expresses the pattern without adding a new algorithm. The primitive proposal must preserve existing behavior and declare why those simpler forms are insufficient.
+Response: Algorithms are normal CircuitJS stage or tool modules. Trust is applied to the executable project/module
+boundary directly; there is no artificial split where the circuit author language is powerless and real code hides in
+a parallel registry format.
 
-### Question #2: Is multimodal support part of the default Markdown CLI?
+### Question #2: Must every project import all base concepts?
 
-Response: The extension contract is complete, but the default Markdown adapter does not infer image semantics. A document requiring unavailable multimodal evidence becomes incompatible for dependent circuits.
+Response: No. It imports the smallest coherent ontology family needed for source, evidence, time, operational outputs,
+and its domain. Compatibility is computed from actual demand.
 
-### Question #3: Can the system verify arbitrary scientific truth?
+### Question #3: How is current world knowledge added?
 
-Response: No. It can verify declared relationships, computations, procedure conformance, evidence alignment, and solver-backed properties under explicit assumptions. Open scientific interpretation remains bounded and reviewable.
-
-### Question #4: What must a domain provide for CNL generation planning?
-
-Response: It must provide representative ideas, idea-observation schemas, one or more planning patterns, expected idea-specific CNL plans, and the authority and validation assets already required by the domain. Editorial, normative, technical, and scientific modules should reuse rule identities, schemas, calendars, units, operators, and validation oracles. Content selection, ordering, and dependencies belong in explicit planning circuits or registered planning operators rather than hidden prompts. Optional realization and repair require separate tests.
-
-### Question #5: Is a runtime-extension module equivalent to an agent circuit?
-
-Response: No. The extension is trusted application code and may implement an algorithm. The circuit is untrusted-to-
-execute declarative theory: it chooses the extension id, passes values, and routes the result through verification.
-Learning may propose the need, contract, examples, and tests for an operator, but it cannot install executable extension
-code into production automatically.
-
-### Question #6: What may a Coding Agent do when a use case needs a new trusted algorithm?
-
-Response: It may preserve the natural reproducer and propose the complete runtime-extension contract, ordinary
-JavaScript implementation, independent verifier, structured schemas, budgets, security effects, CNL example, and
-tests in an agent-owned proposal. It may also author a candidate circuit against an extension already installed and
-digest-locked by the host. It cannot install new trusted code or describe an unavailable proposal as production
-support; the dependent candidate remains blocked or explicitly limited until platform review and installation.
-
-# Conclusion
-
-Domain breadth comes from published modules and solver contracts, not from weakening the core into an opaque universal prompt. Unsupported extensions remain explicit gaps.
+Response: Through explicit sourced project modules with date, scope, jurisdiction, conflict policy, and benchmarks. The
+current foundation contains only bounded source-claim invariants.

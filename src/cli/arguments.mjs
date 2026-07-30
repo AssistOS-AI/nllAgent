@@ -1,84 +1,51 @@
 import { NllError } from '../core/errors.mjs';
 
 const COMMAND_OPTIONS = new Map([
-  ['run', ['agent', 'input', 'output', 'release', 'foundation', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['plan', ['agent', 'input', 'output', 'realize-output', 'release', 'foundation', 'max-revisions', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['learn', ['agent', 'rules', 'data-root', 'json', 'codex-bin']],
-  ['benchmark', ['agent', 'release', 'foundation', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['agent init', ['agent', 'description', 'language', 'data-root', 'json']],
-  ['agent list', ['data-root', 'json']],
-  ['agent inspect', ['agent', 'data-root', 'json']],
-  ['issue list', ['agent', 'status', 'data-root', 'json']],
-  ['feedback add', ['agent', 'run', 'type', 'message', 'finding', 'role', 'data-root', 'json']],
-  ['release publish', ['agent', 'candidate', 'data-root', 'json', 'no-llm', 'translator', 'codex-bin']],
-  ['model inspect', ['json']]
+  ['run', ['agent', 'input', 'output', 'foundation', 'data-root', 'no-llm', 'translator', 'codex-bin']],
+  ['plan', ['agent', 'input', 'output', 'realize-output', 'foundation', 'max-revisions', 'data-root', 'no-llm', 'translator', 'codex-bin']],
+  ['benchmark', ['agent', 'foundation', 'data-root', 'no-llm', 'translator', 'codex-bin']],
+  ['learn', ['agent', 'rules', 'data-root', 'codex-bin']],
+  ['agent init', ['agent', 'description', 'language', 'data-root']],
+  ['agent list', ['data-root']],
+  ['agent inspect', ['agent', 'data-root']],
+  ['issue list', ['agent', 'status', 'data-root']],
+  ['feedback add', ['agent', 'run', 'type', 'message', 'finding', 'role', 'data-root']],
+  ['model inspect', []]
 ]);
-const TRANSLATION_BACKENDS = new Set(['auto', 'achilles', 'codex', 'none']);
-const FOUNDATION_MODES = new Set(['core', 'off']);
 
 function parseArguments(argv) {
   const positionals = [];
-  const options = {};
+  const options = Object.create(null);
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
-    if (!token.startsWith('--')) {
-      positionals.push(token);
-      continue;
-    }
+    if (!token.startsWith('--')) { positionals.push(token); continue; }
     const name = token.slice(2);
-    if (Object.hasOwn(options, name)) {
-      throw new NllError('invalid-arguments', `Option --${name} may be specified only once.`);
-    }
-    if (['json', 'no-llm', 'help'].includes(name)) {
-      options[name] = true;
-      continue;
-    }
+    if (Object.hasOwn(options, name)) throw new NllError('invalid-arguments', `Duplicate option --${name}.`);
+    if (['help', 'no-llm'].includes(name)) { options[name] = true; continue; }
     const value = argv[index + 1];
-    if (value === undefined || value.startsWith('--')) throw new NllError('invalid-arguments', `Option --${name} requires a value.`);
+    if (!value || value.startsWith('--')) throw new NllError('invalid-arguments', `Option --${name} requires a value.`);
     options[name] = value;
     index += 1;
   }
-  return { positionals, options };
+  return Object.freeze({ positionals: Object.freeze(positionals), options });
+}
+
+function commandKey(positionals) {
+  if (COMMAND_OPTIONS.has(positionals[0])) return positionals[0];
+  return positionals.slice(0, 2).join(' ');
 }
 
 function validateCommandArguments(positionals, options) {
-  const key = COMMAND_OPTIONS.has(positionals[0])
-    ? positionals[0]
-    : positionals.slice(0, 2).join(' ');
+  const key = commandKey(positionals);
   const allowed = COMMAND_OPTIONS.get(key);
-  if (!allowed) return;
-  const expectedPositionals = key.split(' ').length;
-  if (positionals.length !== expectedPositionals) {
-    throw new NllError('invalid-arguments', `Command ${key} does not accept extra positional arguments.`);
-  }
+  if (!allowed) throw new NllError('invalid-arguments', `Unknown command: ${positionals.join(' ')}`);
+  if (positionals.length !== key.split(' ').length) throw new NllError('invalid-arguments', `${key} accepts no extra positional arguments.`);
   const unknown = Object.keys(options).filter((name) => name !== 'help' && !allowed.includes(name));
-  if (unknown.length) {
-    throw new NllError('invalid-arguments', `Unknown option for ${key}: --${unknown[0]}.`, { command: key, unknown });
-  }
-  if (options.translator && !TRANSLATION_BACKENDS.has(options.translator)) {
-    throw new NllError('invalid-arguments', `Unknown translation backend ${options.translator}.`);
-  }
-  if (options.foundation && !FOUNDATION_MODES.has(options.foundation)) {
-    throw new NllError('invalid-arguments', `Unknown foundation mode ${options.foundation}.`);
-  }
-  if (options['no-llm'] && options.translator && options.translator !== 'none') {
-    throw new NllError('invalid-arguments', '--no-llm conflicts with an enabled --translator value.');
-  }
-  if (key === 'plan' && options['max-revisions'] !== undefined) {
-    const maximum = Number(options['max-revisions']);
-    if (!Number.isInteger(maximum) || maximum < 0 || maximum > 10) {
-      throw new NllError('invalid-arguments', '--max-revisions must be an integer between 0 and 10.');
-    }
-    if (!options['realize-output']) {
-      throw new NllError('invalid-arguments', '--max-revisions is meaningful only with --realize-output.');
-    }
-  }
-  if (key === 'plan' && options['realize-output']
-    && (options['no-llm'] || options.translator === 'none')) {
-    throw new NllError(
-      'invalid-arguments',
-      '--realize-output requires an enabled translation backend; remove --no-llm or --translator none.'
-    );
+  if (unknown.length) throw new NllError('invalid-arguments', `Unknown option for ${key}: --${unknown[0]}.`);
+  if (options.foundation && !['core', 'off'].includes(options.foundation)) throw new NllError('invalid-arguments', '--foundation must be core or off.');
+  if (options.translator && !['auto', 'achilles', 'codex', 'none'].includes(options.translator)) throw new NllError('invalid-arguments', 'Unknown translator.');
+  if (options['max-revisions'] !== undefined && (!Number.isInteger(Number(options['max-revisions'])) || Number(options['max-revisions']) < 0)) {
+    throw new NllError('invalid-arguments', '--max-revisions must be a non-negative integer.');
   }
 }
 
@@ -87,11 +54,4 @@ function requireOption(options, name) {
   return options[name];
 }
 
-export {
-  COMMAND_OPTIONS,
-  FOUNDATION_MODES,
-  TRANSLATION_BACKENDS,
-  parseArguments,
-  requireOption,
-  validateCommandArguments
-};
+export { COMMAND_OPTIONS, commandKey, parseArguments, requireOption, validateCommandArguments };

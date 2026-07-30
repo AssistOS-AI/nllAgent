@@ -1,8 +1,0 @@
-{
-  "kind": "NaturalLanguageLinterBenchmarkCase",
-  "rule": "ED-001",
-  "family": "positive",
-  "validationStatus": "mechanically-derived",
-  "reportComparison": "structured",
-  "rationale": "A narrative paragraph contains one exact whole-word occurrence."
-}

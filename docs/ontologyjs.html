@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OntologyJS</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a></nav><h1>OntologyJS: executable vocabulary</h1><p class="lead">OntologyJS gives materializers and circuits the same constructor identities and catches local category errors before execution.</p>
+<pre><code>const O = ontology('facility.operations@1', extendsOntology(core));
+
+export const Person = O.entity('Person', requires(named));
+export const Door = O.entity('Door', requires(named));
+export const agent = O.role('agent', from(O.Event), to(Person), exactlyOne());
+export const theme = O.role('theme', from(O.Event), to(Door), exactlyOne());
+export const Open = O.event('Open', requires(agent), requires(theme));
+
+export default O.seal();</code></pre>
+<p><code>Open(agent(ana), theme(gate))</code> returns a ground <code>Term</code>. Replacing <code>ana</code> with <code>variable(Person, 'person')</code> makes the same call return a typed <code>Pattern</code>. Neither result is a record with arbitrary fields.</p>
+<h2>What belongs in an ontology</h2><p>Local type validation, cardinality, normalization, index hints, lexicalization, and definitional views belong here. A behavior receives one local value. If a computation needs source evidence, a store query, a world, an exception, priority, or authority, it belongs in CircuitJS.</p>
+<h2>Identity</h2><p>Source entities and anchored events use explicit identifiers; derived immutable values use structural identity. The experiment that selected this hybrid is explained in <a href="experiments.html">Architecture experiments</a>.</p>
+<p>API contract: <a href="specsLoader.html">DS005</a>.</p></main></body></html>

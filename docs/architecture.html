@@ -1,106 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Architecture Map — NaturalLanguageLinterAgent</title>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="partials-loader.js"></script>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
-  </script>
-</head>
-<body>
-<div class="layout">
-  <aside data-include="partials/nav.html"></aside>
-  <main>
-    <div class="breadcrumbs"><a href="index.html">Documentation</a> / Architecture map</div>
-    <p class="kicker">The system in one page</p>
-    <h1>Two programs, two CNL outputs, one learning loop</h1>
-    <p class="lead">LongTextJS represents the concrete input; CircuitJS represents reusable rule knowledge. Validation turns a document into a CNL audit. Planning turns an idea into a CNL generation specification. Learning builds candidates for both; maintainers publish them explicitly.</p>
-
-    <pre class="mermaid">
-flowchart LR
-  INPUT[Document or idea] --> LTX[LongTextJS]
-  FOUNDATION[Versioned foundation: core or off] --> LTX
-  FOUNDATION --> GRAPHS[Published CircuitJS validation or planning graph]
-  LTX --> GRAPHS --> CNL[CNL audit or generation plan]
-  CNL -. optional plan realization returns as input .-> INPUT
-    </pre>
-    <p class="diagram-caption"><strong>The runtime architecture.</strong> The graph purpose selects the CNL output profile. The two graphs share authority, schemas, operators, compatibility, provenance, and release identity, while retaining different control flow.</p>
-
-    <div class="concept-grid">
-      <section class="concept-card">
-        <h2>Architecture of one verification</h2>
-        <p>A document is snapshotted, compiled into LongTextJS, checked against CircuitJS observation contracts, executed, verified, and persisted as <code>CNLAuditReport</code>. The question is: <em>what can this release responsibly say about this document?</em></p>
-        <p><a href="verification.html">Follow one verification chronologically →</a></p>
-      </section>
-      <section class="concept-card">
-        <h2>Architecture of CNL generation planning</h2>
-        <p>An idea becomes LongTextJS, planning circuits apply the released theory, and <code>CNLGenerationPlan</code> becomes the primary specification. A rule-to-plan witness proves where each applied rule shaped it. A model may optionally realize it; validation then audits the candidate.</p>
-        <p><a href="generation.html">Follow planning and optional realization chronologically →</a></p>
-      </section>
-      <section class="concept-card">
-        <h2>Architecture of learning</h2>
-        <p>Authority, examples, feedback, and issues enter an isolated authoring job. The job produces candidate schemas, producers, circuits, and benchmarks. A maintainer later chooses whether to publish that candidate. The important question is: <em>what must change before future runs may judge more or judge differently?</em></p>
-        <p><a href="learning-architecture.html">Follow learning chronologically →</a></p>
-      </section>
-    </div>
-
-    <h2 id="boundaries">The three boundaries that make it work</h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Boundary</th><th>What stays on each side</th><th>Failure prevented</th></tr></thead>
-      <tbody>
-        <tr><td>Source / judgment</td><td>LongTextJS records anchored observations; CircuitJS derives rule-dependent conclusions.</td><td>An interpretation is not presented as source, and extraction does not decide the verdict it is meant to support.</td></tr>
-        <tr><td>Candidate / publication</td><td>Operators may propose results; registered verifiers and finding contracts control emission.</td><td>A plausible candidate is not presented as a verified finding.</td></tr>
-        <tr><td>Learning / production</td><td>Learning edits staged candidates; production reads an immutable published release.</td><td>A production document or reviewer comment cannot rewrite the rule during the run.</td></tr>
-      </tbody>
-    </table></div>
-
-    <h2 id="connection">A small foundation plus explicit domain contracts</h2>
-    <p>Circuit compilation walks backward from every output and derives the LongTextJS types that can influence it. Pre-publication checks require each critical type to have an approved producer. During a run, compatibility proves that this particular source produced acceptable observations and coverage. These are different checks: a release may know how to produce <code>narrative.object-event@1</code> in general and still fail to produce enough such events for one damaged or unfamiliar document.</p>
-    <p><code>foundation-core</code> is the deliberate exception to per-agent repetition: it contributes bounded state,
-      order, exact-arithmetic, quantity, type, and literal-emotion observations plus five verifier-dominated circuits.
-      It does not provide domain authority, unrestricted interpretation, or changing world facts. See
-      <a href="foundation.html">Default foundation</a>.</p>
-    <p>The detailed mechanism is in <a href="connection.html">The observation contract</a>. This is the central link between the two halves of the documentation.</p>
-
-    <h2 id="query-layer">Experimental query layer: an authoring aid, not a new authority</h2>
-    <p>DS020 now implements a bounded adapter over one canonical LongTextJS value as finite read-only relations, then expresses suitable CircuitJS rule families as typed queries and evidence-aware decisions. The normalized query/table data is the logical plan and lowers to the ordinary graph. This avoids a mandatory third semantic artifact and keeps direct graphs for fixpoints, state, search, argumentation, and solvers.</p>
-    <pre class="mermaid">
-flowchart LR
-  LTX[LongTextJS instance world] --> QUERY[Experimental typed query/table]
-  QUERY --> GRAPH[Canonical CircuitJS graph]
-  GRAPH --> VERIFY[Existing verifier + emit]
-  INDEX[Discardable physical index] -. optimization only .-> QUERY
-    </pre>
-    <p class="diagram-caption"><strong>Status boundary.</strong> The implemented subset generates ordinary observation bindings and nodes, exact anti-join coverage checks, QueryContracts, source maps, replay witnesses, and benchmark differential records. Native indexes and the extended algebra remain unavailable.</p>
-
-    <h2 id="deployment">Implementation shape</h2>
-    <p>The current product is a modular local Node.js application, not a required microservice deployment. <code>src/runtime/production-run.mjs</code> owns direct validation, <code>src/generation/runner.mjs</code> owns planning and the optional realization branch, <code>src/runtime/analyzer.mjs</code> supplies the shared validation path, <code>src/learning/runner.mjs</code> owns isolated authoring, and <code>src/release/manager.mjs</code> owns explicit publication and active-pointer replacement.</p>
-    <p>Hard algorithms enter through registered operators. The standard registry ships with the runtime; a host
-      programmer may explicitly install a trusted, content-addressed JavaScript extension before compiling a circuit.
-      The graph still fixes dataflow, primitive meaning, witness, verifier, and publication. See
-      <a href="circuits-in-practice.html">Circuits in practice</a> for the concrete execution model.</p>
-    <div class="callout warning"><strong>Architecture versus extension surface.</strong> The runtime supports versioned schemas and registered reasoning operators, but the repository does not ship a published implementation for every literary, legal, scientific, multimodal, or solver-backed theory described by the broader design. Missing domain capability remains a compatibility gap.</div>
-
-    <nav class="page-nav" aria-label="Architecture reading path">
-      <strong>Continue by question</strong>
-      <a href="concepts.html">What ideas and guarantees is this built on?</a>
-      <a href="longtextjs.html">What is the document program?</a>
-      <a href="foundation.html">What is checked before agent-specific rules?</a>
-      <a href="circuitjs.html">What is the theory program?</a>
-      <a href="circuits-in-practice.html">How do values move and where does custom code belong?</a>
-      <a href="query-first.html">How does experimental query-first authoring lower to the graph?</a>
-      <a href="circuit-tutorial.html">How does the graph execute step by step?</a>
-      <a href="verification.html">How does a run execute?</a>
-      <a href="generation.html">How does an idea become CNL?</a>
-      <a href="learning-architecture.html">How is a candidate built and published?</a>
-    </nav>
-
-    <footer>Normative boundaries: <a href="specsLoader.html?spec=DS000-vision.md">DS000</a>, <a href="specsLoader.html?spec=DS005-longtextjs.md">DS005</a>, <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS010-compatibility-coverage.md">DS010</a>, and <a href="specsLoader.html?spec=DS013-learning-coding-agent-skills.md">DS013</a>. Experimental query profile: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>
-  </main>
-</div>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent architecture</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a></nav>
+<h1>Three language roles, one semantic world</h1><p class="lead">This page answers one question: how do executable JavaScript modules become an auditable semantic circuit without reducing JavaScript to data?</p>
+<h2>The language boundary</h2><table><thead><tr><th>Layer</th><th>Owns</th><th>Must not own</th></tr></thead><tbody><tr><td>OntologyJS</td><td>Sorts, concepts, roles, cardinality, local normalization, constructor identity.</td><td>Contextual exceptions, priorities, or verdicts.</td></tr><tr><td>LongTextJS</td><td>Ground terms, claims, anchors, alternatives, identity candidates, coverage, gaps.</td><td>Findings or desired rule conclusions.</td></tr><tr><td>CircuitJS</td><td>Patterns, queries, rules, tables, algorithms, capabilities, derivation, verification, generation.</td><td>Retrospective mutation of source observations.</td></tr><tr><td>SemanticStore</td><td>One typed term graph and stable query/transaction API.</td><td>Public physical indexes or implicit casts.</td></tr></tbody></table>
+<h2>The execution sequence</h2><pre><code>Markdown source
+  → executable LongTextJS program
+  → SemanticStore snapshot
+  → backward capability plan
+  → forward rule/stage activation
+  → atomic semantic deltas
+  → typed findings or CNLFrame
+  → executable trace/result modules + Markdown</code></pre>
+<h2>Why the circuit is dynamic</h2><p>A circuit template does not pre-create every possible node. Matches bind variables and create concrete work; a stage may request a capability or run a subcircuit. The graph can grow during the snapshot, but each canonical instance is added once and committed values remain immutable.</p>
+<h2>Why the circuit is hierarchical</h2><p>Declarative matching and decisions expose fine-grained nodes because the runtime understands their semantics. A graph algorithm or iterative solver stays a normal function and appears as an instrumented macro-node. This preserves both meaningful inspection and full JavaScript expressiveness.</p>
+<h2>What SSA means here</h2><p>SSA governs published dataflow values, not local variables. A stage can update a local accumulator inside a loop; at commit it publishes one immutable result with one producer. If a step matters semantically, the author exposes it as a task, checkpoint, rule, or subcircuit.</p>
+<p>Normative details: <a href="specsLoader.html">DS000, DS008, and DS009</a>.</p></main></body></html>

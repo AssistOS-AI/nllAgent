@@ -1,8 +1,8 @@
 import { randomBytes } from 'node:crypto';
 
-function sortableId(prefix, now = new Date()) {
-  const stamp = now.toISOString().replace(/[-:.TZ]/g, '').slice(0, 17);
-  return `${prefix}-${stamp}-${randomBytes(6).toString('hex')}`;
+function sortableId(prefix) {
+  const time = new Date().toISOString().replaceAll(/[-:.TZ]/gu, '');
+  return `${prefix}-${time}-${randomBytes(5).toString('hex')}`;
 }
 
 export { sortableId };

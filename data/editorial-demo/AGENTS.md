@@ -1,16 +1,14 @@
-# NaturalLanguageLinterAgent Learning Workspace
+# Editorial experiment guidance
 
-## Scope
+This workspace is an executable example of the OntologyJS, LongTextJS, CircuitJS, and controlled-generation
+architecture.
 
-This directory is the complete workspace for one NaturalLanguageLinterAgent learning project.
-Use only the skills linked under `.agents/skills/`. Do not invoke repository bootstrap,
-documentation-rebuild, Ploinky-management, or unrelated imported skills from parent directories.
-
-## Rules
-
-- Treat `learning-runs/<id>/input-rules/` as the authority snapshot for the current job.
-- Write theory code only under `circuits/`, `schemas/`, `extraction/`, and `candidates/`.
-- Write natural benchmark cases under `benchmark/` and issue analyses under `proposals/`.
-- Never edit `releases/` or `active-release.json`.
-- Circuit authoring should use restricted `.circuit.mjs` modules and the documented CircuitJS DSL.
-- Prepare candidates and run public checks, but leave publication to the explicit manual CLI command.
+- `agent.mjs` is the only assembly root.
+- Extend vocabulary under `ontologies/`.
+- Describe source observations under `longtext/`; do not add findings there.
+- Implement rules and full JavaScript algorithms under `circuits/`.
+- Keep dialect renderers and parsers under `cnl/`.
+- Every benchmark case contains `input.md` and `case.mjs`; expected values are typed benchmark DSL terms.
+- Run `node bin/nllagent.mjs benchmark --agent editorial-demo` from the repository root after changes.
+- Do not add a release pointer, candidate tree, generated schema, or parallel data representation.
+- Preserve exact source spans, explicit evidence, open-world absence, and transactional circuit writes.

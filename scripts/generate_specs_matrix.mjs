@@ -2,116 +2,62 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
-const repoRoot = resolve(scriptDir, '..');
-const specsDir = resolve(repoRoot, 'docs/specs');
-const matrixPath = resolve(specsDir, 'matrix.md');
-const embeddedDataPath = resolve(repoRoot, 'docs/specs-data.js');
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const specificationsDirectory = resolve(repositoryRoot, 'docs/specs');
 
-function parseFrontmatter(markdown) {
-  if (!markdown.startsWith('---\n')) {
-    return { metadata: {}, body: markdown };
+function parseFrontmatter(source) {
+  const match = source.match(/^---\n([\s\S]*?)\n---\n/u);
+  if (!match) return { metadata: new Map(), body: source };
+  const metadata = new Map();
+  for (const line of match[1].split('\n')) {
+    const separator = line.indexOf(':');
+    if (separator > 0) metadata.set(line.slice(0, separator).trim(), line.slice(separator + 1).trim());
   }
-
-  const endIndex = markdown.indexOf('\n---\n', 4);
-  if (endIndex === -1) {
-    return { metadata: {}, body: markdown };
-  }
-
-  const metadata = {};
-  for (const line of markdown.slice(4, endIndex).trim().split('\n')) {
-    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (match) {
-      metadata[match[1]] = match[2];
-    }
-  }
-
-  return {
-    metadata,
-    body: markdown.slice(endIndex + 5)
-  };
+  return { metadata, body: source.slice(match[0].length) };
 }
 
-function parseTitle(body, fallback) {
-  const match = body.match(/^#\s+(.+)$/m);
-  return match ? match[1].trim() : fallback;
+function titleFrom(body, fallback) {
+  return body.match(/^#\s+(.+)$/mu)?.[1]?.trim() ?? fallback;
 }
 
-function parseSummary(metadata, body) {
-  if (metadata.summary) {
-    return metadata.summary;
-  }
-
-  const paragraphs = body
-    .split('\n\n')
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .filter((chunk) => !chunk.startsWith('#'));
-
-  return paragraphs[0]?.replace(/\s+/g, ' ') ?? '';
-}
-
-function normalizeStatus(status) {
-  const normalized = (status ?? 'unknown').trim().toLowerCase();
-  return normalized.replace(/\s+/g, '-');
-}
-
-function requiredMetadata(fileName, metadata, body) {
-  const title = parseTitle(body, metadata.title ?? fileName);
-
-  return {
-    id: metadata.id,
-    title: metadata.title ?? title.replace(/^DS\d{3}\s+/, ''),
-    status: normalizeStatus(metadata.status),
-    owner: metadata.owner ?? 'repository',
-    summary: parseSummary(metadata, body),
-    fileName
-  };
-}
-
-function validateContiguousIds(specs) {
-  const ids = specs.map((spec) => Number(spec.id.slice(2)));
-  for (let index = 1; index < ids.length; index += 1) {
-    if (ids[index] !== ids[index - 1] + 1) {
-      throw new Error(
-        `DS numbering is not contiguous: expected DS${String(ids[index - 1] + 1).padStart(3, '0')} after ${specs[index - 1].id}, found ${specs[index].id}.`
-      );
-    }
-  }
-}
-
-async function loadSpecs() {
-  const entries = await readdir(specsDir, { withFileTypes: true });
-  const specFiles = entries
-    .filter((entry) => entry.isFile() && /^DS\d{3}-.*\.md$/.test(entry.name))
+async function loadSpecifications() {
+  const entries = await readdir(specificationsDirectory, { withFileTypes: true });
+  const names = entries
+    .filter((entry) => entry.isFile() && /^DS\d{3}-.*\.md$/u.test(entry.name))
     .map((entry) => entry.name)
     .sort((left, right) => left.localeCompare(right, undefined, { numeric: true }));
-
-  const specs = [];
-  for (const fileName of specFiles) {
-    const markdown = await readFile(resolve(specsDir, fileName), 'utf8');
-    const { metadata, body } = parseFrontmatter(markdown);
-    if (!metadata.id) {
-      throw new Error(`${fileName} is missing required frontmatter field "id".`);
-    }
-    specs.push(requiredMetadata(fileName, metadata, body));
+  const specifications = [];
+  for (const fileName of names) {
+    const source = await readFile(resolve(specificationsDirectory, fileName), 'utf8');
+    const { metadata, body } = parseFrontmatter(source);
+    const id = metadata.get('id');
+    if (!/^DS\d{3}$/u.test(id ?? '')) throw new Error(`${fileName} has no valid id.`);
+    specifications.push(Object.freeze({
+      id,
+      fileName,
+      title: metadata.get('title') ?? titleFrom(body, fileName),
+      status: metadata.get('status') ?? 'unknown',
+      owner: metadata.get('owner') ?? 'repository',
+      summary: metadata.get('summary') ?? ''
+    }));
   }
-
-  validateContiguousIds(specs);
-  return specs;
+  specifications.forEach((specification, index) => {
+    const expected = `DS${String(index).padStart(3, '0')}`;
+    if (specification.id !== expected) {
+      throw new Error(`Specification order is not contiguous: expected ${expected}, received ${specification.id}.`);
+    }
+  });
+  return specifications;
 }
 
-function renderMatrix(specs) {
-  const rows = specs
-    .map(
-      (spec) =>
-        `| [${spec.id}](specsLoader.html?spec=${spec.fileName}) | ${spec.title} | [[status:${spec.status}]] | ${spec.owner} | ${spec.summary.replace(/\|/g, '\\|')} |`
-    )
-    .join('\n');
-
+function render(specifications) {
+  const rows = specifications.map((specification) =>
+    `| [${specification.id}](${specification.fileName}) | ${specification.title} | ${specification.status} | ${specification.owner} | ${specification.summary.replaceAll('|', '\\|')} |`
+  ).join('\n');
   return `# Specification Matrix
 
-Generated from DS frontmatter by \`scripts/generate_specs_matrix.mjs\`. Edit the DS files and rerun the generator instead of editing this file manually.
+Generated from DS frontmatter by \`scripts/generate_specs_matrix.mjs\`. Edit the specifications, then rerun the
+generator.
 
 | Specification | Title | Status | Owner | Summary |
 | --- | --- | --- | --- | --- |
@@ -119,22 +65,6 @@ ${rows}
 `;
 }
 
-async function main() {
-  const specs = await loadSpecs();
-  const matrixMarkdown = renderMatrix(specs);
-  await writeFile(matrixPath, matrixMarkdown);
-  const documents = { 'matrix.md': matrixMarkdown };
-  for (const spec of specs) documents[spec.fileName] = await readFile(resolve(specsDir, spec.fileName), 'utf8');
-  const embedded = {
-    schemaVersion: 1,
-    catalog: specs,
-    documents
-  };
-  await writeFile(embeddedDataPath, `globalThis.__NLL_SPECS__ = ${JSON.stringify(embedded)};\n`);
-  console.log(`Updated ${matrixPath} and ${embeddedDataPath}`);
-}
-
-main().catch((error) => {
-  console.error(error.message || String(error));
-  process.exit(1);
-});
+const specifications = await loadSpecifications();
+await writeFile(resolve(specificationsDirectory, 'matrix.md'), render(specifications));
+process.stdout.write(`Updated the matrix for ${specifications.length} specifications.\n`);

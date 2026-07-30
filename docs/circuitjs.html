@@ -1,240 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CircuitJS Theory Program — NaturalLanguageLinterAgent</title>
-  <link rel="stylesheet" href="styles.css">
-  <script defer src="partials-loader.js"></script>
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
-  </script>
-</head>
-<body>
-<div class="layout">
-  <aside data-include="partials/nav.html"></aside>
-  <main>
-    <div class="breadcrumbs"><a href="index.html">Documentation</a> / CircuitJS / The theory program</div>
-    <p class="kicker">The theory side</p>
-    <h1>CircuitJS is a program of the rulebook</h1>
-    <p class="lead">CircuitJS turns reusable rule knowledge into a typed declarative graph. Validation graphs publish verified findings that become a CNL audit; planning graphs publish a verified CNL document specification. Both state what observations are required, how rules apply, and what must be checked before publication.</p>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CircuitJS</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="runtime.html">Runtime</a></nav><h1>CircuitJS: rules and real algorithms</h1><p class="lead">CircuitJS combines typed declarative rules with full JavaScript stages inside one hierarchical dataflow program.</p>
+<h2>A declarative rule</h2><pre><code>const object = variable(ObjectEntity, 'object');
 
-    <div class="callout"><strong>New to graph execution?</strong> Read
-      <a href="circuits-in-practice.html">Circuits, without the mystery</a> for the practical programmer model, then use
-      the <a href="circuit-tutorial.html">interactive circuit execution tutorial</a>. It lets you move from a source
-      through LongTextJS, observation binding, operator output, witness replay, <code>emit</code>, and both CNL profiles one
-      stage at a time.</div>
-
-    <h2 id="lifecycle">A theory has a different lifecycle</h2>
-    <p>A production document may change daily. A published rule theory should remain stable across many documents until authority, evidence, or feedback justifies a new release. CircuitJS is therefore authored and tested in learning, locked into an immutable release by a manual publication command, and only read during production.</p>
-    <p>The five <code>foundation-core</code> circuits are versioned platform theory rather than agent release files. The runtime prepends them in <code>core</code> mode and records their pack digest beside the selected release. They still use ordinary observation bindings, registered operators, independent verifiers, and <code>emit</code>; <a href="quick-tutorial.html#circuit">the Quick Tutorial shows the exact DSL shape</a>.</p>
-
-    <pre class="mermaid">
-flowchart LR
-  AUTHOR[Rulebook → restricted author form] --> GRAPH[Canonical plain-data graph]
-  GRAPH --> STATIC[Static compilation + linking]
-  STATIC --> CHECKS[Natural benchmark checks]
-  CHECKS --> REL[Manual immutable publication]
-    </pre>
-    <p class="diagram-caption"><strong>The theory becomes production code only through an explicit manual publication command.</strong> The author notation cannot add executable capabilities. Static analysis and natural cases must agree before the graph is frozen into a release.</p>
-
-    <h2 id="real-circuit">A circuit that exists in the repository</h2>
-    <p>The <code>editorial-demo</code> candidate contains this restricted author module. It finds the exact English phrase “in fact” only in published narrative paragraph scope and publishes a finding only after replay verification:</p>
-    <pre><code>export default circuit({
-  kind: 'CircuitJS',
-  id: 'editorial.weak-phrase',
-  version: '0.1.0',
-  description: 'Find “in fact” in narrative Markdown paragraphs.',
-  sourceRuleReferences: [
-    'authority/style-guide.md#rule-ed-001-weak-phrase-in-narration'
-  ],
-  inputs: {
-    paragraphs: {
-      type: 'document.paragraph@1',
-      cardinality: 'many',
-      statuses: ['extracted'],
-      coverage: 'closed-world',
-      critical: true
-    }
-  },
-  nodes: [
-    {
-      id: 'matches',
-      primitive: 'call',
-      operator: 'text.lexical-occurrences@1',
-      inputs: { observations: binding('paragraphs'), rules: [/* ED-001 */] }
-    },
-    {
-      id: 'verified',
-      primitive: 'verify',
-      verifier: 'text.exact-match@1',
-      inputs: { candidates: node('matches') }
-    },
-    {
-      id: 'findings',
-      primitive: 'emit',
-      inputs: { verified: node('verified') }
-    }
-  ],
-  outputs: { findings: node('findings') },
-  budgets: { nodes: 12, wallTimeMs: 5000 }
+export default rule(
+  'missing-retrieval',
+  when(
+    match(Leave(objectRole(object))),
+    notExists(
+      match(Retrieve(objectRole(object))),
+      narrativeInterval,
+      requireCoverage(Retrieve)
+    )
+  ),
+  then(emit(ContinuityGap(objectRole(object))))
+);</code></pre>
+<h2>A procedural macro-node</h2><pre><code>export const timelineCheck = stage('timeline-cycles', async (ctx) =&gt; {
+  const graph = new TemporalGraph();
+  for (const event of ctx.store.instancesOf(Event)) graph.add(event);
+  for (const cycle of graph.findCycles()) {
+    const witness = await ctx.verify('cycle', () =&gt; replay(cycle));
+    if (witness) ctx.emit(TimelineConflict(evidence(...cycle.claims)));
+  }
 });</code></pre>
-
-    <h2 id="read-it">How to read the graph</h2>
-    <ol class="step-list">
-      <li><strong>Identity and authority.</strong> The circuit has a semantic version and a source-rule reference. A finding can therefore return to the rulebook passage that authorized it.</li>
-      <li><strong>Typed observation binding.</strong> <code>paragraphs</code> accepts many <code>document.paragraph@1</code> observations, but only with <code>extracted</code> status and closed-world coverage. It is critical, so a missing producer blocks the circuit. <code>binding()</code> names the selected immutable value; <code>port()</code> remains an exact compatibility alias for older sources.</li>
-      <li><strong>Registered computation.</strong> <code>call</code> invokes <code>text.lexical-occurrences@1</code>. The circuit supplies policy data; the operator supplies reviewed executable behavior.</li>
-      <li><strong>Independent check.</strong> <code>verify</code> gives the candidate and source evidence to <code>text.exact-match@1</code>. A rejected candidate never reaches the output.</li>
-      <li><strong>Controlled publication.</strong> <code>emit</code> consumes only the verified result. Static analysis proves that every path to this output is verification-dominated.</li>
-    </ol>
-
-    <h2 id="restricted">Why the file looks like JavaScript but is not general JavaScript</h2>
-    <p>The loader accepts exactly one direct <code>export default circuit({...})</code> or experimental <code>export default queryFirstCircuit({...})</code> expression and injects only the allowed data constructors. It rejects imports, wrappers, functions, classes, control flow, asynchronous work, templates, dynamic code generation, process, filesystem, network, prototype mechanisms, accessors, cycles, non-finite numbers, and values that cannot be converted losslessly to plain data.</p>
-    <p>The expression is evaluated briefly in a restricted <code>node:vm</code> context and normalized. The CircuitJS compiler then treats the result exactly like JSON. Domain logic must live in a registered operator with a declared signature, effect set, budget, and verifier—not inside an author-supplied callback.</p>
-
-    <h2 id="custom-code">Real JavaScript belongs behind a registered node</h2>
-    <p>Restricted circuit source does not make the runtime computationally weak. A host programmer can implement an
-      ordinary JavaScript function in a trusted <code>NllRuntimeExtension</code>, install its operator and verifier into
-      the registries, and use their exact ids in the graph. The function receives resolved plain-data inputs and a
-      read-only LongTextJS context; its schema-checked plain-data result becomes the node output.</p>
-    <p>The runnable <code>examples/runtime-extension</code> example counts paragraph words with JavaScript, constructs a
-      witness, independently recounts it in a verifier, and emits one finding. Run it with
-      <code>node examples/runtime-extension/run.mjs</code>. The
-      <a href="circuits-in-practice.html#javascript">practical circuit page</a> explains the code and every transferred
-      value. A custom extension supplies algorithms for existing primitives; adding a new primitive name still changes
-      the compiler's orchestration contract.</p>
-
-    <h2 id="data-dictionary">CircuitJS data dictionary</h2>
-    <p>These are the review-significant fields of the ordinary graph. Optional fields may be omitted, but an omitted policy never grants a stronger guarantee than the compiler and runtime can prove.</p>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Construction</th><th>Fields</th><th>Meaning and restrictions</th></tr></thead>
-      <tbody>
-        <tr><td>Top-level circuit</td><td><code>kind</code>, <code>id</code>, <code>version</code>, <code>purpose</code>, <code>description</code>, <code>sourceRuleReferences</code></td><td>Stable theory identity, validation/planning purpose, human summary, and immutable authority links. <code>kind</code> is <code>CircuitJS</code>.</td></tr>
-        <tr><td>Graph interface</td><td><code>inputs</code>, <code>outputs</code></td><td>Named external observation bindings and named graph result references. Only output-reachable inputs enter the compiled contract.</td></tr>
-        <tr><td>Execution body</td><td><code>nodes</code>, <code>budgets</code></td><td>Finite node list plus graph node and wall-time ceilings. Node ids are unique and references must form an acyclic dependency graph.</td></tr>
-        <tr><td>Observation binding</td><td><code>type</code>/<code>types</code>, <code>cardinality</code>, <code>statuses</code>, <code>coverage</code>, <code>critical</code></td><td>Exact nominal observation family, <code>one</code>/<code>optional</code>/<code>many</code> shape, accepted epistemic states, completeness demand, and fail-closed importance.</td></tr>
-        <tr><td>Binding refinements</td><td><code>where</code>, <code>scopeRelation</code>, <code>guarantee</code></td><td><code>where</code> is an AND-list of safe local field matchers. Structural relationship and minimum premise requirements remain explicit. Joins, absence, general ordering, and deduplication are not binding semantics.</td></tr>
-        <tr><td>Node</td><td><code>id</code>, <code>primitive</code>, <code>operator</code>/<code>verifier</code>, <code>inputs</code>, <code>effects</code></td><td>The primitive chooses orchestration semantics. An executable registry id is exact and versioned; its permitted primitive and declared effects are checked by the compiler.</td></tr>
-        <tr><td>Generated logical metadata</td><td><code>logical</code>, <code>authoringProfile</code>, author/graph digests</td><td>Compiler-owned traceability for lowered query-first graphs. Direct authors cannot spoof the profile marker.</td></tr>
-        <tr><td>References</td><td><code>{ "$port": name }</code>, <code>{ "$node": id }</code></td><td>Immutable whole-value references. No dynamic property lookup or hidden ambient value is available.</td></tr>
-      </tbody>
-    </table></div>
-
-    <h2 id="ports">Observation bindings are the document-side interface</h2>
-    <p>Inputs declare nominal type and version, cardinality, accepted statuses, coverage, criticality, safe local matchers, scope relation, and guarantee requirements. The compiler traces which inputs can affect an output and persists an <code>ObservationContract</code> including matcher field demand. Dead declarations and hidden side paths are rejected. Query-First owns cross-relation, ordering, aggregation, and evidence-aware absence semantics.</p>
-    <p>This is how CircuitJS asks the document side for neutral premises without sending the desired verdict. The weak-phrase circuit asks for all qualifying paragraphs. A continuity circuit asks for leave, retrieve, transfer, and use events—including negated or hypothetical candidates—not for “evidence that continuity is broken.”</p>
-    <p>Matchers are evaluated as an AND-list. <code>eq</code>, <code>neq</code>, <code>in</code>, and array
-      <code>includes</code> use strict values; <code>gt</code>, <code>gte</code>, <code>lt</code>, and <code>lte</code>
-      accept finite numbers only; string <code>includes</code> and <code>startsWith</code> require strings; and
-      <code>exists</code> distinguishes a present value from <code>null</code> or an unavailable path. No JavaScript
-      coercion, regular expression, callback, OR expression, or negative coverage claim is hidden in a binding.</p>
-
-    <h2 id="execution">Primitives coordinate; operators reason</h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Family</th><th>Examples</th><th>Purpose</th></tr></thead>
-      <tbody>
-        <tr><td>Relational</td><td><code>select</code>, <code>filter</code>, <code>join</code>, <code>group</code>, <code>aggregate</code></td><td>Correlate typed observations while retaining provenance.</td></tr>
-        <tr><td>Inference and state</td><td><code>derive</code>, <code>fixpoint</code>, <code>maintain</code>, <code>retract</code></td><td>Build consequences, timelines, and revision-aware state.</td></tr>
-        <tr><td>Alternatives and services</td><td><code>choose</code>, <code>search</code>, <code>call</code>, <code>judge</code>, <code>invoke</code></td><td>Explore bounded alternatives or invoke registered capabilities.</td></tr>
-        <tr><td>Publication</td><td><code>verify</code>, <code>certify</code>, <code>explain</code>, <code>emit</code></td><td>Check witnesses and limit what a report may claim.</td></tr>
-      </tbody>
-    </table></div>
-    <p>The runtime currently implements the static core and a set of deterministic relational, temporal, state, unit, interval, fixpoint, argumentation, lexical, semantic, and replay operators used by tests and example packages. The broader primitive catalog is an extension contract; unsupported semantics must block rather than appear to work.</p>
-
-    <h3 id="constructors">The direct author constructors</h3>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Constructor</th><th>Generated data</th><th>Semantics</th></tr></thead>
-      <tbody>
-        <tr><td><code>circuit(definition)</code></td><td>The definition object unchanged before lossless normalization.</td><td>Marks the single allowed module expression; it executes no domain algorithm.</td></tr>
-        <tr><td><code>queryFirstCircuit(definition)</code></td><td>The query-first definition unchanged before lossless normalization.</td><td>Marks the experimental author profile; compilation validates and generates an ordinary <code>CircuitJS</code> graph.</td></tr>
-        <tr><td><code>observationBinding(definition)</code></td><td>The definition unchanged.</td><td>Names the type/status/local-matcher selector at the graph boundary.</td></tr>
-        <tr><td><code>binding(name)</code></td><td><code>{ "$port": name }</code></td><td>Recommended reference to the immutable selected array.</td></tr>
-        <tr><td><code>port(name)</code></td><td><code>{ "$port": name }</code></td><td>Compatibility alias for <code>binding(name)</code>; it performs no matching.</td></tr>
-        <tr><td><code>node(name)</code></td><td><code>{ "$node": name }</code></td><td>References the complete immutable output of a dependency node.</td></tr>
-      </tbody>
-    </table></div>
-
-    <h3 id="primitive-semantics">Every CircuitJS primitive</h3>
-    <p>A primitive fixes an orchestration contract; an exact registry entry supplies the algorithm. The compiler recognizes every name below, but only the “current execution” column describes behavior supplied today.</p>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Primitive</th><th>Required result semantics</th><th>Current execution</th></tr></thead>
-      <tbody>
-        <tr><td><code>select</code></td><td>Ordered typed relation or subset with dependencies.</td><td>Requires a registered operator; no standard select entry.</td></tr>
-        <tr><td><code>filter</code></td><td>Rows retained by a declared predicate and unknown policy.</td><td><code>relational.filter@1</code> supports conjunctions of path comparisons.</td></tr>
-        <tr><td><code>project</code></td><td>Declared output fields without erasing dependencies.</td><td><code>relational.project@1</code> maps named paths; rich envelopes are not implemented.</td></tr>
-        <tr><td><code>join</code></td><td>Typed pairs under keys, scope, direction, and multiplicity.</td><td><code>relational.join@1</code> is a deterministic equality inner join.</td></tr>
-        <tr><td><code>antiJoin</code></td><td>Unmatched left rows guarded by exact closed-world coverage.</td><td>The experimental <code>LongTextQuery@1</code> evaluator implements the exact coverage-aware subset; no standalone standard anti-join operator exists.</td></tr>
-        <tr><td><code>group</code></td><td>Deterministic groups with typed key and member ids.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>window</code></td><td>Bounded neighborhoods over declared total order.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>aggregate</code></td><td>Named measure plus contributing members or replay commitment.</td><td><code>relational.aggregate@1</code> counts or collects by one path.</td></tr>
-        <tr><td><code>normalize</code></td><td>Canonical equivalent representation.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>rewrite</code></td><td>Finite rewrite plus applied rule ids.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>compare</code></td><td>Typed relation and operand dependencies.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>convert</code></td><td>Versioned converted value and witness.</td><td><code>units.convert@1</code> supports the documented unit table.</td></tr>
-        <tr><td><code>align</code></td><td>Explicit correspondence retaining ambiguity and scope.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>derive</code></td><td>Finite rule consequence with premises and rule id.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>fixpoint</code></td><td>Finite closure or budget failure under declared monotonicity.</td><td><code>logic.fixpoint@1</code> computes positive Datalog-style closure.</td></tr>
-        <tr><td><code>maintain</code></td><td>Ordered state history and current state.</td><td><code>state.timeline@1</code> applies ordered effects and retractions.</td></tr>
-        <tr><td><code>retract</code></td><td>Explicit supersession/retraction and invalidation.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>invalidate</code></td><td>Explicit stale dependency set.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>guard</code></td><td>Value on true; declared empty/not-applicable branch on false.</td><td>Core truthiness check; false returns an empty array.</td></tr>
-        <tr><td><code>assert</code></td><td>Value on true; typed invariant failure otherwise.</td><td>Core truthiness check; false throws <code>circuit-assertion-failed</code>.</td></tr>
-        <tr><td><code>require</code></td><td>Continue only with required evidence or capability.</td><td>Same minimal core behavior as <code>assert</code>.</td></tr>
-        <tr><td><code>choose</code></td><td>One explicit alternative selected deterministically.</td><td>Core boolean choice between <code>whenTrue</code> and <code>whenFalse</code>.</td></tr>
-        <tr><td><code>fork</code></td><td>Named immutable branches with explicit worlds.</td><td>Pass-through scaffold unless an operator is registered.</td></tr>
-        <tr><td><code>merge</code></td><td>Combined branches under order, duplicate, conflict, and world policy.</td><td>Core one-level flatten; advanced policies are not implemented.</td></tr>
-        <tr><td><code>fallback</code></td><td>First semantically available value under priority.</td><td>Core first present non-empty value.</td></tr>
-        <tr><td><code>search</code></td><td>Bounded result, path, assumptions, cost, and goal witness.</td><td>Requires a registered operator; shortest path is one exact algorithm.</td></tr>
-        <tr><td><code>assume</code></td><td>Branch-local assumption and world id.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>expand</code></td><td>Bounded successor states.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>prune</code></td><td>Retained states plus pruning reasons.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>score</code></td><td>Ranking value that does not become truth.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>backtrack</code></td><td>Restored branch plus failed-branch trace.</td><td>Requires a registered operator.</td></tr>
-        <tr><td><code>call</code></td><td>Output of one exact registered algorithm.</td><td>Fully dispatched through the operator registry.</td></tr>
-        <tr><td><code>judge</code></td><td>Schema-bound model result with model-judgment ceiling.</td><td>Uses a registered model operator when a gateway is configured.</td></tr>
-        <tr><td><code>ask</code></td><td>Typed bounded <code>NeedObservation</code>.</td><td>Core constructor adds kind, criticality, and requesting node.</td></tr>
-        <tr><td><code>invoke</code></td><td>Output of one exact subcircuit and typed mapping.</td><td>Requires a registered operator; generic invocation is not implemented.</td></tr>
-        <tr><td><code>verify</code></td><td>Candidate plus accept, reject, or inconclusive verifier record.</td><td>Fully dispatched through the verifier registry.</td></tr>
-        <tr><td><code>certify</code></td><td>Accepted checked property and bounded guarantee.</td><td>Pass-through scaffold unless an operator is registered.</td></tr>
-        <tr><td><code>explain</code></td><td>Structured envelope from trace facts.</td><td>Pass-through scaffold; report rendering uses finding fields.</td></tr>
-        <tr><td><code>emit</code></td><td>Published findings or plans filtered to accepted records.</td><td>Core implementation adds circuit/source identity and filters rejection.</td></tr>
-      </tbody>
-    </table></div>
-
-    <div class="callout warning"><strong>Known contract gap.</strong> Operator entries now declare permitted primitives and the compiler rejects mismatches. Experimental query/table entries also declare their immediate schema, cost, coverage, ordering, and witness contracts. Older operators do not yet expose the complete machine-typed contract required for arbitrary semantic query schemas, aggregates, patterns, or native optimization; see <a href="../serious_issues.md">serious issue 4</a>.</div>
-
-    <h2 id="query-first">Where query-first authoring fits</h2>
-    <p>DS020 implements an experimental normalized <code>LongTextQuery@1</code> and <code>DecisionTable@1</code> subset for repeated relational rule families. It compiles into the same graph and preserves query, table, row, authority, evidence, coverage, and verifier identities. Tables construct candidates only; generated verifier and emit nodes remain mandatory.</p>
-    <p>The current lexical release should not be migrated merely to use the profile: <code>call → verify → emit</code> is already the smallest safe representation. Query-first becomes useful when it removes repeated selection, join, exception, and priority wiring across a genuine family. Follow the <a href="query-first-tutorial.html">executable level-by-level tutorial</a>.</p>
-
-    <h2 id="generation-purpose">Validation circuits and planning circuits</h2>
-    <p>A normal circuit has validation purpose and publishes findings. The runtime collects those findings into <code>CNLAuditReport</code>, the <code>CNL/Audit-1</code> profile. A <code>purpose: planning</code> circuit consumes LongTextJS observations of one high-level idea and publishes a verification-dominated <code>CNLGenerationPlan</code>, the <code>CNL/Plan-1</code> profile. Its construction node must map every applied rule to concrete locations in the plan. Validation circuits cannot embed CNL constraint projections: rules remain executable theory. Releases list the two graph families as <code>circuits</code> and <code>planningCircuits</code>.</p>
-
-    <h2 id="files">Where to inspect it</h2>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Implementation</th><th>Responsibility</th></tr></thead>
-      <tbody>
-        <tr><td><code>src/circuit/module-loader.mjs</code></td><td>Restricted <code>.circuit.mjs</code> capability analysis and lossless plain-data conversion.</td></tr>
-        <tr><td><code>src/circuit/compiler.mjs</code></td><td>Graph validation, registry linking, verification dominance, dead-declaration checks, and observation-contract derivation.</td></tr>
-        <tr><td><code>src/runtime/scheduler.mjs</code></td><td>Budgeted graph execution over immutable node inputs and outputs.</td></tr>
-        <tr><td><code>src/runtime/standard-operators.mjs</code></td><td>Standard operator and verifier registrations, including translation-backed operators.</td></tr>
-        <tr><td><code>src/foundation/</code></td><td>Default platform circuits plus their bounded observation, operator, and replay semantics.</td></tr>
-      </tbody>
-    </table></div>
-
-    <nav class="page-nav" aria-label="CircuitJS reading path">
-      <strong>Continue on the theory side</strong>
-      <a href="operators.html">How operators and verifiers execute</a>
-      <a href="circuits-in-practice.html#javascript">How to add trusted JavaScript processing</a>
-      <a href="benchmark.html">How natural cases test a theory</a>
-      <a href="advanced-circuit-tutorial.html">Run bindings, custom code, foundation, and CNL together</a>
-      <a href="connection.html">How bindings connect to LongTextJS</a>
-    </nav>
-
-    <footer>Normative contracts: <a href="specsLoader.html?spec=DS008-circuitjs.md">DS008</a>, <a href="specsLoader.html?spec=DS009-runtime-operators.md">DS009</a>, <a href="specsLoader.html?spec=DS011-findings-verification-reporting.md">DS011</a>, and <a href="specsLoader.html?spec=DS021-foundation-ontology-validation.md">DS021</a>. Experimental query profile: <a href="specsLoader.html?spec=DS020-query-first-circuit-authoring.md">DS020</a>.</footer>
-  </main>
-</div>
-</body>
-</html>
+<p>The stage may use loops, classes, recursion, and promises. It cannot mutate source terms or indexes. <code>ctx.derive</code> and <code>ctx.emit</code> write to an atomic transaction; tools, models, tasks, checkpoints, and subcircuits are traced boundaries.</p>
+<h2>Choosing a form</h2><p>Use a typed pattern/rule for relational conditions, a decision table for explicit policy combinations, a stage for algorithms, and a circuit for capability composition. Compact syntax is not a goal by itself.</p>
+<p>Contracts: <a href="specsLoader.html">DS008, DS009, and DS020</a>.</p></main></body></html>

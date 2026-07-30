@@ -1,6 +1,0 @@
-interface:
-  display_name: "Scope Natural Linter Project"
-  short_description: "Compile intended use and authority boundaries."
-  default_prompt: "Use $nll-scope-project to scope this NaturalLanguageLinterAgent learning job."
-policy:
-  allow_implicit_invocation: false
