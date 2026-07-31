@@ -1,7 +1,8 @@
 import { variable } from '../ontology/api.mjs';
 import {
-  ANY, Action, AliasReference, Capability, CircuitTemplate, ContractPart, CoverageRequirement,
-  DecisionRow, DecisionTable, IncludePart, MatchClause, NotExistsClause, Rule, SchedulePart, Stage, WhereClause
+  ANY, Action, AliasReference, Capability, CircuitAnnotation, CircuitTemplate, ContractPart, CoverageRequirement,
+  DecisionRow, DecisionTable, DynamicInstantiation, EffectDescriptor, IncludePart, MatchClause, NotExistsClause,
+  PortBinding, Rule, SchedulePart, Stage, WhereClause
 } from './model.mjs';
 
 class ClauseGroup {
@@ -29,10 +30,20 @@ const guarantee = (...values) => new ContractPart('guarantee', values);
 const reads = (...values) => new ContractPart('reads', values);
 const writes = (...values) => new ContractPart('writes', values);
 const effects = (...values) => new ContractPart('effects', values);
+const usesPrimitives = (...values) => new ContractPart('primitives', values);
+const pure = () => new ContractPart('property', ['pure']);
+const callsTool = (id) => new EffectDescriptor('tool', id);
+const emits = (...values) => new ContractPart('writes', values);
 const capability = (value, ...qualifiers) => new Capability(value, qualifiers);
 const include = (...values) => new IncludePart(values);
 const schedule = (...values) => new SchedulePart(values);
 const parallel = (...values) => new SchedulePart(values);
+const primaryRole = (value) => new CircuitAnnotation('primary-role', [value]);
+const usesMethod = (...values) => new CircuitAnnotation('method', values);
+const supports = (...values) => new CircuitAnnotation('supports', values);
+const summary = (value) => new CircuitAnnotation('summary', [value]);
+const bind = (outputPort, inputPort) => new PortBinding(outputPort, inputPort);
+const instantiateEach = (selector, template) => new DynamicInstantiation(selector, template);
 const beforeStage = (first, second) => Object.freeze([first, second]);
 const afterStage = (first, ...dependencies) => Object.freeze([...dependencies, first]);
 const columns = (...values) => Object.freeze(values);
@@ -48,8 +59,9 @@ const priority = () => 'priority';
 const anyValue = () => ANY;
 
 export {
-  afterStage, anyValue, beforeStage, capability, circuit, columns, decisionTable, derive, effects, emit,
-  guarantee, include, match, notExists, parallel, priority, provides, reads, ref, requireCoverage,
+  afterStage, anyValue, beforeStage, bind, callsTool, capability, circuit, columns, decisionTable, derive,
+  effects, emit, emits,
+  guarantee, include, instantiateEach, match, notExists, parallel, primaryRole, priority, provides, pure, reads, ref, requireCoverage,
   requires, result, row, rule, schedule, stage, then, uniqueOrConflict, using, values, variable, when,
-  where, writes
+  where, writes, summary, supports, usesMethod, usesPrimitives
 };

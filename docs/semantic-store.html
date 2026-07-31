@@ -1,5 +1,45 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SemanticStore</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a></nav><h1>SemanticStore: one logical model</h1><p class="lead">LongTextJS materializes and CircuitJS derives over the same term identities. Circuits never inspect storage arrays or physical indexes.</p>
-<table><thead><tr><th>Public operation</th><th>Meaning</th></tr></thead><tbody><tr><td><code>instancesOf(concept)</code></td><td>Ground terms of the concept or compatible subtype.</td></tr><tr><td><code>query(pattern)</code></td><td>Immutable bindings with evidence/context policies.</td></tr><tr><td><code>claimsAbout(term)</code></td><td>Source or derived claims about one proposition.</td></tr><tr><td><code>evidenceFor(term)</code></td><td>Exact anchors and transitive provenance.</td></tr><tr><td><code>identityCandidates(mention)</code></td><td>Competing entity hypotheses without implicit merge.</td></tr><tr><td><code>coverageFor(concept, scope)</code></td><td>Closed, partial, unknown, or conflicting completeness.</td></tr><tr><td><code>beginTransaction(node)</code></td><td>Atomic buffer for derivations and outputs.</td></tr></tbody></table>
-<h2>Hidden physical structures</h2><p>The current store indexes concepts and roles in maps. Future anchor, temporal, identity, and dependency indexes may replace scans. Their only valid effect is performance; logical values, order, evidence, coverage, and provenance must agree.</p>
-<h2>Four values</h2><p>Predicates distinguish <code>TRUE</code>, <code>FALSE</code>, <code>UNKNOWN</code>, and <code>CONFLICT</code>. Unknown is missing support; conflict is incompatible admitted support. Negating unknown remains unknown.</p>
-<p>Contract: <a href="specsLoader.html">DS007, DS010, and DS020</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SemanticStore</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a></nav>
+<h1>SemanticStore: one logical model</h1>
+<p class="lead">LongTextJS and CircuitJS share a typed attributed term graph. Physical indexes may change without changing agent code because circuits use a semantic query and transaction algebra.</p>
+
+<h2>What the retention snapshot contains</h2>
+<table><thead><tr><th>Layer</th><th>Example</th><th>Authority</th></tr></thead><tbody>
+<tr><td>source</td><td>Customer policy revision and exact section spans</td><td>Pinned input bytes/code points</td></tr>
+<tr><td>observation</td><td>Explicit ten-year RetentionDeclaration claim</td><td>Task LongTextJS + source evidence</td></tr>
+<tr><td>observation/context</td><td>Proposed coreference or alternative authority classification</td><td>Named interpretation, not main-world fact</td></tr>
+<tr><td>derived</td><td>Normalized duration or temporal relation</td><td>Circuit node and dependencies</td></tr>
+<tr><td>output</td><td>Retention Finding with violation status</td><td>Decision trace and evidence</td></tr>
+</tbody></table>
+
+<h2>Query, not storage traversal</h2>
+<pre><code>const declarations = ctx.query(
+  match(RetentionDeclaration(
+    actor(controller),
+    category(dataCategory),
+    durationYears(duration)
+  ))
+);</code></pre>
+<p>The runtime can satisfy that pattern through concept and role indexes. Circuit code cannot depend on an internal array layout, mutate a stored term, or infer identity from an index key.</p>
+
+<h2>Identity and alternatives</h2>
+<p>A source mention, source entity, claim, event, and structurally canonical value have distinct policies. Alternatives share an immutable base and add context-specific facts. A result is robust only after explicit aggregation across all admitted interpretations; copying a proposed fact into the main context is forbidden.</p>
+
+<h2>Atomic semantic deltas</h2>
+<pre><code>query stable epoch snapshot
+  → stage builds candidate derivations/findings
+  → validate types + layer + provenance + evidence + effects
+  → commit all candidates
+  OR discard the entire buffer on failure</code></pre>
+<p>If a verifier throws after the first of three candidate findings, none is visible. If two independent stages produce incompatible admitted values, the store retains conflict semantics rather than using publication order.</p>
+
+<h2>Coverage as data</h2>
+<p>Coverage is indexed by concept, exact scope, and evidence policy. Closing <code>ExceptionEvidence</code> in a policy's exception register does not close it in an external legal database or another document section. Query absence consults this typed coverage state.</p>
+
+<h2>Persistence and caches</h2>
+<p>Canonical LongTextJS, result, and trace modules are authoritative. Content-addressed caches are reconstructible. Cache identity includes code, ontology, inputs, context/interpretation, and policy dependencies; a hit never changes provenance.</p>
+
+<p>Normative contracts: DS007, DS009, and DS010. Current optimization limits are listed in <a href="../serious_issues.md">serious issues</a>.</p>
+</main></body></html>

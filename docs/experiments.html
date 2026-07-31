@@ -1,3 +1,19 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Architecture experiments</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="benchmark.html">Benchmark</a> · <a href="specsLoader.html">Specifications</a></nav><h1>Five design questions resolved by executable counterexamples</h1><p class="lead">Run <code>node experiments/architecture/run.mjs</code>. Each program asserts the failure of a tempting alternative and records the selected contract.</p>
-<table><thead><tr><th>Question</th><th>Observed counterexample</th><th>Decision</th></tr></thead><tbody><tr><td>Term identity</td><td>Structural identity merges two people named Ana.</td><td>Explicit source entities/events; structural immutable values and derivations.</td></tr><tr><td>Ontology behavior</td><td>A context-dependent exception needs store access.</td><td>Behaviors are unary local operations; contextual logic is CircuitJS.</td></tr><tr><td>Alternative explosion</td><td>18 binary readings produce 262,144 eager worlds.</td><td>Shared factorized contexts, demand-lazy enumeration, proven-incompatibility pruning.</td></tr><tr><td>Model reuse</td><td>Omitting ontology identity collides two semantic requests.</td><td>Exact full-dependency key and accepted frozen artifact only.</td></tr><tr><td>CNL equivalence</td><td>Fluent text can lose an exception or weaken MUST to MAY.</td><td>Exact normalized equivalence of every critical and declared slot.</td></tr></tbody></table>
-<p>The detailed results are in <code>experiments/architecture/results.md</code>. Their normative homes are DS002, DS005, DS007, DS012, and DS019.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Architecture experiments</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="benchmark.html">Evaluation</a> · <a href="specsLoader.html">Specifications</a></nav>
+<h1>Five decisions backed by executable counterexamples</h1>
+<p class="lead">The architectural choices left open by the original theory were not closed by prose. Each experiment preserves a tempting alternative, its failure, and the selected invariant.</p>
+<pre><code>node experiments/architecture/run.mjs</code></pre>
+<table><thead><tr><th>Question</th><th>Concrete counterexample</th><th>Selected contract</th></tr></thead><tbody>
+<tr><td>Identity between modules/snapshots</td><td>Two distinct people named Ana collapse under label/structure-only identity.</td><td>Explicit identity for anchored source entities/events; qualified structural identity for suitable derived values.</td></tr>
+<tr><td>Ontology behavior boundary</td><td>An “exception” normalizer needs document scope and changing policy state.</td><td>Ontology behavior is local validation/normalization/view; contextual decisions are circuits.</td></tr>
+<tr><td>Interpretation explosion</td><td>18 independent binary readings produce 262,144 eager worlds.</td><td>Factorized shared contexts, lazy demand evaluation, pruning only from proved incompatibility.</td></tr>
+<tr><td>Artifact reuse</td><td>Two requests collide when ontology/context identity is omitted from a model/cache key.</td><td>Full dependency identity and frozen accepted artifact; no implicit probabilistic replay.</td></tr>
+<tr><td>CNL equivalence</td><td>Fluent text changes MUST to MAY or loses an exception.</td><td>Exact equality of every critical semantic slot after parser round-trip.</td></tr>
+</tbody></table>
+
+<h2>Why the experiments stay executable</h2>
+<p>A later optimization may look safe in ordinary examples. The counterexample ensures it still distinguishes two source identities, rejects contextual ontology behavior, avoids eager alternatives, includes complete cache dependencies, and preserves controlled modality/exception scope.</p>
+<p>Detailed output: <a href="../experiments/architecture/results.md">architecture experiment results</a>. Normative contract: DS012.</p>
+</main></body></html>

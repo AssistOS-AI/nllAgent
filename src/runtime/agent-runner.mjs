@@ -1,6 +1,8 @@
 import * as coreVocabulary from '../../ontologies/core/index.mjs';
 import { CNLFrame, renderVerified } from '../generation/cnl.mjs';
 import { compileMarkdown, source } from '../longtext/index.mjs';
+import { LongTextProgram } from '../longtext/model.mjs';
+import { NllError } from '../core/errors.mjs';
 import { Term } from '../ontology/model.mjs';
 import { SemanticStore } from '../store/semantic-store.mjs';
 import { foundationCircuit } from '../foundation/circuit.mjs';
@@ -18,22 +20,41 @@ async function materializeProject(project, sourceValue, foundation = 'core') {
   return Object.freeze({ program, store });
 }
 
-async function analyzeProject(project, text, sourceId, options = {}) {
-  const sourceValue = source(sourceId, text, options.revision || 'working');
-  const { program, store } = await materializeProject(project, sourceValue, options.foundation);
-  const trace = new ExecutionTrace(`audit:${sourceValue.digest}`);
+async function executeProgram(project, program, options = {}) {
+  if (!(program instanceof LongTextProgram)) {
+    throw new NllError('invalid-program', 'Deterministic analysis requires a LongTextProgram.');
+  }
+  const store = options.store || new SemanticStore();
+  if (!options.store) store.publish(program);
+  const trace = new ExecutionTrace(`audit:${program.source.digest}`);
   const circuits = options.foundation === 'off'
     ? project.circuits
     : [foundationCircuit, ...project.circuits];
   for (const template of circuits) {
     await executeCircuit(template, store, {
       trace,
-      tools: project.tools,
-      models: project.models
+      tools: project.tools
     });
   }
   const findings = store.outputs.filter((output) => output instanceof Term && output.concept.name === 'Finding');
-  return Object.freeze({ source: sourceValue, program, store, trace, findings, status: store.gaps.length ? 'reported-with-limits' : 'reported' });
+  return Object.freeze({
+    source: program.source,
+    program,
+    store,
+    trace,
+    findings,
+    status: store.gaps.length ? 'reported-with-limits' : 'reported'
+  });
+}
+
+async function analyzeProject(project, text, sourceId, options = {}) {
+  const sourceValue = source(sourceId, text, options.revision || 'working');
+  const { program, store } = await materializeProject(project, sourceValue, options.foundation);
+  return executeProgram(project, program, { ...options, store });
+}
+
+async function analyzeLongTextProject(project, program, options = {}) {
+  return executeProgram(project, program, options);
 }
 
 async function planProject(project, text, sourceId, options = {}) {
@@ -43,8 +64,7 @@ async function planProject(project, text, sourceId, options = {}) {
   for (const template of project.planningCircuits) {
     await executeCircuit(template, store, {
       trace,
-      tools: project.tools,
-      models: project.models
+      tools: project.tools
     });
   }
   const frame = store.outputs.find((output) => output instanceof CNLFrame);
@@ -53,4 +73,4 @@ async function planProject(project, text, sourceId, options = {}) {
   return Object.freeze({ source: sourceValue, program, store, trace, frame, document, status: frame ? 'planned' : 'blocked-capability' });
 }
 
-export { analyzeProject, materializeProject, planProject };
+export { analyzeLongTextProject, analyzeProject, materializeProject, planProject };

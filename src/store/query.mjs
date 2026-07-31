@@ -17,6 +17,9 @@ function executeSemanticQuery(store, queryValue) {
   let bindings = [...store.match(queryValue.pattern)];
   for (const clause of queryValue.clauses) {
     if (clause.kind === 'where') bindings = bindings.filter((binding) => clause.predicate(binding, store));
+    else if (clause.kind === 'scope') {
+      bindings = bindings.filter((binding) => binding.matched.every((term) => store.inContext(term, clause.scope)));
+    }
     else if (clause.kind === 'evidence') {
       bindings = bindings.filter((binding) => binding.matched.every((term) => {
         const claims = store.claimsAbout(term);

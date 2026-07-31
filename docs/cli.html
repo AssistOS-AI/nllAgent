@@ -1,19 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent CLI</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="quick-tutorial.html">Tutorial</a> · <a href="benchmark.html">Benchmark</a> · <a href="learning.html">Learning</a></nav><h1>Command-line reference</h1><p class="lead">The CLI keeps document work file-oriented. Structured artifacts are written inside the selected agent workspace as executable modules.</p>
-<h2>Audit</h2><pre><code>nllagent run --agent &lt;name&gt; --input &lt;file.md&gt; --output &lt;report.md&gt;
-  [--foundation core|off] [--translator auto|achilles|codex|none]
-  [--data-root &lt;folder&gt;]</code></pre>
-<h2>Plan</h2><pre><code>nllagent plan --agent &lt;name&gt; --input &lt;idea.md&gt; --output &lt;plan.md&gt;
-  [--realize-output &lt;draft.md&gt;] [--max-revisions &lt;count&gt;]
-  [--foundation core|off] [--translator auto|achilles|codex|none]
-  [--data-root &lt;folder&gt;]</code></pre>
-<h2>Workspace and authoring</h2><pre><code>nllagent benchmark --agent &lt;name&gt;
-nllagent learn --agent &lt;name&gt; --rules &lt;folder&gt;
-nllagent agent init --agent &lt;name&gt; [--description &lt;text&gt;]
-nllagent agent list
-nllagent agent inspect --agent &lt;name&gt;
-nllagent issue list --agent &lt;name&gt; [--status &lt;status&gt;]
-nllagent feedback add --agent &lt;name&gt; --run &lt;id&gt; --type &lt;type&gt; --message &lt;text&gt;
-nllagent model inspect</code></pre>
-<h2>Parsing rules</h2><p>Options use <code>--name value</code>, may occur once, and are command-scoped. Agent names are path-safe lowercase identifiers. The default data root is <code>data/</code>; the default foundation is <code>core</code>. Unknown compatibility options fail with exit 64.</p>
-<h2>Exit codes</h2><table><tbody><tr><th>0</th><td>Completed report or plan.</td></tr><tr><th>2</th><td>Configured blocking finding.</td></tr><tr><th>3–6</th><td>Incompatible, incomplete, resource-blocked, or review-conflicted.</td></tr><tr><th>9</th><td>Benchmark mismatch.</td></tr><tr><th>10</th><td>Authoring failure.</td></tr><tr><th>64</th><td>Usage or configuration.</td></tr><tr><th>70</th><td>Unexpected runtime failure.</td></tr></tbody></table>
-<p>Normative contract: <a href="specsLoader.html">DS003</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent CLI</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="quick-tutorial.html">Tutorial</a> · <a href="learning.html">Training</a> · <a href="security.html">Security</a> · <a href="FS.md">FS</a></nav>
+<h1>Train and analyze are separate commands</h1>
+<p class="lead">The CLI preserves the two user journeys while enforcing their different permissions. The convenience binary dispatches the same contracts as the separately grantable train and analyze executables.</p>
+
+<h2>Compile a trained agent</h2>
+<pre><code>node bin/nllagent-train.mjs train \
+  --agent supplier-incident \
+  --theory rules/service-agreement.md \
+  --theory rules/notification-exceptions.md \
+  --codex-bin codex \
+  --data-root data</code></pre>
+<p>Success names the promoted immutable build. A candidate test, benchmark, review, context, or import failure returns nonzero and leaves current unchanged.</p>
+
+<h2>Analyze a document</h2>
+<pre><code>node bin/nllagent-analyze.mjs analyze \
+  --agent supplier-incident \
+  --task incident-2026-0042 \
+  --input evidence/incident-0042.md \
+  --target findings \
+  --output reports/incident-0042.md \
+  --data-root data</code></pre>
+<p>The task identifier is unique. The selected build and source are pinned before Codex materialization. A semantic blocker can produce a preserved task/report and a distinct non-success result; a malformed materializer publishes no snapshot.</p>
+
+<h2>Inspect and replay</h2>
+<pre><code>node bin/nllagent.mjs agent list --data-root data
+node bin/nllagent.mjs agent inspect --agent supplier-incident --data-root data
+node bin/nllagent.mjs task inspect --task incident-2026-0042 --data-root data
+node bin/nllagent.mjs benchmark --agent supplier-incident --data-root data</code></pre>
+
+<h2>Native authoring tools</h2>
+<pre><code>node tools/nll.mjs source outline evidence/incident-0042.md
+node tools/nll.mjs ontology inspect agent-build/ontologies/index.mjs
+node tools/nll.mjs context inspect agent-build/context/agent-context.mjs
+node tools/nll.mjs plan check agent-build/plans/incident.plan.mjs
+node tools/nll.mjs circuit preflight agent-build/circuits/root.circuit.mjs
+node tools/nll.mjs benchmark run agent-build/agent.mjs</code></pre>
+<p>Each tool loads real ESM values and writes a Markdown report when <code>--report</code> is supplied. It validates or explains code; method and business decisions remain in the plan and authority review.</p>
+
+<h2>Removed surfaces</h2>
+<p>There is no <code>learn</code>, <code>run</code> translator mode, <code>--translator</code>, direct-model selector, release-candidate publication command, JSON stdout contract, or Achilles configuration. Retraining is explicit <code>train</code>; document processing is explicit <code>analyze</code>.</p>
+
+<h2>Exit behavior</h2>
+<table><thead><tr><th>Condition</th><th>Operational meaning</th></tr></thead><tbody>
+<tr><td>Invalid options, missing agent/build/input, duplicate task</td><td>Usage/artifact failure; no Codex invocation where detectable beforehand</td></tr>
+<tr><td>Codex generation or independent review fails</td><td>Training/task workspace retained; no promotion or semantic result</td></tr>
+<tr><td>Benchmark mismatch</td><td>Accepted executable expectation failed</td></tr>
+<tr><td>Semantic blocker</td><td>Task records blocker; never rewritten as clean</td></tr>
+<tr><td>Success</td><td>All requested deterministic operations and persistence completed</td></tr>
+</tbody></table>
+</main></body></html>

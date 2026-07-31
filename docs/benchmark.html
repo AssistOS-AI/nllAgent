@@ -1,17 +1,43 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent benchmarks</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="cli.html">CLI</a> · <a href="experiments.html">Experiments</a> · <a href="learning.html">Learning</a></nav><h1>Benchmarks protect semantic behavior</h1><p class="lead">A benchmark case is an executable module beside human-readable input and notes. It checks expected terms and statuses, not byte-for-byte report prose.</p>
-<pre><code>benchmarks/cases/unexplained-use/
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent evaluation</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="learning.html">Training</a> · <a href="experiments.html">Experiments</a> · <a href="FS.md">FS</a></nav>
+<h1>Semantic benchmarks and Codex forward evaluation</h1>
+<p class="lead">A green import is not a qualified semantic agent. Evaluation checks business outcome, exact evidence, interpretation, coverage, trace, mutations, and the ability of fresh coding roles to use the published skills.</p>
+
+<h2>What an executable case asserts</h2>
+<pre><code>benchmarks/over-limit-open-coverage/
   input.md
   case.mjs
   expected.mjs
   notes.md
 
-export default benchmarkCase(
-  'unexplained-use',
-  './input.md',
-  findingCount(1),
-  containsFinding('continuity-gap')
+expected(
+  assessmentStatus('UNKNOWN'),
+  evidenceIncludes(retentionClauseSpan),
+  traceIncludes('absence-open-scope'),
+  excludesFinding('retention-violated')
 );</code></pre>
-<h2>Case families</h2><p>Each material rule should have a positive, close negative, exception, incomplete evidence, open and closed absence, ambiguity, conflict, and incompatible-ontology case where meaningful. Long-range cases cross file or section boundaries.</p>
-<h2>Mutation</h2><p>Semantic mutants invert comparisons, remove exceptions, forge coverage, promote proposed claims, merge identities, drop evidence, or bypass verification. Expected programs stay fixed. A surviving relevant mutant identifies an inadequate benchmark.</p>
-<h2>What the demo proves</h2><p>The editorial benchmark proves ten deterministic cases for whole-phrase detection, dialogue/code exclusions, and paragraph-scoped frequency. It does not establish statistical prose quality.</p>
-<p>Contract: <a href="specsLoader.html">DS012</a>.</p></main></body></html>
+<p>Expected output remains independent from the circuit. If a comparator is inverted or open coverage is forged as closed, the unchanged case must fail. Message text alone is never the oracle.</p>
+
+<h2>Case matrix</h2>
+<p>Important rule families include conforming, violating, valid and incomplete exception, exact boundary, missing information, open/closed absence, ambiguity, incompatible claims, and ontology blocker cases. Recursive logic adds base, multi-hop, cycle, and duplicate cases. Controlled generation adds round-trip failure cases.</p>
+
+<h2>Business-diverse forward tests</h2>
+<table><thead><tr><th>Evaluation</th><th>Methods exercised</th><th>Critical failure prevented</th></tr></thead><tbody>
+<tr><td><a href="../agentsEval/privacy-retention/evaluation-report.md">Privacy retention</a></td><td>Query, quantity/constraint, decision, coverage</td><td>Treating “for audit” or missing exception as legal authorization</td></tr>
+<tr><td><a href="../agentsEval/scientific-consistency/evaluation-report.md">Scientific consistency</a></td><td>Query, equivalence, quantity, decision, bounded CNL</td><td>Comparing relative improvement with absolute percentage points</td></tr>
+<tr><td><a href="../agentsEval/narrative-continuity/evaluation-report.md">Narrative continuity</a></td><td>Identity alternatives, temporal/relation closure, coverage</td><td>Calling an unexplained transition definite across an ellipsis</td></tr>
+</tbody></table>
+<p>Each directory preserves medium-size theory/input, generated OntologyJS/CircuitJS/LongTextJS, typed contexts, tests, deterministic output, independent review, and timing. Additional scenarios are listed in <a href="../agentsEval/index.md">the evaluation index</a>.</p>
+
+<h2>Performance interpretation</h2>
+<p>Reports separate Codex theory compilation, Codex source materialization, validation, and deterministic circuit execution. Replaying a frozen task does not call Codex. Measurements pin Node version, source size, term count, circuit work, and assurance profile; a single blended wall-clock number would obscure the architecture.</p>
+
+<h2>Repository qualification</h2>
+<pre><code>node --test
+node experiments/architecture/run.mjs
+node agentsEval/run.mjs
+node scripts/check.mjs</code></pre>
+<p>Normative contract: DS015 and <a href="FS.md">FS-VAL</a>.</p>
+</main></body></html>

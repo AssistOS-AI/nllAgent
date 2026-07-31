@@ -1,6 +1,34 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Runtime and SSA</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="security.html">Security</a></nav><h1>Runtime, SSA, and semantic transactions</h1><p class="lead">This page follows one value from a ready node to a committed semantic result.</p>
-<ol><li>The planner selects a circuit chain that can provide the requested capability.</li><li>A rule binding or stage instance becomes <code>READY</code> after its inputs exist.</li><li>The node runs against a stable store snapshot and buffers derivations or outputs.</li><li>Runtime validation checks term types, provenance, destination layer, duplicates, and invariants.</li><li>Commit publishes immutable values and activates dependants; failure discards the entire buffer.</li></ol>
-<h2>The SSA boundary</h2><p>Published values have one producer. Local variables do not: a graph solver can update its own arrays and maps. The stage publishes one final term set or output, so SSA describes semantic dataflow instead of JavaScript syntax.</p>
-<h2>Dynamic graph growth</h2><p>Rules can create work for each binding; stages can request capabilities or subcircuits. Growth is append-only inside a snapshot. A canonical template–binding–context instance is created once. Resource exhaustion produces a blocked result.</p>
-<h2>Current implementation boundary</h2><p>Sequential hierarchical scheduling, typed matching, async stages, transactions, subcircuits, and lifecycle trace are implemented. Parallel merge, persistent node cache, epochs, and generalized expansion remain planned runtime work and are not presented as current guarantees.</p>
-<p>Contract: <a href="specsLoader.html">DS009 and DS014</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent runtime</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="semantic-store.html">SemanticStore</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="security.html">Security</a></nav>
+<h1>Deterministic execution and bounded assurance</h1>
+<p class="lead">The runtime evaluates one accepted AgentProject and one validated LongText snapshot. Codex has already left the process boundary.</p>
+
+<h2>Execution sequence</h2>
+<ol><li>Load the task pin, agent build, ontology, profile, circuits, and provider pins.</li><li>Publish validated source/observation values into a new SemanticStore snapshot.</li><li>Derive SemanticDemand and check concepts, roles, operations, evidence policy, and exact coverage.</li><li>Plan the minimal authorized capability chain for the target.</li><li>Create canonical root and per-binding CircuitInstances.</li><li>Evaluate ready rules and stages; pure stage deltas may reuse content-addressed cache entries.</li><li>Validate and commit semantic transactions; activate dependent nodes.</li><li>Aggregate interpretation-aware results where the circuit requests it.</li><li>Attach requested abstract, witnessed, local-proof, or generative assurance.</li><li>Persist typed result, trace, and Markdown report.</li></ol>
+
+<h2>Node lifecycle</h2>
+<pre><code>CREATED → READY → RUNNING → PRODUCED → VALIDATED → COMMITTED
+                  │                         │
+                  ├── FAILED (no commit)   └── BLOCKED
+                  └── CACHED (same typed value/provenance contract)</code></pre>
+<p>Technical node state is separate from business status. A successfully committed decision may be <code>UNKNOWN</code>; a failed stage produces no business verdict.</p>
+
+<h2>Multi-semantic example</h2>
+<p>A retention source says “between four and seven years,” and exception coverage is open. Abstract preflight can soundly retain <code>SATISFIED</code>, <code>VIOLATED</code>, and <code>UNKNOWN</code> as possible outcomes. Symbolic boundary generation may propose exactly five years and just above five years. Each generated case must become valid LongTextJS and replay concretely before it counts as witnessed. The final task still uses its concrete interval/coverage evidence.</p>
+
+<h2>Native engines</h2>
+<table><thead><tr><th>Engine</th><th>Business use</th><th>Explicit limit</th></tr></thead><tbody>
+<tr><td>ConstraintKernel</td><td>Deadline, equality, duration, finite and temporal constraints</td><td>Unsupported atoms return <code>UNKNOWN</code></td></tr>
+<tr><td>RelationEngine</td><td>Dependency reachability and narrative temporal closure</td><td>Typed least fixed point; negation must be stratified</td></tr>
+<tr><td>EGraphLite</td><td>Canonical metric/unit/CNL forms</td><td>Only pinned typed rewrite theories</td></tr>
+<tr><td>ProofKernel</td><td>Decision-table and local implication certificates</td><td>No proof of arbitrary JavaScript</td></tr>
+<tr><td>SynthesisEngine</td><td>Minimal typed clause or semantic repair</td><td>Finite grammar, cost, and concrete validator required</td></tr>
+</tbody></table>
+
+<h2>Resource honesty</h2>
+<p>Node, instance, iteration, query, engine, and process budgets are explicit. Exhaustion is <code>BLOCKED_RESOURCE</code>, never an empty clean result. Current general parallel and cross-snapshot incrementality limits remain documented in <a href="../serious_issues.md">serious issues</a>.</p>
+
+<p>Normative contracts: DS009, DS010, DS011, and DS012.</p>
+</main></body></html>

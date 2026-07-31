@@ -1,4 +1,0 @@
-interface:
-  display_name: "Review nllAgent Documentation"
-  short_description: "Make DS and HTML docs concise and coherent."
-  default_prompt: "Use $nll-review-documentation to review these DS and HTML documents at the right reader level."

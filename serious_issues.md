@@ -1,63 +1,62 @@
 # Current Serious Issues
 
-This file lists concrete gaps in the current executable architecture. It does not reopen the five decisions already
-settled by `experiments/architecture/`.
+This file lists concrete limits of the current implementation. It does not reopen the five architectural decisions
+covered by executable experiments and does not list removed legacy workflows.
 
-## 1. Dynamic scheduling is a correct minimal slice, not yet a complete incremental engine
+## 1. Scheduler incrementality is bounded
 
-The scheduler executes typed rules and asynchronous procedural macro-nodes transactionally, preserves immutable
-published values, records trace events, and rolls back failed stages. It does not yet implement epoch-separated
-positive closure, non-monotone closure, content-addressed node caching across snapshots, parallel scheduling, or
-runtime graph expansion through `instantiateEach` and `requestCapability`.
+The runtime has canonical circuit-instance identity, immutable single-producer values, transactional stages,
+content-addressed reuse for pure stage deltas, and dynamic `instantiateEach`. It does not yet provide a complete
+epoch-separated positive/non-monotone scheduler, general runtime `requestCapability` graph growth, deterministic
+parallel execution, or dependency-minimal invalidation across arbitrary edited snapshots.
 
-Until those mechanisms exist, documentation must not claim self-adjusting recomputation or parallel execution.
-Acceptance requires deterministic scheduling tests, canonical instance identity, dependency invalidation, cache reuse
-measurements, and explicit `BLOCKED_RESOURCE` behavior.
+Documentation may claim the tested mechanisms individually, but not general self-adjusting or parallel execution.
+Closure requires epoch tests, capability-expansion tests, descendant invalidation metrics, and explicit resource-budget
+behavior on realistic recursive circuits.
 
-## 2. Module isolation is specified more strongly than the current loader
+## 2. Interpretation support is not yet integrated through every circuit path
 
-Agent programs are normal ESM and semantic writes are protected by opaque values and transactions. The CLI currently
-imports an agent module in the host process; it does not yet enforce the worker/process allowlist, filesystem boundary,
-time budget, memory budget, and injected tool capability policy required by DS015.
+LongTextJS stores alternatives in separate contexts and the runtime can aggregate supplied per-interpretation outcomes
+as robust, conditional, or conflicting. Not every query, dynamic instance, procedural stage, and root-output path is
+automatically evaluated across a factorized interpretation set.
 
-Untrusted generated modules therefore require external process isolation today. The in-process loader is suitable only
-for reviewed repository modules. Acceptance requires a child-process runner, explicit import roots, killed-process
-diagnostics, and security fixtures for ambient filesystem, environment, network, and process access.
+An agent may claim interpretation-aware results only when its circuit and benchmark exercise the explicit context path.
+General closure requires lazy shared-base scheduling, context-preserving cache keys, and combinatorial stress cases.
 
-## 3. Interpretation contexts are represented but not fully evaluated
+## 3. Compatibility remains conservative for opaque procedural behavior
 
-LongTextJS can preserve alternatives and identity candidates, and the experiment proves factorized lazy selection.
-The scheduler does not yet branch a circuit run by interpretation context or aggregate outputs as robust, conditional,
-or conflicting across admitted worlds.
+Recursive SemanticDemand includes typed concepts, roles, capability contracts, evidence policies, operations, nested
+circuits, dynamic instantiations, and exact coverage scopes. An opaque macro-node can still read a semantically relevant
+dimension not expressible by its declared effect/summary, and global aggregation of independently blocked rule paths is
+not a fully general planner feature.
 
-No output may claim interpretation robustness until the runtime has context-aware matching, shared-base evaluation,
-lazy branching, provenance-preserving aggregation, and combinatorial stress benchmarks.
+Critical macro-nodes must declare and test an adequate summary or fail closed. Closure requires observed-versus-declared
+demand checking for every stage and a general partial/global result aggregation contract.
 
-## 4. Coverage and compatibility planning are intentionally conservative but incomplete
+## 4. Query planning and temporal indexing are minimal
 
-`SemanticDemand` detects concept-level incompatibility and coverage-aware absence distinguishes open from closed
-scope. Role-level demand, operational capability demand, evidence-policy guarantees, temporal normalizer discovery,
-and localized partial-result aggregation are not yet complete.
+SemanticStore hides its physical indexes and typed query behavior is correct for the implemented finite snapshot
+fragment. The planner does not yet cost alternative join orders, maintain a full reverse-role/interval index suite, or
+incrementally update every index across source revisions.
 
-A circuit depending on those missing dimensions must declare or check them procedurally and return a blocked or unknown
-result. Acceptance requires demand extraction from every rule and stage contract plus planner tests that localize
-blocked subgraphs without promoting partial results to a global assessment.
+No performance claim should imply database-grade optimization. Closure requires query-plan inspection, equivalent-plan
+tests, interval workloads, and before/after metrics on the medium-size `agentsEval` corpus.
 
-## 5. Controlled generation covers deterministic critical-slot round-trip only
+## 5. Controlled generation is deliberately narrow
 
-`CnlDialect` verifies that a rendered sentence parses back to the same normalized critical semantic slots. The
-reference dialect is deliberately narrow. Model-assisted long-form realization, re-materialization, iterative repair,
-and acceptance as a `GeneratedDocument` are architecture contracts but not complete production paths.
+The implemented CNL path checks critical-slot round-trip and bounded typed synthesis. It does not provide unrestricted
+long-form generation, universal multilingual parsing, or verified stylistic rewriting. Deterministic circuits have no
+direct model-call capability.
 
-Until the loop is implemented, model-generated prose is a draft artifact, never verified controlled language.
-Acceptance requires frozen model artifacts, reanalysis through LongTextJS, unauthorized-claim detection, repair
-budgets, and benchmark cases for modality, negation, actor, time, quantification, and exceptions.
+Long-form prose created by a coding role remains a draft source until re-materialized and checked. Closure of any wider
+claim requires a paired grammar/parser, unauthorized-claim detection, concrete replay, and language-specific benchmark
+evidence.
 
-## 6. Mutation testing has fixtures but no general source mutator
+## 6. Mutation support is scenario-specific
 
-The benchmark runner compares expected semantic findings and the architecture suite includes targeted counterexamples.
-It does not yet generate circuit or LongText source mutations and calculate a per-rule mutation score.
+The benchmark API and evaluations contain meaningful targeted mutants, but the repository does not yet offer a general
+typed source-mutator that enumerates comparator, exception, coverage, identity, evidence, rewrite, and status mutants
+for arbitrary CircuitJS.
 
-Claims about mutation adequacy remain blocked. A complete runner must generate typed comparator, exception, coverage,
-identity, evidence, and status mutations, preserve every mutant as an ESM artifact, and require expected modules to
-remain unchanged.
+Global mutation-adequacy claims remain unsupported. Closure requires preserved `.mjs` mutant artifacts, independent
+unchanged expected modules, per-rule scores, and minimization of surviving counterexamples.

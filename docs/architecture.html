@@ -1,15 +1,42 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent architecture</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a></nav>
-<h1>Three language roles, one semantic world</h1><p class="lead">This page answers one question: how do executable JavaScript modules become an auditable semantic circuit without reducing JavaScript to data?</p>
-<h2>The language boundary</h2><table><thead><tr><th>Layer</th><th>Owns</th><th>Must not own</th></tr></thead><tbody><tr><td>OntologyJS</td><td>Sorts, concepts, roles, cardinality, local normalization, constructor identity.</td><td>Contextual exceptions, priorities, or verdicts.</td></tr><tr><td>LongTextJS</td><td>Ground terms, claims, anchors, alternatives, identity candidates, coverage, gaps.</td><td>Findings or desired rule conclusions.</td></tr><tr><td>CircuitJS</td><td>Patterns, queries, rules, tables, algorithms, capabilities, derivation, verification, generation.</td><td>Retrospective mutation of source observations.</td></tr><tr><td>SemanticStore</td><td>One typed term graph and stable query/transaction API.</td><td>Public physical indexes or implicit casts.</td></tr></tbody></table>
-<h2>The execution sequence</h2><pre><code>Markdown source
-  → executable LongTextJS program
-  → SemanticStore snapshot
-  → backward capability plan
-  → forward rule/stage activation
-  → atomic semantic deltas
-  → typed findings or CNLFrame
-  → executable trace/result modules + Markdown</code></pre>
-<h2>Why the circuit is dynamic</h2><p>A circuit template does not pre-create every possible node. Matches bind variables and create concrete work; a stage may request a capability or run a subcircuit. The graph can grow during the snapshot, but each canonical instance is added once and committed values remain immutable.</p>
-<h2>Why the circuit is hierarchical</h2><p>Declarative matching and decisions expose fine-grained nodes because the runtime understands their semantics. A graph algorithm or iterative solver stays a normal function and appears as an instrumented macro-node. This preserves both meaningful inspection and full JavaScript expressiveness.</p>
-<h2>What SSA means here</h2><p>SSA governs published dataflow values, not local variables. A stage can update a local accumulator inside a loop; at commit it publishes one immutable result with one producer. If a step matters semantically, the author exposes it as a task, checkpoint, rule, or subcircuit.</p>
-<p>Normative details: <a href="specsLoader.html">DS000, DS008, and DS009</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent architecture</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="learning.html">Training</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a></nav>
+<h1>One semantic world, two Codex lifecycles</h1>
+<p class="lead">The architecture separates flexible source interpretation from reproducible business judgment. Codex compiles source or theory into code; opaque values, SemanticStore, and circuits define what that code can mean.</p>
+
+<h2>The authority map</h2>
+<table><thead><tr><th>Layer</th><th>Owns</th><th>Business example</th><th>Forbidden shortcut</th></tr></thead><tbody>
+<tr><td>Authority + RuleAnalysis</td><td>Policy clauses, scope, exceptions, intended outcomes</td><td>“Over five years is prohibited unless a documented legal obligation applies.”</td><td>Changing the clause because a benchmark fails</td></tr>
+<tr><td>OntologyJS</td><td>Observable vocabulary and local invariants</td><td><code>Retain</code>, <code>PersonalData</code>, actor, duration, authority</td><td>Constructor decides whether an exception is accepted</td></tr>
+<tr><td>LongTextJS</td><td>What one document expresses</td><td>A ten-year retention claim anchored to section 6.2</td><td>Materializing <code>RetentionViolation</code></td></tr>
+<tr><td>CircuitJS</td><td>Query, decision, derivation, verification, repair</td><td>Compare duration, resolve exception, map to status</td><td>Reading private store arrays or treating no match as false</td></tr>
+<tr><td>SemanticStore/runtime</td><td>Identity, context, transactions, trace, execution</td><td>Publish one evidence-bearing finding atomically</td><td>Last writer wins or partial commit</td></tr>
+</tbody></table>
+
+<h2>What a circuit is</h2>
+<p>A circuit has one business responsibility, not one algorithmic method. A scientific-consistency circuit can use typed query to select claims, EGraphLite to canonicalize compatible metrics, ConstraintKernel to compare quantities, a decision table to distinguish conflict from non-applicability, and a JavaScript macro-node to group a report's experiment arms. CircuitArchitecturePlan records that decomposition.</p>
+<p>The source `.circuit.mjs` constructs a reusable CircuitModel. A CircuitInstance binds it to one snapshot, interpretation, and set of bindings. The concrete execution graph contains the nodes actually created by matches and subcircuits. These are three different objects; none is serialized as JSON.</p>
+
+<h2>SSA at the meaningful boundary</h2>
+<pre><code>typed query result ──ValueRef──▶ duration normalization
+                                      │
+                                      └──ValueRef──▶ decision table ──▶ Finding
+
+inside normalization stage:
+  ordinary loops, local assignment, classes, recursion, async/await
+
+at stage boundary:
+  one validated immutable output, one producer, one trace identity</code></pre>
+<p>SSA applies to published dataflow, not local JavaScript syntax. Semantic writes enter a transaction buffer and become visible only after type, evidence, provenance, layer, duplicate, and effect checks pass.</p>
+
+<h2>Concrete execution and assurance</h2>
+<p>Concrete execution is the business authority. Abstract interpretation can report that <code>VIOLATED</code> and <code>UNKNOWN</code> are both possible while exception coverage is open. Symbolic execution can find the exact five-year boundary and earns witnessed assurance only after concrete replay. ProofKernel can establish a small decision-table obligation. SynthesisEngine can propose a typed repair. These are selected per plan step and target, not applied indiscriminately to every circuit.</p>
+
+<h2>Environment isolation</h2>
+<p>One environment can contain a retention agent, a supplier-SLA agent, and an editorial-continuity agent. Each has immutable builds and a generated public context. A task for the supplier agent cannot discover the retention ontology. Its Codex workspace can write only task LongTextJS; the deterministic executor has no Codex capability.</p>
+
+<h2>Honest failure</h2>
+<p>Missing information is <code>UNKNOWN</code>; incompatible admitted support is <code>CONFLICT</code>; an absent constructor is <code>BLOCKED_ONTOLOGY</code>; a missing provider is <code>BLOCKED_CAPABILITY</code>; budget exhaustion is <code>BLOCKED_RESOURCE</code>; an exception or tool failure is <code>ERROR_EXECUTION</code>. None is formatted as compliance.</p>
+<p>Normative contracts: <a href="specsLoader.html">DS000, DS008, DS009, DS012, DS013, and DS014</a>.</p>
+</main></body></html>

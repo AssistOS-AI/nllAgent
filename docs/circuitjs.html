@@ -1,26 +1,72 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CircuitJS</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="runtime.html">Runtime</a></nav><h1>CircuitJS: rules and real algorithms</h1><p class="lead">CircuitJS combines typed declarative rules with full JavaScript stages inside one hierarchical dataflow program.</p>
-<h2>A declarative rule</h2><pre><code>const object = variable(ObjectEntity, 'object');
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CircuitJS</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="runtime.html">Runtime</a> · <a href="generation.html">Generation</a></nav>
+<h1>CircuitJS: executable business judgment</h1>
+<p class="lead">A circuit has one semantic responsibility and may compose several methods. It can expose declarative structure where useful and keep an irregular algorithm as ordinary instrumented JavaScript.</p>
 
-export default rule(
-  'missing-retrieval',
+<h2>A real four-valued retention decision</h2>
+<pre><code>const STATUS_TABLE = decisionTable(
+  'privacy-retention-status',
+  columns('duration-comparison', 'documented-exception'),
+  row(values(CONFLICT, anyValue()), result('CONFLICT'), 100),
+  row(values(anyValue(), CONFLICT), result('CONFLICT'), 100),
+  row(values(FALSE, anyValue()), result('SATISFIED'), 80),
+  row(values(TRUE, TRUE), result('ACCEPTED_EXCEPTION'), 80),
+  row(values(TRUE, FALSE), result('VIOLATED'), 80),
+  row(values(TRUE, UNKNOWN), result('UNKNOWN'), 80),
+  row(values(UNKNOWN, anyValue()), result('UNKNOWN'), 70),
+  'priority'
+);</code></pre>
+<p>The table cannot coerce unknown exception coverage into “no exception.” Equal-priority incompatible rows produce conflict instead of first-row-wins behavior. Decision-table identity and selected rows appear in the circuit model and trace.</p>
+
+<h2>SDK-first implementation</h2>
+<p>CircuitArchitecturePlan selects methods per step. Query/dataflow selects claims; ConstraintKernel handles equality, quantities, deadlines, and temporal atoms; RelationEngine handles recursive reachability; EGraphLite applies an authorized equivalence theory; ProofKernel checks local certificates; SynthesisEngine searches typed repairs. The generated context names exact providers and import exports.</p>
+<pre><code>export default circuit(
+  'privacy.retention.root@1',
+  primaryRole('RetentionAssessment'),
+  usesMethod('query-dataflow', 'constraint-kernel', 'finite-decision-table'),
+  supports('CONCRETE', 'ABSTRACT', 'SYMBOLIC'),
+  include(assessRetention)
+);</code></pre>
+
+<h2>Normal JavaScript remains normal</h2>
+<pre><code>const assessRetention = stage(
+  'privacy-retention.assess-records',
+  async (ctx) => {
+    const groups = new Map();
+    for (const declaration of ctx.store.instancesOf(RetentionDeclaration)) {
+      const id = declaration.value(recordId);
+      groups.set(id, [...(groups.get(id) || []), declaration]);
+    }
+    for (const [id, declarations] of groups) {
+      // typed comparison, exception resolution, decision and verification
+      const verified = await ctx.verify(`retention-evidence-${id}`, verifier);
+      if (verified) ctx.emit(buildAssessment(id, declarations));
+    }
+  },
+  reads(RetentionDeclaration, ExceptionEvidence, ExceptionCoverageEvidence),
+  writes(Finding)
+);</code></pre>
+<p>The runtime does not transform the loop and map into decorative graph nodes. The stage is a macro-node with declared inputs/effects, a transaction, and trace. Local objects never enter SemanticStore.</p>
+
+<h2>Typed rules and absence</h2>
+<p>For naturally relational rules, constructors also build Patterns:</p>
+<pre><code>rule('notice-missing',
   when(
-    match(Leave(objectRole(object))),
+    match(Incident(actor(supplier), within(serviceScope))),
     notExists(
-      match(Retrieve(objectRole(object))),
-      narrativeInterval,
-      requireCoverage(Retrieve)
+      match(Notice(actor(supplier), about(ref('incident')))),
+      serviceScope,
+      requireCoverage(Notice)
     )
   ),
-  then(emit(ContinuityGap(objectRole(object))))
+  then(emit(({ incident }) => MissingNotice(evidenceOf(incident))))
 );</code></pre>
-<h2>A procedural macro-node</h2><pre><code>export const timelineCheck = stage('timeline-cycles', async (ctx) =&gt; {
-  const graph = new TemporalGraph();
-  for (const event of ctx.store.instancesOf(Event)) graph.add(event);
-  for (const cycle of graph.findCycles()) {
-    const witness = await ctx.verify('cycle', () =&gt; replay(cycle));
-    if (witness) ctx.emit(TimelineConflict(evidence(...cycle.claims)));
-  }
-});</code></pre>
-<p>The stage may use loops, classes, recursion, and promises. It cannot mutate source terms or indexes. <code>ctx.derive</code> and <code>ctx.emit</code> write to an atomic transaction; tools, models, tasks, checkpoints, and subcircuits are traced boundaries.</p>
-<h2>Choosing a form</h2><p>Use a typed pattern/rule for relational conditions, a decision table for explicit policy combinations, a stage for algorithms, and a circuit for capability composition. Compact syntax is not a goal by itself.</p>
-<p>Contracts: <a href="specsLoader.html">DS008, DS009, and DS020</a>.</p></main></body></html>
+<p>An open scope leaves the rule condition unknown and does not run <code>then</code>. Each binding, absence result, and action is traced.</p>
+
+<h2>Dynamic and hierarchical composition</h2>
+<p><code>instantiateEach</code> creates one canonical subcircuit instance per semantic binding. Subcircuits and scheduled stages preserve typed ports. Positive recursive cycles are explicit fixed-point groups; accidental capability cycles fail planning. The execution graph grows from real facts without asking authors to handwrite a flat node inventory.</p>
+
+<p>Inspect the actual generated circuits in <a href="../agentsEval/">agentsEval</a>. Normative contract: DS008.</p>
+</main></body></html>

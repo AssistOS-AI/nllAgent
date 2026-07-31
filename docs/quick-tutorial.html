@@ -1,14 +1,63 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent quick tutorial</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="cli.html">CLI</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a></nav><h1>Audit one phrase end to end</h1><p class="lead">You will run the included editorial agent, inspect its real materializer and circuit, and reimport the resulting modules. This tutorial does not teach ontology design or model translation.</p>
-<h2>1. The source</h2><pre><code># Excerpt
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent tutorial</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="learning.html">Training</a> · <a href="cli.html">CLI</a></nav>
+<h1>From retention standard to audited policy</h1>
+<p class="lead">This tutorial follows the actual product boundary: first compile the authority into an agent, then use that immutable build to analyze a separate policy. The business result is never written in LongTextJS and never requested from Codex.</p>
 
-Alice entered the room. In fact, the window was open.</code></pre>
-<h2>2. The materializer</h2><p><code>data/editorial-demo/longtext/editorial.materializer.mjs</code> scans source text, creates an exact span for the whole phrase, and constructs a ground <code>PhraseOccurrence</code> term. It marks dialogue and code context explicitly. The source phrase is not yet a finding.</p>
-<h2>3. The circuit</h2><p><code>data/editorial-demo/circuits/weak-phrase.circuit.mjs</code> is a normal JavaScript stage. It queries typed occurrences, excludes dialogue/code, verifies the whole phrase against the anchored excerpt, and emits a typed <code>Finding</code> through its transaction.</p>
-<h2>4. Run it</h2><pre><code>node bin/nllagent.mjs run \
-  --agent editorial-demo \
-  --foundation off \
-  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
-  --output /tmp/editorial-report.md</code></pre>
-<h2>5. Inspect the result</h2><p>The reported run directory contains <code>input.md</code>, <code>longtext/program.mjs</code>, <code>trace/run.trace.mjs</code>, <code>result.mjs</code>, and <code>report.md</code>. Importing those modules reconstructs typed DSL values and reruns constructor validation; no hidden intermediate format is required.</p>
-<h2>6. Check the exceptions</h2><pre><code>node bin/nllagent.mjs benchmark --agent editorial-demo --foundation off</code></pre><p>Ten cases cover clean prose, whole-word boundaries, dialogue, fenced code, paragraph-scoped frequency, and the positive examples.</p>
-<p>Next: <a href="architecture.html">understand the three language roles</a>.</p></main></body></html>
+<h2>1. Prepare the theory</h2>
+<p>The authority states that personal data may be kept for no more than five years after collection. A longer period is allowed only when a documented legal obligation applies to the same data and period. The authority also says absence can be used only after the complete exception register has been reviewed.</p>
+<pre><code>node bin/nllagent-train.mjs train \
+  --agent privacy-retention \
+  --theory agentsEval/privacy-retention/theory/retention-standard.md \
+  --data-root /tmp/nll-environment</code></pre>
+<p>The host creates a TRAIN context. Codex uses the generated constructor and SDK catalogs rather than inventing data fields. The candidate is reviewed and promoted only if its actual tests and semantic benchmarks pass.</p>
+
+<h2>2. Inspect what was trained</h2>
+<pre><code>node bin/nllagent.mjs agent inspect \
+  --agent privacy-retention \
+  --data-root /tmp/nll-environment
+
+node tools/nll.mjs context inspect \
+  /tmp/nll-environment/agents/privacy-retention/current/context/agent-context.mjs</code></pre>
+<p>The context lists the exact ontology, circuit tree, concepts and roles demanded from a document, exact scopes that can support absence, and reusable SDK providers. It is executable and has a digest; it is not a prompt assembled by convention.</p>
+
+<h2>3. Analyze a policy</h2>
+<pre><code>node bin/nllagent-analyze.mjs analyze \
+  --agent privacy-retention \
+  --task customer-policy-review \
+  --input agentsEval/privacy-retention/input/customer-policy.md \
+  --output /tmp/customer-policy-report.md \
+  --data-root /tmp/nll-environment</code></pre>
+<p>Before Codex reads the policy, the task pins the selected build and source digest. Codex receives only the ANALYZE context and writes a dependency-free materializer function. It identifies concrete retention claims, legal-obligation claims, policy sections, exact spans, and justified coverage. It does not emit <code>VIOLATED</code>.</p>
+
+<h2>4. Follow a real trace</h2>
+<p>For the ten-year customer-profile clause, the deterministic trace should contain this chain:</p>
+<pre><code>source span "ten years after collection"
+  → explicit Retain claim in policy-retention scope
+  → typed duration normalization
+  → greater-than-five-years = TRUE
+  → query LegalObligation for the same data and scope
+  → zero matches + closed exception-register coverage
+  → retention decision row = VIOLATED
+  → finding with the retention and authority evidence</code></pre>
+<p>If the appendix is missing, the fifth step has open coverage and the result is <code>UNKNOWN</code>. The absence check cannot silently return true.</p>
+
+<h2>5. Inspect task artifacts</h2>
+<pre><code>/tmp/nll-environment/tasks/customer-policy-review/
+  input/input.md
+  pin/task-pin.mjs
+  generation/
+  longtext/program.mjs
+  output/result.mjs
+  output/run.trace.mjs
+  output/report.md</code></pre>
+<p>Importing the `.mjs` artifacts reconstructs typed values and reruns validation. The report is for people; the result and trace are the audit contract.</p>
+
+<h2>6. Verify without calling Codex again</h2>
+<pre><code>node bin/nllagent.mjs benchmark \
+  --agent privacy-retention \
+  --data-root /tmp/nll-environment</code></pre>
+<p>Benchmark replay uses frozen LongTextJS and circuits. Training/materialization timing is reported separately from deterministic runtime timing.</p>
+<p>Next: <a href="architecture.html">see why one circuit can use several semantic methods</a>.</p>
+</main></body></html>

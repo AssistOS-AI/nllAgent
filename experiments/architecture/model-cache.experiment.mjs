@@ -16,7 +16,7 @@ const exactKey = (request) => hash([
 
 const first = {
   role: 'materialize', source: 'The term is five years.', prompt: 'extract duration',
-  model: 'model-a', adapter: 'achilles', ontology: 'retention@1',
+  model: 'codex-a', adapter: 'codex', ontology: 'retention@1',
   evidencePolicy: 'explicit-only', context: 'document-1@r1'
 };
 const changed = { ...first, ontology: 'retention@2' };

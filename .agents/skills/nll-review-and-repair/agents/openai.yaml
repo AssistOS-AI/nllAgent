@@ -1,0 +1,4 @@
+interface:
+  display_name: "nllAgent Review and Repair"
+  short_description: "Independently review and repair semantic programs"
+  default_prompt: "Use $nll-review-and-repair to review this nllAgent artifact set and repair only the authoritative layer."

@@ -87,6 +87,9 @@ class Claim extends SemanticValue {
     const status = qualifiers.find((value) => value instanceof EpistemicStatus) || new EpistemicStatus('proposed');
     const anchors = qualifiers.filter((value) => value instanceof Qualifier && value.name === 'groundedAt')
       .map((value) => value.value);
+    if (['explicit', 'verified'].includes(status.name) && anchors.length === 0) {
+      throw new NllError('claim-without-anchor', `${status.name} claims require at least one exact source anchor.`);
+    }
     super('Claim', {
       content,
       status,

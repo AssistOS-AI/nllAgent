@@ -1,0 +1,4 @@
+interface:
+  display_name: "nllAgent Analyze Task"
+  short_description: "Compile one task into source-grounded LongTextJS"
+  default_prompt: "Use $nll-analyze-task to analyze this task with the selected trained agent."

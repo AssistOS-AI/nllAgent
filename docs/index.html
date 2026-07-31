@@ -1,26 +1,44 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent documentation</title><link rel="stylesheet" href="styles.css"></head><body><main>
-<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="cli.html">CLI</a> · <a href="specsLoader.html">Specifications</a></nav>
-<p class="kicker">Executable semantic programming for natural language</p><h1>NaturalLanguageLinterAgent</h1>
-<p class="lead">nllAgent turns authority and long documents into inspectable JavaScript programs. OntologyJS defines the vocabulary, LongTextJS describes the source world, CircuitJS computes judgments and controlled text, and one SemanticStore preserves identity, evidence, coverage, and provenance.</p>
-<div class="callout"><strong>The decisive change:</strong> these languages are real ESM <code>.mjs</code> modules. Their constructors return opaque typed values. They are not configuration records, serialized syntax trees, or wrappers around a hidden data language.</div>
-<h2>What you can do</h2>
-<table><thead><tr><th>Use case</th><th>Result</th></tr></thead><tbody>
-<tr><td>Audit a Markdown document</td><td>A Markdown report plus reimportable LongTextJS, result, and trace modules.</td></tr>
-<tr><td>Plan a document</td><td>A verified controlled-language plan produced from a typed semantic frame.</td></tr>
-<tr><td>Build a specialized agent</td><td>A multi-file project containing ontology, materializers, circuits, dialects, benchmarks, and tools.</td></tr>
-<tr><td>Investigate uncertain meaning</td><td>Explicit alternatives, gaps, unknown coverage, conflicts, and local blocked states.</td></tr>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent documentation</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="quick-tutorial.html">Tutorial</a> · <a href="architecture.html">Architecture</a> · <a href="learning.html">Training</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a> · <a href="cli.html">CLI</a> · <a href="benchmark.html">Evaluation</a> · <a href="specsLoader.html">DS</a> · <a href="FS.md">FS</a></nav>
+<p class="kicker">Codex-authored, deterministically executed semantic programs</p>
+<h1>NaturalLanguageLinterAgent</h1>
+<p class="lead">nllAgent turns business rules into an immutable semantic analyzer and turns each audited document into a separate source-grounded program. Codex writes both programs under different skills and permissions; the result is computed by frozen JavaScript circuits, not by asking a model for a verdict.</p>
+<div class="callout"><strong>Architectural boundary:</strong> OntologyJS, LongTextJS, and CircuitJS are internal ESM DSLs whose constructors create opaque typed values. There is no JSON semantic format, TypeScript layer, direct LLM runtime, or AchillesAgentLib dependency.</div>
+
+<h2>A concrete retention review</h2>
+<p>A privacy team trains <code>privacy-retention</code> from a retention standard and an exception policy. The generated ontology can represent retained data, duration, policy scope, and documented legal obligations. The generated circuit selects retention claims, compares their duration with the five-year limit, searches for an applicable exception only in a covered scope, and emits one of several explicit assessments.</p>
+<table><thead><tr><th>Document evidence</th><th>Coverage</th><th>Deterministic result</th></tr></thead><tbody>
+<tr><td>Ten years; no documented obligation</td><td>Exception section completely materialized</td><td><code>VIOLATED</code></td></tr>
+<tr><td>Ten years; applicable documented obligation</td><td>Obligation and applicability grounded</td><td><code>ACCEPTED_EXCEPTION</code></td></tr>
+<tr><td>Ten years; appendices unavailable</td><td>Open</td><td><code>UNKNOWN</code>, never presumed compliant</td></tr>
+<tr><td>Five years</td><td>Duration explicit</td><td><code>SATISFIED</code></td></tr>
 </tbody></table>
-<h2>Run the included project</h2><pre><code>node bin/nllagent.mjs benchmark --agent editorial-demo
 
-node bin/nllagent.mjs run \
-  --agent editorial-demo \
-  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
-  --output /tmp/editorial-report.md
+<h2>Two operations, two authorities</h2>
+<pre><code>theory Markdown
+  → Codex + nll-train-agent
+  → ontology + plan + profile + circuits + tests + benchmarks
+  → independent review
+  → immutable accepted agent build
 
-node bin/nllagent.mjs plan \
-  --agent editorial-demo \
-  --input data/editorial-demo/examples/planning/idea.md \
-  --output /tmp/editorial-plan.md</code></pre>
-<h2>Reading path</h2><ol><li><a href="quick-tutorial.html">Quick tutorial</a> for one complete run.</li><li><a href="architecture.html">Architecture</a> for the language and execution boundaries.</li><li><a href="ontologyjs.html">OntologyJS</a>, <a href="longtextjs.html">LongTextJS</a>, and <a href="circuitjs.html">CircuitJS</a> for authoring.</li><li><a href="semantic-store.html">SemanticStore</a> and <a href="runtime.html">Runtime and SSA</a> for execution.</li><li><a href="experiments.html">Architecture experiments</a> for the five resolved design questions.</li></ol>
-<footer>This is a research implementation. Its value is explicit, repairable computation—not universal natural-language truth.</footer>
+task Markdown + one accepted build
+  → Codex + nll-analyze-task
+  → task-local LongTextJS with exact spans
+  → deterministic circuit execution
+  → typed result + trace + Markdown report</code></pre>
+<p>Training may change a candidate theory. Analysis may only describe one source using the selected theory. A task pins the exact build before generation begins, so retraining the same agent—or training another agent in the same environment—cannot change an existing result.</p>
+
+<h2>Executable evidence in this repository</h2>
+<ul>
+<li><a href="../agentsEval/privacy-retention/evaluation-report.md">Privacy retention</a>: limits, exceptions, and closed-scope absence.</li>
+<li><a href="../agentsEval/scientific-consistency/evaluation-report.md">Scientific consistency</a>: metric compatibility, baselines, and conflicting quantities.</li>
+<li><a href="../agentsEval/narrative-continuity/evaluation-report.md">Narrative continuity</a>: identity, temporal reachability, and missing transitions.</li>
+<li><a href="experiments.html">Architecture experiments</a>: five executable counterexamples behind identity, behavior, alternatives, artifact reuse, and CNL decisions.</li>
+</ul>
+
+<h2>Reading path</h2>
+<ol><li><a href="quick-tutorial.html">Train and analyze one business scenario</a>.</li><li><a href="architecture.html">Understand language, circuit, SSA, and trust boundaries</a>.</li><li>Read <a href="ontologyjs.html">OntologyJS</a>, <a href="longtextjs.html">LongTextJS</a>, and <a href="circuitjs.html">CircuitJS</a> beside real generated modules.</li><li>Use <a href="FS.md">the functional specification</a> for observable requirements and test traceability.</li></ol>
+<footer>Research implementation: explicit uncertainty and inspectable computation are requirements, not presentation options.</footer>
 </main></body></html>

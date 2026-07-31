@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const auditModulePath = fileURLToPath(import.meta.url);
 const repositoryRoot = resolve(dirname(auditModulePath), '..');
 const ignoredDirectories = new Set(['.git', 'node_modules']);
+const importedSkillRoots = new Set(['achilles-specs', 'article-build', 'gamp-specs', 'review-specs']);
 const forbiddenExtensions = new Set(['.json', '.js', '.ts', '.tsx']);
 const sourceExtensions = new Set(['.mjs']);
 const forbiddenSourcePatterns = [
@@ -17,6 +18,9 @@ async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
     const path = resolve(directory, entry.name);
+    const relative = path.slice(repositoryRoot.length + 1).split('/');
+    if (entry.isDirectory() && relative[0] === '.agents' && relative[1] === 'skills'
+      && importedSkillRoots.has(relative[2])) continue;
     if (entry.isDirectory()) paths.push(...await walk(path));
     else paths.push(path);
   }

@@ -1,47 +1,102 @@
 ---
 id: DS009
-title: Dynamic Execution, SSA, and Transactions
-status: implemented
+title: Runtime Planning, Dynamic Graph, SSA, Transactions, and Scheduling
+status: partial
 owner: nllAgent maintainers
-summary: Defines planning, node lifecycle, SSA boundaries, epochs, transactions, dynamic expansion, caching, and resource failure.
+summary: Defines capability planning, concrete node lifecycle, canonical instantiation, scheduling, transactions, cache, resources, and the boundary of current incremental behavior.
 ---
 
 # Introduction
 
-The runtime turns circuit templates into a dynamic hierarchical execution graph over one immutable source snapshot.
+The runtime turns an accepted RulePack and LongText snapshot into a concrete hierarchical execution graph. Planning
+selects authorized capabilities; scheduling evaluates immutable dataflow and transactional macro-nodes; trace records
+the complete operational path.
 
 # Core Content
 
-Backward capability planning selects the minimal provider chain for a requested output. Forward activation then creates
-rule bindings, stage nodes, and subcircuit instances from concrete terms. Instance identity includes template, binding,
-and interpretation context; duplicate canonical instances are rejected.
+## Planning and instantiation
 
-SSA applies to values visible between nodes. A published value has one producer and cannot be changed. A stage may
-change local variables internally but publishes one immutable delta or output at its boundary. Authors expose finer
-trace with subcircuits, tasks, or checkpoints when semantically useful.
+Planning starts from a semantic target such as AllFindings, Assessment, WitnessedFinding, or CNLRepair. It resolves
+`requires` backward through providers pinned by the RulePack and refuses ambiguous or unavailable providers. Concrete
+facts then activate the selected templates forward. Provider identity and selection rationale enter the execution
+plan and trace.
 
-Every node runs in a semantic transaction. Reads see the current stable snapshot. `derive` and `emit` buffer candidates;
-validation checks type, layer, provenance, duplicates, and invariants before commit. Failure rolls back the complete
-buffer. Independent nodes may run in parallel once deterministic merge and write-set checks apply.
+A canonical circuit-instance key contains template identity, binding identity, interpretation context, and snapshot
+dependency. Repeating the same key returns the existing instance. `instantiateEach` obtains bindings from a typed query
+or selector and creates only relevant children. An expansion request can ask for an authorized capability; it cannot
+load arbitrary repository code.
 
-The lifecycle is `CREATED → READY → RUNNING → PRODUCED → VALIDATED → COMMITTED`, with `CACHED`, `BLOCKED`, `FAILED`,
-and `CANCELLED` branches. Semantic statuses such as `UNKNOWN` are distinct from technical node states. Resource limits
-produce `BLOCKED_RESOURCE`, never an empty successful result.
+## Node lifecycle and SSA
+
+The technical lifecycle is `CREATED → READY → RUNNING → PRODUCED → VALIDATED → COMMITTED`. A pure cached result may use
+`CACHED`; missing inputs/resources may use `BLOCKED`; exceptions use `FAILED` and discard the transaction. Technical
+state is distinct from the semantic result: a committed decision node may produce `UNKNOWN`, while a failed node
+produces no rule status.
+
+A node binds each public output port once. ValueRef identity contains producer, port, and content. A stage can mutate
+local JavaScript state while running, but only the final validated transaction delta becomes public. Source observations
+and earlier public values are never rewritten.
+
+## Scheduling
+
+Explicit schedule constraints form a directed dependency graph. Independent components have deterministic canonical
+ordering in the reference scheduler; parallel execution is permitted only when inputs are ready and semantic write
+sets cannot race. A cycle must be classified as a monotone fixed point or controlled procedural loop. An accidental
+schedule or capability cycle fails closed.
+
+Rule paths use four-valued conjunction and existential aggregation across bindings. Rules and stages execute in their
+declared composition order unless the schedule establishes another dependency. A subcircuit shares the store and trace
+but has its own canonical instance identity.
+
+## Transactions and effects
+
+Each rule binding and stage owns a transaction buffer. `derive` accepts ground terms; `emit` accepts registered opaque
+outputs. Validation checks ontology, destination layer, evidence, provenance, duplicate policy, and invariants before
+commit. An exception, effect drift, invalid output, or failed verification rolls back the complete delta.
+
+ExecutionContext instruments query reads, semantic writes, subcircuits, tools, primitive applications, decisions,
+tasks, checkpoints, and verification. Observed effects must be covered by the stage or primitive contract. Codex is not
+an ExecutionContext capability.
+
+## Cache, epochs, and resources
+
+Pure stages may use a content-addressed cache including stage implementation, snapshot, binding, ontology, context,
+and policy. Cached deltas are validated on commit and publish new ValueRefs; cache storage is reconstructible. Stateful
+or externally changing operations are not pure.
+
+The target architecture separates positive derivation, closure, non-monotone absence, and output epochs. The current
+reference scheduler implements deterministic component execution, canonical dynamic instantiation, transactions,
+effect validation, and pure-stage caching. General dependency invalidation, parallel scheduling, capability-driven
+runtime expansion, and epoch-separated incremental fixed points remain partial. Circuits requiring these mechanisms
+must use the implemented engine boundary or return an explicit blocker.
+
+Budgets cover nodes, iterations, elapsed time, memory/process limits, and external tool calls. Exceeding a budget yields
+`BLOCKED_RESOURCE`, never an empty successful report. A fixed-point helper records iterations and stops on convergence
+or budget.
 
 # Decisions & Questions
 
-### Question #1: Why not lower every JavaScript statement into SSA nodes?
+### Question #1: Why distinguish component schedule from JavaScript control flow?
 
-Response: That would create decorative graphs that obscure the algorithm. The meaningful SSA boundary is the typed
-input/output contract of a semantic operation; local implementation details remain normal JavaScript.
+Response: The schedule expresses semantic dependencies between public values and reusable components. Local control
+flow implements one node. Mixing the two would either hide composition or explode ordinary algorithms into noise.
 
-### Question #2: How are non-monotone rules scheduled?
+### Question #2: Can cached results bypass validation?
 
-Response: Positive derivation and closure run before absence, exceptions, or other non-monotone decisions. Those
-decisions remain `UNKNOWN` until their declared scope is closed.
+Response: No. Cache avoids recomputation but the semantic delta still passes transaction validation against the target
+store and policy before commit.
 
-### Question #3: What is implemented now?
+### Question #3: What does append-only mean when a document changes?
 
-Response: Sequential hierarchical execution, rule binding, async macro-stages, atomic commit/rollback, subcircuit calls,
-and lifecycle trace are implemented. True parallel scheduling, epochs, canonical dynamic expansion, and persistent node
-caching remain explicit runtime work.
+Response: A change creates a new source and store snapshot. Unchanged content-addressed values may be reused; the old
+snapshot and trace remain immutable. The runtime does not delete old nodes to simulate history.
+
+### Question #4: Why is this DS marked partial?
+
+Response: Concrete transactions, lifecycle, cache, schedules, trace, and dynamic binding instantiation are executable.
+General agenda expansion, parallel merge, epoch stratification, and cross-snapshot invalidation are not yet complete.
+
+### Question #5: Does a must-result from abstract preflight skip concrete execution?
+
+Response: No. Concrete execution remains operational authority unless a separately specified certificate protocol is
+the target. Preflight guides planning and reports precision.

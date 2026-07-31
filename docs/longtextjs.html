@@ -1,16 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LongTextJS</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="semantic-store.html">SemanticStore</a> · <a href="circuitjs.html">CircuitJS</a></nav><h1>LongTextJS: the executable document program</h1><p class="lead">LongTextJS records what the document expresses, where it expresses it, and what remains uncertain. It never embeds the expected finding.</p>
-<pre><code>const opening = Open(
-  agent(ana),
-  theme(northGate),
-  during('09:00')
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LongTextJS</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="ontologyjs.html">OntologyJS</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="semantic-store.html">SemanticStore</a></nav>
+<h1>LongTextJS: what this document says</h1>
+<p class="lead">LongTextJS is a source-grounded program for one revision. Codex can organize it with normal JavaScript, but the program may publish only typed ground observations, claims, contexts, alternatives, coverage, and gaps.</p>
+
+<h2>A real task materialization</h2>
+<p>For a policy sentence declaring a ten-year retention period, the task materializer constructs the same ontology term the retention circuit will query and wraps it in an explicit claim:</p>
+<pre><code>const anchor = span(source, start, end);
+const declaration = RetentionDeclaration(
+  identifiedAs(`retention-declaration:${anchor.id}`),
+  recordId('CUSTOMER-PROFILE'),
+  actor(controller),
+  category(customerProfileData),
+  durationYears(10),
+  assessmentScope(retentionPolicyScope),
+  sourceAnchor(anchor)
 );
 
-export default semanticUnit(
-  'incident.opening',
-  claim(opening, explicit(), groundedAt(openingSpan)),
-  identityCandidate(sheMention, ana, confidence(0.72))
+return semanticUnit(
+  'retention-customer-profile',
+  claim(declaration, explicit(), groundedAt(anchor))
 );</code></pre>
-<h2>Anchors and claims</h2><p>A span is a validated half-open Unicode code-point range over one exact source revision. A claim connects a ground ontology term to epistemic status and anchors. “Proposed” says how an interpretation entered the program; it is not a truth value.</p>
-<h2>Long documents</h2><p>ESM imports are the module system. A project may separate source, identities, contexts, sections, timeline, cross-references, coverage, and the root program. There is no parallel manifest.</p>
-<h2>Ambiguity and absence</h2><p>Competing readings remain factorized alternatives. An unresolved mention remains unresolved. Missing vocabulary creates an ontology gap. Missing coverage creates a coverage gap. An absent match does not become a negative claim unless the exact domain and scope are closed.</p>
-<p>Contract: <a href="specsLoader.html">DS006 and DS007</a>.</p></main></body></html>
+<p>The source phrase is evidence for a declaration. It is not evidence that the policy violates authority until CircuitJS compares duration, applicability, exception evidence, and coverage.</p>
+
+<h2>Exact Unicode anchors</h2>
+<p>Spans are half-open Unicode code-point intervals. The substring at <code>[start,end)</code> must match the pinned source revision. Byte offsets and JavaScript UTF-16 indexes are not accepted substitutes. The native source tool reports outline and exact excerpts so a coding role need not count a long document manually.</p>
+<pre><code>node tools/nll.mjs source outline agentsEval/privacy-retention/input/customer-policy.md
+node tools/nll.mjs source span agentsEval/privacy-retention/input/customer-policy.md 812 934</code></pre>
+
+<h2>Claims, identity, and scope</h2>
+<p>An event is propositional content; a Claim says that the document or a speaker asserts it with an epistemic status. A textual Mention is not automatically an Entity. Reported speech, negation, permissions, obligations, examples, and counterfactuals remain in structural contexts.</p>
+<p>“The operator did not confirm that Ana opened the gate” is a negated confirmation whose proposition contains an opening. It is not a negative <code>Open</code> fact. Likewise, two uses of “it” can remain incompatible identity alternatives instead of selecting the higher-confidence guess.</p>
+
+<h2>Coverage is earned</h2>
+<p>Coverage is a positive statement about the materialization procedure. Reviewing a complete exception register may close <code>LegalObligation</code> in that register's scope. Reading a policy that refers to unavailable appendices does not. A literal word search does not close a semantic concept. Open coverage keeps absence <code>UNKNOWN</code>.</p>
+
+<h2>Task program capsule</h2>
+<pre><code>export default function materialize({ source, program, api, ontology, vocabulary }) {
+  // local functions, arrays, maps, loops, and conditions are allowed
+  // imports, environment, network, subprocesses, findings, and new concepts are not
+  return program('customer-policy@r1', source, ...semanticUnits);
+}</code></pre>
+<p>The host supplies only the selected build's vocabulary. A malformed program, wrong type, invalid span, or forbidden import fails before deterministic execution. A relevant unrepresentable phrase produces a gap and may block one circuit without corrupting other observations.</p>
+
+<p>See the generated task modules under <a href="../agentsEval/privacy-retention/">the retention evaluation</a>. Normative contract: DS006.</p>
+</main></body></html>

@@ -2,6 +2,7 @@ import { SOURCE_FORM, canonicalSource, digestSource, quote } from '../core/canon
 import { NllError, invariant } from '../core/errors.mjs';
 
 const DETAILS = new WeakMap();
+const SUBTYPE_PARENTS = new WeakMap();
 
 class SemanticValue {
   constructor(kind, details) {
@@ -40,8 +41,7 @@ class TypeConstraint extends SemanticValue {
   accepts(value) {
     if (value instanceof Variable) return this.choices.some((choice) => isSubtype(value.sort, choice));
     if (value instanceof Term || value instanceof Pattern) {
-      return this.choices.some((choice) => isSubtype(value.concept.resultSort, choice)
-        || value.concept === choice);
+      return this.choices.some((choice) => isSubtype(value.concept, choice));
     }
     return this.choices.some((choice) => choice.name === 'Value');
   }
@@ -57,6 +57,13 @@ class RoleDefinition extends SemanticValue {
   get target() { return this.detail('target'); }
   get cardinality() { return this.detail('cardinality'); }
   [SOURCE_FORM]() { return `roleRef(${quote(this.id)})`; }
+}
+
+class RoleConstraint extends SemanticValue {
+  constructor(role, minimum, maximum) { super('RoleConstraint', { role, minimum, maximum }); }
+  get role() { return this.detail('role'); }
+  get minimum() { return this.detail('minimum'); }
+  get maximum() { return this.detail('maximum'); }
 }
 
 class ConceptDefinition extends SemanticValue {
@@ -161,10 +168,19 @@ function definitionOf(value) {
 function isSubtype(candidate, expected) {
   if (candidate === expected) return true;
   if (candidate instanceof ConceptDefinition) {
-    return candidate === expected || isSubtype(candidate.resultSort, expected);
+    const declared = SUBTYPE_PARENTS.get(candidate) || [];
+    return candidate === expected || [...declared].some((parent) => isSubtype(parent, expected))
+      || isSubtype(candidate.resultSort, expected);
   }
   if (!(candidate instanceof Sort)) return false;
-  return candidate.parents.some((parent) => isSubtype(parent, expected));
+  const declared = SUBTYPE_PARENTS.get(candidate) || [];
+  return [...candidate.parents, ...declared].some((parent) => isSubtype(parent, expected));
+}
+
+function registerSubtype(child, parent) {
+  const existing = SUBTYPE_PARENTS.get(child) || new Set();
+  existing.add(parent);
+  SUBTYPE_PARENTS.set(child, existing);
 }
 
 function hasPatternValue(value) {
@@ -186,11 +202,14 @@ function validateApplication(concept, roleValues) {
     if (!roleValue.values.every((value) => roleValue.role.target.accepts(value))) {
       throw new NllError('role-type-mismatch', `${roleValue.role.name} received an incompatible value.`);
     }
+    if (concept.constraints.length && !concept.constraints.some((constraint) => constraint.role === roleValue.role)) {
+      throw new NllError('role-not-allowed', `${roleValue.role.name} is not declared for ${concept.name}.`);
+    }
   }
   for (const constraint of concept.constraints) {
     const count = roleValues.filter((item) => item.role === constraint.role)
       .reduce((total, item) => total + item.values.length, 0);
-    if (count < constraint.role.cardinality.minimum || count > constraint.role.cardinality.maximum) {
+    if (count < constraint.minimum || count > constraint.maximum) {
       throw new NllError('role-cardinality', `${concept.name}.${constraint.role.name} has invalid cardinality ${count}.`);
     }
   }
@@ -218,7 +237,7 @@ function createRoleConstructor(definition) {
 }
 
 export {
-  Cardinality, ConceptDefinition, ExplicitIdentity, Pattern, RoleDefinition, RoleValue, SOURCE_FORM,
+  Cardinality, ConceptDefinition, ExplicitIdentity, Pattern, RoleConstraint, RoleDefinition, RoleValue, SOURCE_FORM,
   SemanticValue, Sort, Term, TypeConstraint, Variable, createConceptConstructor, createRoleConstructor,
-  definitionOf, identityForm, isSubtype
+  definitionOf, identityForm, isSubtype, registerSubtype
 };

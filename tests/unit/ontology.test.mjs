@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  Pattern, Term, exactlyOne, from, identifiedAs, ontology, requires, to, variable
+  Pattern, Term, allows, exactlyOne, from, identifiedAs, ontology, requires, to, variable
 } from '../../src/ontology/index.mjs';
 
 function fixture() {
@@ -61,4 +61,29 @@ test('role source and every repeated target are validated', () => {
   const { O, named, Person, agent } = fixture();
   const Related = O.relation('Related');
   assert.throws(() => Related(agent(Person(named('Ana')))), { code: 'role-source-mismatch' });
+});
+
+test('allowed roles are optional while required roles retain their declared maximum', () => {
+  const O = ontology('test.optional-role@1');
+  const note = O.role('note', from(O.Entity), to(O.Value), exactlyOne());
+  const OptionalNote = O.entity('OptionalNote', allows(note));
+  assert.ok(OptionalNote() instanceof Term);
+  assert.throws(() => OptionalNote(note('first', 'second')), { code: 'role-cardinality' });
+});
+
+test('subtypes, disjointness, lexicalizations, and local behaviors remain inspectable', () => {
+  const O = ontology('test.introspection@1');
+  const Animal = O.entity('Animal');
+  const Machine = O.entity('Machine');
+  const Cat = O.entity('Cat');
+  O.subtype(Cat, Animal);
+  O.disjoint(Animal, Machine);
+  O.lexicalize(Cat, 'cat', 'feline');
+  O.behavior(Cat, 'normalize', (value) => value.trim());
+  const sealed = O.seal();
+  assert.equal(sealed.isSubtype(Cat, Animal), true);
+  assert.equal(sealed.isDisjoint(Cat, Machine), false);
+  assert.equal(sealed.isDisjoint(Animal, Machine), true);
+  assert.deepEqual(sealed.lexicalizations(Cat), ['cat', 'feline']);
+  assert.equal(sealed.behavior(Cat, 'normalize')('  cat '), 'cat');
 });

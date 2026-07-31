@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { parseArguments, validateCommandArguments } from '../../src/cli/arguments.mjs';
 import { runCli } from '../../src/cli/main.mjs';
 
 class BufferStream {
@@ -10,40 +11,36 @@ class BufferStream {
   write(text) { this.value += text; }
 }
 
-async function invoke(arguments_) {
+async function invoke(arguments_, cwd = process.cwd()) {
   const stdout = new BufferStream();
   const stderr = new BufferStream();
-  const exitCode = await runCli(arguments_, { stdout, stderr, cwd: process.cwd(), env: process.env });
+  const exitCode = await runCli(arguments_, { stdout, stderr, cwd, env: process.env });
   return { exitCode, stdout: stdout.value, stderr: stderr.value };
 }
 
-test('CLI preserves audit, planning, benchmark, and agent discovery use cases', async () => {
-  const temporary = await mkdtemp(join(tmpdir(), 'nll-cli-'));
-  const planningRoot = 'data/editorial-demo/planning-runs';
-  const before = new Set(await readdir(planningRoot).catch(() => []));
-  try {
-    const benchmark = await invoke(['benchmark', '--agent', 'editorial-demo', '--foundation', 'off']);
-    assert.equal(benchmark.exitCode, 0, benchmark.stderr);
-    assert.match(benchmark.stdout, /10\/10/u);
-    const plan = await invoke([
-      'plan', '--agent', 'editorial-demo', '--foundation', 'off',
-      '--input', 'data/editorial-demo/examples/planning/idea.md', '--output', join(temporary, 'plan.md')
-    ]);
-    assert.equal(plan.exitCode, 0, plan.stderr);
-    const agents = await invoke(['agent', 'list']);
-    assert.match(agents.stdout, /editorial-demo/u);
-  } finally {
-    for (const entry of await readdir(planningRoot).catch(() => [])) {
-      if (!before.has(entry)) await rm(join(planningRoot, entry), { recursive: true });
-    }
-    await rm(temporary, { recursive: true });
-  }
+test('training accepts multiple theory files as one ordered option family', () => {
+  const parsed = parseArguments(['train', '--agent', 'privacy', '--theory', 'a.md', '--theory', 'b.md']);
+  validateCommandArguments(parsed.positionals, parsed.options);
+  assert.deepEqual(parsed.options.theory, ['a.md', 'b.md']);
 });
 
-test('legacy data-output and publication options are not compatibility aliases', async () => {
-  const legacyOption = await invoke(['agent', 'list', '--json']);
-  assert.equal(legacyOption.exitCode, 64);
-  assert.match(legacyOption.stderr, /--json/u);
-  const publication = await invoke(['release', 'publish', '--agent', 'editorial-demo']);
-  assert.equal(publication.exitCode, 64);
+test('the public CLI exposes separate train/analyze workflows and rejects translator and learn', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'nll-cli-'));
+  try {
+    const help = await invoke([], root);
+    assert.equal(help.exitCode, 0);
+    assert.match(help.stdout, /nllagent train/u);
+    assert.match(help.stdout, /nllagent analyze/u);
+    assert.doesNotMatch(help.stdout, /--translator|nllagent learn/u);
+    const translator = await invoke(['analyze', '--agent', 'a', '--task', 't', '--input', 'x.md', '--translator', 'none'], root);
+    assert.equal(translator.exitCode, 64);
+    assert.match(translator.stderr, /--translator/u);
+    const learn = await invoke(['learn', '--agent', 'a'], root);
+    assert.equal(learn.exitCode, 64);
+    const agents = await invoke(['agent', 'list', '--data-root', join(root, 'environment')], root);
+    assert.equal(agents.exitCode, 0);
+    assert.match(agents.stdout, /No trained agents/u);
+  } finally {
+    await rm(root, { recursive: true });
+  }
 });

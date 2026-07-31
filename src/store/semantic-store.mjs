@@ -1,6 +1,8 @@
 import { digestSource } from '../core/canonical-source.mjs';
 import { NllError } from '../core/errors.mjs';
-import { Claim, Coverage, Gap, IdentityCandidate, LongTextProgram, Mention } from '../longtext/model.mjs';
+import {
+  AlternativeSet, Claim, Coverage, Gap, IdentityCandidate, Interpretation, LongTextProgram, Mention
+} from '../longtext/model.mjs';
 import { Pattern, RoleValue, SemanticValue, Term, Variable, isSubtype } from '../ontology/model.mjs';
 import { Binding } from './binding.mjs';
 import { SemanticQuery, executeSemanticQuery } from './query.mjs';
@@ -23,8 +25,15 @@ class SemanticTransaction {
   }
   emit(output) {
     if (!(output instanceof SemanticValue)) throw new NllError('invalid-output', 'emit accepts only an opaque DSL value.');
+    if (output instanceof Term && output.concept.name === 'Finding' && output.values('evidence').length === 0) {
+      throw new NllError('finding-without-evidence', 'Every Finding requires source or versioned external evidence.');
+    }
     this.#outputs.push(output);
     return output;
+  }
+  delta() {
+    if (this.#closed) throw new NllError('transaction-closed', 'Semantic transaction is already closed.');
+    return Object.freeze({ terms: Object.freeze([...this.#terms]), outputs: Object.freeze([...this.#outputs]) });
   }
   commit() {
     if (this.#closed) throw new NllError('transaction-closed', 'Semantic transaction is already closed.');
@@ -45,22 +54,28 @@ class SemanticStore {
   #mentions = new Map();
   #identityCandidates = new Map();
   #provenance = new Map();
+  #contexts = new Map();
+  #claimContexts = new Map();
+  #alternatives = new Map();
   #snapshots = [];
 
   publish(program) {
     if (!(program instanceof LongTextProgram)) throw new NllError('invalid-program', 'SemanticStore publishes LongTextJS programs.');
-    for (const value of program.values()) this.#publishValue(value, `longtext:${program.identity}`);
+    for (const value of program.values()) this.#publishValue(value, `longtext:${program.identity}`, 'main');
     this.#snapshots.push(program.identity);
     return this.snapshot();
   }
 
-  #publishValue(value, producer) {
+  #publishValue(value, producer, context) {
     if (value instanceof Claim) {
       this.#claims.set(value.identity, value);
-      this.#addTerm(value.content, producer);
-      this.#provenance.set(value.content.identity, Object.freeze({ producer, claim: value.identity }));
+      const declared = value.qualifiers.filter((qualifier) => qualifier.name === 'within').map((qualifier) => qualifier.value);
+      const contexts = declared.length ? declared.map(contextId) : [context];
+      this.#claimContexts.set(value.identity, new Set(contexts));
+      for (const claimContext of contexts) this.#addTerm(value.content, producer, claimContext);
+      this.#provenance.set(value.content.identity, Object.freeze({ producer, claim: value.identity, contexts: Object.freeze(contexts) }));
     } else if (value instanceof Term) {
-      this.#addTerm(value, producer);
+      this.#addTerm(value, producer, context);
     } else if (value instanceof Coverage) {
       this.#coverage.push(value);
     } else if (value instanceof Gap) {
@@ -70,12 +85,20 @@ class SemanticStore {
     } else if (value instanceof IdentityCandidate) {
       this.#mentions.set(value.mention.identity, value.mention);
       this.#identityCandidates.set(value.identity, value);
+    } else if (value instanceof AlternativeSet) {
+      this.#alternatives.set(value.id, value);
+      for (const reading of value.interpretations) this.#publishValue(reading, producer, `${value.id}:${reading.id}`);
+    } else if (value instanceof Interpretation) {
+      for (const nested of value.values) this.#publishValue(nested, producer, context);
     } else if (value?.values) {
-      for (const nested of value.values) this.#publishValue(nested, producer);
+      for (const nested of value.values) this.#publishValue(nested, producer, context);
     }
   }
 
-  #addTerm(term, producer) {
+  #addTerm(term, producer, context = 'main') {
+    const contexts = this.#contexts.get(term.identity) || new Set();
+    contexts.add(contextId(context));
+    this.#contexts.set(term.identity, contexts);
     if (this.#terms.has(term.identity)) return false;
     this.#terms.set(term.identity, term);
     const conceptSet = this.#byConcept.get(term.concept.id) || new Set();
@@ -85,24 +108,25 @@ class SemanticStore {
       const roleSet = this.#byRole.get(roleValue.role.id) || new Set();
       roleSet.add(term.identity);
       this.#byRole.set(roleValue.role.id, roleSet);
-      for (const value of roleValue.values) if (value instanceof Term) this.#addTerm(value, producer);
+      for (const value of roleValue.values) if (value instanceof Term) this.#addTerm(value, producer, context);
     }
     this.#provenance.set(term.identity, Object.freeze({ producer }));
     return true;
   }
 
-  instancesOf(conceptOrSort) {
+  instancesOf(conceptOrSort, options = {}) {
     const definition = conceptOrSort.definition ?? conceptOrSort;
-    return Object.freeze([...this.#terms.values()].filter((term) => term.concept === definition
+    return Object.freeze([...this.#terms.values()].filter((term) => (term.concept === definition
       || isSubtype(term.concept, definition)
-      || isSubtype(term.concept.resultSort, definition)));
+      || isSubtype(term.concept.resultSort, definition))
+      && (!options.context || this.inContext(term, options.context))));
   }
 
-  match(pattern, initial = new Binding()) {
+  match(pattern, initial = new Binding(), options = {}) {
     if (!(pattern instanceof Pattern) && !(pattern instanceof Term)) {
       throw new NllError('invalid-pattern', 'Store matching requires an ontology pattern or ground term.');
     }
-    const candidates = this.instancesOf(pattern.concept);
+    const candidates = this.instancesOf(pattern.concept, options);
     const bindings = [];
     for (const candidate of candidates) {
       const binding = unify(pattern, candidate, initial);
@@ -116,13 +140,16 @@ class SemanticStore {
     return this.match(queryValue);
   }
 
-  claimsAbout(term) {
-    return Object.freeze([...this.#claims.values()].filter((claimValue) => claimValue.content.identity === term.identity));
+  claimsAbout(term, options = {}) {
+    return Object.freeze([...this.#claims.values()].filter((claimValue) => claimValue.content.identity === term.identity
+      && (!options.context || (this.#claimContexts.get(claimValue.identity) || new Set()).has(contextId(options.context)))));
   }
   evidenceFor(term) {
     return Object.freeze(this.claimsAbout(term).flatMap((claimValue) => claimValue.anchors));
   }
   provenanceOf(term) { return this.#provenance.get(term.identity); }
+  contextsOf(term) { return Object.freeze([...(this.#contexts.get(term.identity) || new Set())]); }
+  inContext(term, context) { return (this.#contexts.get(term.identity) || new Set()).has(contextId(context)); }
   identityCandidates(mention) {
     return Object.freeze([...this.#identityCandidates.values()].filter((candidate) => candidate.mention.identity === mention.identity));
   }
@@ -139,6 +166,11 @@ class SemanticStore {
   get outputs() { return Object.freeze([...this.#outputs]); }
   get terms() { return Object.freeze([...this.#terms.values()]); }
   get claims() { return Object.freeze([...this.#claims.values()]); }
+  get alternatives() { return Object.freeze([...this.#alternatives.values()]); }
+  interpretationContexts() {
+    return Object.freeze([...this.#alternatives.values()].flatMap((set) =>
+      set.interpretations.map((reading) => `${set.id}:${reading.id}`)));
+  }
   beginTransaction(producer) { return new SemanticTransaction(this, producer); }
   commit(producer, terms, outputs) {
     const added = [];
@@ -160,11 +192,11 @@ class SemanticStore {
   }
 }
 
+function contextId(value) { return value?.identity ?? value?.id ?? String(value); }
+
 function sameScope(left, right) {
   if (left === right) return true;
-  if (left?.identity && right?.identity) return left.identity === right.identity;
-  if (left?.id && right?.id) return left.id === right.id;
-  return false;
+  return contextId(left) === contextId(right);
 }
 
 function unify(pattern, candidate, binding) {

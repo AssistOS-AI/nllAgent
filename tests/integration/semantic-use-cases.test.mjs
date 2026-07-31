@@ -3,8 +3,8 @@ import test from 'node:test';
 import core, {
   Finding, assurance, evidence, findingType, message, severity
 } from '../../ontologies/core/index.mjs';
-import { circuit, include, stage } from '../../src/circuit/index.mjs';
-import { claim, explicit, longTextProgram, semanticUnit, source } from '../../src/longtext/index.mjs';
+import { circuit, include, reads, stage, writes } from '../../src/circuit/index.mjs';
+import { claim, explicit, groundedAt, longTextProgram, semanticUnit, source, span } from '../../src/longtext/index.mjs';
 import { exactlyOne, extendsOntology, from, identifiedAs, ontology, requires, to } from '../../src/ontology/index.mjs';
 import { executeCircuit } from '../../src/runtime/index.mjs';
 import { SemanticStore } from '../../src/store/index.mjs';
@@ -20,14 +20,22 @@ test('retention policy distinguishes violation from a documented exception', asy
   const records = Data(identifiedAs('data:records'), named('customer records'));
   async function assess(exception) {
     const document = source('policy.md', 'Retention policy.');
+    const anchor = span(document, 0, document.length);
     const store = new SemanticStore();
-    store.publish(longTextProgram('policy', document, semanticUnit('retention', claim(Retain(dataRole(records), duration(10), legalException(exception)), explicit()))));
-    const check = stage('retention-check', async (ctx) => {
-      for (const term of ctx.store.instancesOf(Retain)) {
-        if (term.value(duration) <= 5 || term.value(legalException)) continue;
-        ctx.emit(Finding(findingType('retention-violation'), message('Retention exceeds five years.'), severity('error'), evidence('authority:retention-rule'), assurance('mechanical')));
-      }
-    });
+    store.publish(longTextProgram('policy', document, semanticUnit('retention', claim(
+      Retain(dataRole(records), duration(10), legalException(exception)), explicit(), groundedAt(anchor)
+    ))));
+    const check = stage(
+      'retention-check',
+      async (ctx) => {
+        for (const term of ctx.store.instancesOf(Retain)) {
+          if (term.value(duration) <= 5 || term.value(legalException)) continue;
+          ctx.emit(Finding(findingType('retention-violation'), message('Retention exceeds five years.'), severity('error'), evidence('authority:retention-rule'), assurance('mechanical')));
+        }
+      },
+      reads(Retain),
+      writes(Finding)
+    );
     await executeCircuit(circuit('retention@1', include(check)), store);
     return store.outputs;
   }
@@ -48,12 +56,17 @@ test('continuity and scientific checks remain ordinary JavaScript macro-nodes ov
   const document = source('report.md', 'The phone moved. Accuracy differs.');
   const store = new SemanticStore();
   store.publish(longTextProgram('report', document, semanticUnit('facts', phone, first, second)));
-  const globalCheck = stage('global-check', async (ctx) => {
-    const metrics = ctx.store.instancesOf(Metric);
-    if (metrics.length === 2 && metrics[0].value(value) !== metrics[1].value(value)) {
-      ctx.emit(Finding(findingType('scientific-value-conflict'), message('The same metric has incompatible values.'), severity('warning'), evidence('report'), assurance('mechanical')));
-    }
-  });
+  const globalCheck = stage(
+    'global-check',
+    async (ctx) => {
+      const metrics = ctx.store.instancesOf(Metric);
+      if (metrics.length === 2 && metrics[0].value(value) !== metrics[1].value(value)) {
+        ctx.emit(Finding(findingType('scientific-value-conflict'), message('The same metric has incompatible values.'), severity('warning'), evidence('report'), assurance('mechanical')));
+      }
+    },
+    reads(Metric),
+    writes(Finding)
+  );
   await executeCircuit(circuit('global@1', include(globalCheck)), store);
   assert.equal(store.outputs[0].value(findingType), 'scientific-value-conflict');
 });

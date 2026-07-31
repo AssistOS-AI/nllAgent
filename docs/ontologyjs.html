@@ -1,14 +1,53 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OntologyJS</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a></nav><h1>OntologyJS: executable vocabulary</h1><p class="lead">OntologyJS gives materializers and circuits the same constructor identities and catches local category errors before execution.</p>
-<pre><code>const O = ontology('facility.operations@1', extendsOntology(core));
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OntologyJS</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="longtextjs.html">LongTextJS</a> · <a href="circuitjs.html">CircuitJS</a></nav>
+<h1>OntologyJS: the executable business vocabulary</h1>
+<p class="lead">OntologyJS says which business facts can be expressed and how they are typed. It does not decide whether those facts satisfy a policy.</p>
 
-export const Person = O.entity('Person', requires(named));
-export const Door = O.entity('Door', requires(named));
-export const agent = O.role('agent', from(O.Event), to(Person), exactlyOne());
-export const theme = O.role('theme', from(O.Event), to(Door), exactlyOne());
-export const Open = O.event('Open', requires(agent), requires(theme));
+<h2>Retention ontology from the evaluation</h2>
+<p>The privacy agent needs controllers, personal-data categories, policy scopes, retention declarations, exception evidence, and coverage evidence. The generated module uses actual constructors and role constraints:</p>
+<pre><code>const O = ontology('privacy.retention.eval@1', extendsOntology(core));
+
+export const DataController = O.entity('DataController', requires(retentionName));
+export const PersonalDataCategory = O.entity('PersonalDataCategory', requires(retentionName));
+export const PolicyScope = O.entity('PolicyScope', requires(retentionName));
+
+export const actor = O.role(
+  'retentionActor', from(O.Event), to(DataController), exactlyOne()
+);
+export const category = O.role(
+  'dataCategory', from(O.Event), to(PersonalDataCategory), exactlyOne()
+);
+export const durationYears = O.role(
+  'durationYears', from(O.Event), to(O.Value), exactlyOne()
+);
+
+export const RetentionDeclaration = O.event(
+  'RetentionDeclaration',
+  requires(recordId), requires(actor), requires(category),
+  requires(durationYears), requires(assessmentScope), requires(sourceAnchor)
+);
 
 export default O.seal();</code></pre>
-<p><code>Open(agent(ana), theme(gate))</code> returns a ground <code>Term</code>. Replacing <code>ana</code> with <code>variable(Person, 'person')</code> makes the same call return a typed <code>Pattern</code>. Neither result is a record with arbitrary fields.</p>
-<h2>What belongs in an ontology</h2><p>Local type validation, cardinality, normalization, index hints, lexicalization, and definitional views belong here. A behavior receives one local value. If a computation needs source evidence, a store query, a world, an exception, priority, or authority, it belongs in CircuitJS.</p>
-<h2>Identity</h2><p>Source entities and anchored events use explicit identifiers; derived immutable values use structural identity. The experiment that selected this hybrid is explained in <a href="experiments.html">Architecture experiments</a>.</p>
-<p>API contract: <a href="specsLoader.html">DS005</a>.</p></main></body></html>
+<p>This is executable JavaScript. <code>RetentionDeclaration(...)</code> validates roles and returns an opaque Term for ground arguments. With a typed circuit variable, the same constructor returns a Pattern. There is no generated object schema between author and runtime.</p>
+
+<h2>What belongs here</h2>
+<table><thead><tr><th>Belongs in OntologyJS</th><th>Belongs elsewhere</th></tr></thead><tbody>
+<tr><td>Controller, data category, retain event, duration role, legal-obligation claim</td><td>“Duration above five years is a violation” — CircuitJS</td></tr>
+<tr><td>Required/optional role cardinality and compatible types</td><td>Exception priority and evidence policy — CircuitJS/RulePack</td></tr>
+<tr><td>Unit normalization and canonical local lexicalization</td><td>A particular policy's ten-year claim — LongTextJS</td></tr>
+<tr><td>Derived concept identity such as RetentionAssessment</td><td>Materializing that assessment from source — forbidden</td></tr>
+</tbody></table>
+
+<h2>Identity is not a name match</h2>
+<p>A mention of “Northstar” and a legal entity are separate. LongTextJS anchors the mention and records an identity candidate. Source entities normally use explicit stable identities. Pure derived values may use structural identity when the concept declares it. Qualified concept and role identities participate in structural equality, preventing two ontologies with similarly named roles from colliding.</p>
+
+<h2>Local behavior boundary</h2>
+<p>A duration value type may reject negative years or normalize months to a canonical quantity. A behavior must not inspect a document, decide that an audit purpose is a legal obligation, or accept an exception. The architecture experiment demonstrates why contextual rule behavior in a constructor is invisible to circuit planning and trace.</p>
+
+<h2>Failure example</h2>
+<p>If Codex tries to connect a <code>Person</code> to the <code>durationYears</code> role, construction fails immediately. Broadening the target to <code>Entity</code> only to make that program load is an ontology defect, not a repair. The task should instead emit a typed gap or the ontology should be deliberately retrained.</p>
+
+<p>Inspect a real module with <code>node tools/nll.mjs ontology inspect agentsEval/privacy-retention/ontologies/index.mjs</code>. Normative contract: DS005.</p>
+</main></body></html>

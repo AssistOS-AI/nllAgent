@@ -61,6 +61,7 @@ class Stage extends SemanticValue {
 class Capability extends SemanticValue {
   constructor(value, qualifiers = []) { super('Capability', { value, qualifiers: Object.freeze([...qualifiers]) }); }
   get value() { return this.detail('value'); }
+  get qualifiers() { return this.detail('qualifiers'); }
   get id() { return this.value.id ?? this.value.definition?.id ?? String(this.value); }
 }
 
@@ -68,6 +69,12 @@ class ContractPart extends SemanticValue {
   constructor(contractKind, values) { super('ContractPart', { contractKind, values: Object.freeze([...values]) }); }
   get contractKind() { return this.detail('contractKind'); }
   get values() { return this.detail('values'); }
+}
+
+class EffectDescriptor extends SemanticValue {
+  constructor(effectKind, target) { super('EffectDescriptor', { effectKind, target }); }
+  get effectKind() { return this.detail('effectKind'); }
+  get target() { return this.detail('target'); }
 }
 
 class IncludePart extends SemanticValue {
@@ -80,10 +87,31 @@ class SchedulePart extends SemanticValue {
   get values() { return this.detail('values'); }
 }
 
+class CircuitAnnotation extends SemanticValue {
+  constructor(annotationKind, values) {
+    super('CircuitAnnotation', { annotationKind, values: Object.freeze([...values]) });
+  }
+  get annotationKind() { return this.detail('annotationKind'); }
+  get values() { return this.detail('values'); }
+}
+
+class PortBinding extends SemanticValue {
+  constructor(outputPort, inputPort) { super('PortBinding', { outputPort, inputPort }); }
+  get outputPort() { return this.detail('outputPort'); }
+  get inputPort() { return this.detail('inputPort'); }
+}
+
+class DynamicInstantiation extends SemanticValue {
+  constructor(selector, template) { super('DynamicInstantiation', { selector, template }); }
+  get selector() { return this.detail('selector'); }
+  get template() { return this.detail('template'); }
+}
+
 class CircuitTemplate extends SemanticValue {
   constructor(id, parts) {
     const includes = parts.filter((part) => part instanceof IncludePart).flatMap((part) => part.values)
-      .concat(parts.filter((part) => part instanceof Rule || part instanceof Stage || part instanceof CircuitTemplate));
+      .concat(parts.filter((part) => part instanceof Rule || part instanceof Stage
+        || part instanceof CircuitTemplate || part instanceof DecisionTable));
     const required = parts.filter((part) => part instanceof ContractPart && part.contractKind === 'requires')
       .flatMap((part) => part.values);
     const provided = parts.filter((part) => part instanceof ContractPart && part.contractKind === 'provides')
@@ -94,17 +122,32 @@ class CircuitTemplate extends SemanticValue {
       includes: Object.freeze(includes),
       required: Object.freeze(required),
       provided: Object.freeze(provided),
+      annotations: Object.freeze(parts.filter((part) => part instanceof CircuitAnnotation)),
+      bindings: Object.freeze(parts.filter((part) => part instanceof PortBinding)),
+      instantiations: Object.freeze(parts.filter((part) => part instanceof DynamicInstantiation)),
+      schedules: Object.freeze(parts.filter((part) => part instanceof SchedulePart)),
       identity: `circuit:${digestSource([id, ...includes.map((item) => item.id)])}`
     });
   }
   get id() { return this.detail('id'); }
   get identity() { return this.detail('identity'); }
+  get parts() { return this.detail('parts'); }
   get includes() { return this.detail('includes'); }
   get required() { return this.detail('required'); }
   get provided() { return this.detail('provided'); }
+  get annotations() { return this.detail('annotations'); }
+  get bindings() { return this.detail('bindings'); }
+  get instantiations() { return this.detail('instantiations'); }
+  get schedules() { return this.detail('schedules'); }
+  annotation(kind) { return this.annotations.find((item) => item.annotationKind === kind)?.values ?? Object.freeze([]); }
+  get primaryRole() { return this.annotation('primary-role')[0] ?? null; }
+  get methods() { return this.annotation('method'); }
+  get supportedInterpreters() { return this.annotation('supports'); }
+  get summary() { return this.annotation('summary')[0] ?? null; }
   get rules() { return this.includes.filter((item) => item instanceof Rule); }
   get stages() { return this.includes.filter((item) => item instanceof Stage); }
   get subcircuits() { return this.includes.filter((item) => item instanceof CircuitTemplate); }
+  get decisionTables() { return this.includes.filter((item) => item instanceof DecisionTable); }
 }
 
 class DecisionRow extends SemanticValue {
@@ -120,13 +163,46 @@ class DecisionTable extends SemanticValue {
   constructor(id, columns, rows, hitPolicy = 'unique') {
     super('DecisionTable', { id, columns: Object.freeze([...columns]), rows: Object.freeze([...rows]), hitPolicy });
   }
-  evaluate(inputs) {
-    const matches = this.detail('rows').filter((row) => row.values.every((expected, index) => expected === ANY || expected === inputs[index]));
-    if (!matches.length) return null;
-    if (this.detail('hitPolicy') === 'priority') return [...matches].sort((a, b) => b.priority - a.priority)[0].result;
+  get id() { return this.detail('id'); }
+  get columns() { return this.detail('columns'); }
+  get rows() { return this.detail('rows'); }
+  get hitPolicy() { return this.detail('hitPolicy'); }
+  decide(inputs) {
+    if (!Array.isArray(inputs) || inputs.length !== this.columns.length) {
+      throw new NllError('invalid-decision-input', `Decision table ${this.id} expects ${this.columns.length} values.`);
+    }
+    const matches = this.rows.filter((row) => row.values.every(
+      (expected, index) => expected === ANY || expected === inputs[index]
+    ));
+    if (!matches.length) return new DecisionEvaluation(this, inputs, [], null, 'UNHANDLED');
+    if (this.hitPolicy === 'priority') {
+      const selected = [...matches].sort((left, right) => right.priority - left.priority)[0];
+      return new DecisionEvaluation(this, inputs, matches, selected.result, 'SELECTED');
+    }
     const results = new Set(matches.map((row) => row.result));
-    return results.size === 1 ? matches[0].result : 'RULE_CONFLICT';
+    const result = results.size === 1 ? matches[0].result : 'RULE_CONFLICT';
+    return new DecisionEvaluation(this, inputs, matches, result, results.size === 1 ? 'SELECTED' : 'CONFLICT');
   }
+  evaluate(inputs) {
+    return this.decide(inputs).result;
+  }
+}
+
+class DecisionEvaluation extends SemanticValue {
+  constructor(table, inputs, matchedRows, result, status) {
+    super('DecisionEvaluation', {
+      table,
+      inputs: Object.freeze([...inputs]),
+      matchedRows: Object.freeze([...matchedRows]),
+      result,
+      status
+    });
+  }
+  get table() { return this.detail('table'); }
+  get inputs() { return this.detail('inputs'); }
+  get matchedRows() { return this.detail('matchedRows'); }
+  get result() { return this.detail('result'); }
+  get status() { return this.detail('status'); }
 }
 
 const ANY = Symbol('any-decision-value');
@@ -146,7 +222,8 @@ function instantiate(value, binding) {
 }
 
 export {
-  ANY, Action, AliasReference, Capability, CircuitTemplate, ContractPart, CoverageRequirement,
-  DecisionRow, DecisionTable, IncludePart, MatchClause, NotExistsClause, Rule, SchedulePart, Stage,
+  ANY, Action, AliasReference, Capability, CircuitAnnotation, CircuitTemplate, ContractPart, CoverageRequirement,
+  DecisionEvaluation, DecisionRow, DecisionTable, DynamicInstantiation, EffectDescriptor, IncludePart, MatchClause, NotExistsClause,
+  PortBinding, Rule, SchedulePart, Stage,
   WhereClause, instantiate
 };

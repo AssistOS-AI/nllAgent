@@ -1,0 +1,4 @@
+interface:
+  display_name: "nllAgent Train Agent"
+  short_description: "Compile natural-language theory into a tested semantic agent"
+  default_prompt: "Use $nll-train-agent to train this nllAgent theory into ontology, circuits, tests, and benchmarks."

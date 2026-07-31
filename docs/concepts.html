@@ -1,4 +1,34 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nllAgent concepts</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="semantic-store.html">SemanticStore</a> · <a href="specsLoader.html">Specifications</a></nav><h1>Concepts and epistemic boundaries</h1><p class="lead">This page is a lookup guide for the distinctions that prevent fluent output from hiding uncertain computation.</p>
-<dl><dt>Term</dt><dd>A ground ontology constructor application with concept, typed roles, identity, context, and provenance.</dd><dt>Pattern</dt><dd>The same constructor structure containing typed variables.</dd><dt>Claim</dt><dd>A proposition attributed to source or producer with epistemic status and evidence.</dd><dt>Binding</dt><dd>An immutable mapping from query variables to compatible terms.</dd><dt>Coverage</dt><dd>A scoped statement about completeness; it is required for absence.</dd><dt>Gap</dt><dd>An explicit inability to represent, materialize, resolve, or cover relevant meaning.</dd><dt>Circuit template</dt><dd>A reusable hierarchical computation definition.</dd><dt>Circuit instance</dt><dd>A template bound to concrete terms and an interpretation context.</dd><dt>Macro-node</dt><dd>A normal JavaScript algorithm with typed semantic inputs, outputs, effects, and trace.</dd><dt>Assurance</dt><dd>Mechanical, cross-checked, model-assisted, heuristic, or unverified support for one result.</dd></dl>
-<h2>Three different state systems</h2><table><thead><tr><th>System</th><th>Examples</th></tr></thead><tbody><tr><td>Predicate logic</td><td><code>TRUE</code>, <code>FALSE</code>, <code>UNKNOWN</code>, <code>CONFLICT</code>.</td></tr><tr><td>Rule result</td><td><code>VIOLATED</code>, <code>ACCEPTED_EXCEPTION</code>, <code>BLOCKED_ONTOLOGY</code>.</td></tr><tr><td>Node lifecycle</td><td><code>READY</code>, <code>RUNNING</code>, <code>COMMITTED</code>, <code>FAILED</code>.</td></tr></tbody></table>
-<p>Conflating these is a category error: a node may commit an <code>UNKNOWN</code> rule result successfully.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>nllAgent concepts</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="semantic-store.html">SemanticStore</a> · <a href="specsLoader.html">Specifications</a></nav>
+<h1>Concepts that preserve semantic honesty</h1>
+<p class="lead">These terms are deliberately distinct. Most serious natural-language analysis bugs collapse two of them.</p>
+<dl>
+<dt>Agent build</dt><dd>An immutable accepted RulePack, ontology, profile, circuits, SDK/provider pins, tests, benchmarks, and generated context.</dd>
+<dt>Task</dt><dd>One source and target pinned to one build, with task-local LongTextJS, result, trace, and report.</dd>
+<dt>Term</dt><dd>A ground ontology constructor application with qualified concept, typed roles, identity, context, and provenance.</dd>
+<dt>Pattern</dt><dd>The same ontological structure with typed variables, used by CircuitJS queries.</dd>
+<dt>Claim</dt><dd>Propositional content attributed to source or speaker with context, epistemic status, and evidence.</dd>
+<dt>Mention</dt><dd>An anchored textual occurrence; it is not automatically the entity to which it may refer.</dd>
+<dt>Coverage</dt><dd>A positive completeness assertion for one concept, exact scope, and evidence policy; required for final absence.</dd>
+<dt>Gap</dt><dd>An explicit ontology, identity, temporal, materialization, or coverage limit.</dd>
+<dt>CircuitModel</dt><dd>The reusable typed computation constructed by a CircuitJS module.</dd>
+<dt>CircuitInstance</dt><dd>A model bound to one snapshot, interpretation, and concrete input/bindings.</dd>
+<dt>Execution graph</dt><dd>Concrete nodes and immutable ValueRefs created for one run; not the authoring format.</dd>
+<dt>Method</dt><dd>A local algorithm family such as query, decision, constraints, relation closure, rewrite, proof, or synthesis.</dd>
+<dt>Interpreter</dt><dd>A mode—concrete, abstract, symbolic, concolic, proof, synthesis—for evaluating supported parts of a CircuitModel.</dd>
+<dt>Macro-node</dt><dd>Ordinary JavaScript behind typed inputs, outputs, effects, transaction, and trace.</dd>
+<dt>AgentAuthoringContext</dt><dd>Host-compiled exact build vocabulary, circuits, demand, SDK providers, resources, commands, purpose, and digest passed to one Codex role.</dd>
+</dl>
+
+<h2>Three independent state systems</h2>
+<table><thead><tr><th>State system</th><th>Values</th><th>Example</th></tr></thead><tbody>
+<tr><td>Predicate evidence</td><td><code>TRUE</code>, <code>FALSE</code>, <code>UNKNOWN</code>, <code>CONFLICT</code></td><td>Whether a documented exception is established</td></tr>
+<tr><td>Rule/business result</td><td><code>VIOLATED</code>, <code>SATISFIED</code>, <code>ACCEPTED_EXCEPTION</code>, blockers</td><td>Retention assessment</td></tr>
+<tr><td>Technical node lifecycle</td><td><code>READY</code>, <code>RUNNING</code>, <code>COMMITTED</code>, <code>FAILED</code></td><td>A decision node commits an <code>UNKNOWN</code> result successfully</td></tr>
+</tbody></table>
+
+<h2>Two different uses of “source”</h2>
+<p>Authority source defines the rule during training. Task source supplies observations during analysis. A task sentence cannot become authority merely because it contains an instruction, and an authority example cannot silently become a document fact.</p>
+</main></body></html>

@@ -1,5 +1,37 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Coding Agent authoring</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="architecture.html">Architecture</a> · <a href="benchmark.html">Benchmark</a> · <a href="security.html">Security</a></nav><h1>Coding Agents compile multi-file semantic projects</h1><p class="lead">A Coding Agent edits a contained project until ontology checks, LongText checks, circuit traces, controlled-language round-trip, and benchmarks agree.</p>
-<table><thead><tr><th>Skill</th><th>Output responsibility</th></tr></thead><tbody><tr><td><code>nll-design-ontology</code></td><td>Concepts, roles, constraints, examples, and ontology notes.</td></tr><tr><td><code>nll-materialize-longtext</code></td><td>Source, identities, sections, global relations, coverage, and gaps.</td></tr><tr><td><code>nll-author-circuits</code></td><td>Rules, tables, stages, templates, verifiers, and traces.</td></tr><tr><td><code>nll-author-cnl</code></td><td>Frames, lexicon, renderer, parser, comparator, and round-trip cases.</td></tr><tr><td><code>nll-build-benchmark</code></td><td>Microcases, long-range cases, expectations, mutants, and metrics.</td></tr><tr><td><code>nll-integrate-experiment</code></td><td><code>agent.mjs</code> and end-to-end report.</td></tr><tr><td><code>nll-review-and-repair</code></td><td>Independent category-error review and repair.</td></tr></tbody></table>
-<h2>Repair the owning layer</h2><p>A missing ontology role is not repaired with string matching in a stage. A lost source scope is not repaired in report wording. A weak benchmark is not repaired by changing its expectation to match current output. Diagnostics and ownership keep these distinctions executable.</p>
-<h2>Current command</h2><p><code>learn</code> builds a disposable workspace, copies authority and authoring modules, invokes a Coding Agent non-interactively, and stores Markdown execution diagnostics. Fine-grained promotion audit is still partial.</p>
-<p>Contract: <a href="specsLoader.html">DS013 and DS018</a>.</p></main></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Training an nllAgent</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="quick-tutorial.html">Tutorial</a> · <a href="architecture.html">Architecture</a> · <a href="cli.html">CLI</a> · <a href="benchmark.html">Evaluation</a></nav>
+<h1>Training means compiling theory</h1>
+<p class="lead">An nll agent is trained when Codex turns authority prose into a reviewed executable RulePack. No model weights are changed, and no custom runtime sends policy questions to an LLM.</p>
+
+<h2>The three skills</h2>
+<table><thead><tr><th>Skill</th><th>Reads</th><th>Writes</th><th>Cannot do</th></tr></thead><tbody>
+<tr><td><code>nll-train-agent</code></td><td>TRAIN context, ordered theory, SDK and examples</td><td>Candidate ontology, plans, profile, circuits, tests, benchmarks, assembly</td><td>Edit accepted builds or invent benchmark oracles</td></tr>
+<tr><td><code>nll-analyze-task</code></td><td>ANALYZE context and one task source</td><td>Dependency-free task materializer and notes</td><td>Add a constructor, rule, finding, or theory fact</td></tr>
+<tr><td><code>nll-review-and-repair</code></td><td>REVIEW context, authority, candidate, diagnostics, traces</td><td>Layer-correct candidate/task repairs and handoff</td><td>Weaken expected output or mutate a promoted build</td></tr>
+</tbody></table>
+<p>Each SKILL.md links the underlying theory—term algebra, ontology boundaries, circuit methods, multi-semantic assurance, source grounding, category ownership, and mutation review—and runs code that validates its exact context.</p>
+
+<h2>What the context answers</h2>
+<p>For a supplier-incident agent, the context names the selected build; the <code>Incident</code>, <code>Notice</code>, <code>BusinessHour</code>, and <code>ExcusedDelay</code> constructors; actor/deadline/evidence roles; the incident-to-notice circuits; exact coverage needed to conclude no notice exists; available time/query/decision SDK providers; and commands/tests that must pass. Codex does not search unrelated agents or infer this contract from prose.</p>
+
+<h2>Candidate gates</h2>
+<ol>
+<li>RuleAnalysis maps every authority clause and exact span.</li>
+<li>Ontology represents every source-observable premise and keeps findings derived.</li>
+<li>CircuitArchitecturePlan chooses methods per typed subproblem and pins reusable providers.</li>
+<li>MaterializationProfile is derived from circuit demand.</li>
+<li>Leaf and root circuits compile, declare effects, preserve four-valued truth, and emit evidence.</li>
+<li>Tests and semantic benchmarks cover boundaries, exceptions, unknown, conflict, and relevant mutants.</li>
+<li>A separate Codex review checks authority-to-trace fidelity.</li>
+<li>The host compiles the final ANALYZE context and atomically promotes a new immutable build.</li>
+</ol>
+
+<h2>Repair follows authority</h2>
+<p>If a LongText program cannot represent “service restoration window,” the ontology may need retraining. If the concept exists but the source span is wrong, only the task LongText changes. If the comparator is inverted, CircuitJS changes. If the expected result contradicts the written authority, independent rule review—not the circuit author—owns the oracle decision.</p>
+
+<h2>Why no Achilles or direct LLM layer</h2>
+<p>The difficult work is multi-file semantic programming: inspect code, reuse SDK APIs, run checkers, interpret traces, create counterexamples, and repair the correct layer. Codex already supplies that coding loop. Maintaining a second bespoke agent/model protocol would duplicate it while making the program/evidence boundary harder to audit.</p>
+<p>See <a href="../.agents/skills/nll-train-agent/SKILL.md">the actual training skill</a> and <a href="benchmark.html">the forward evaluations</a>.</p>
+</main></body></html>

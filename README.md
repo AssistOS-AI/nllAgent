@@ -1,106 +1,106 @@
 # NaturalLanguageLinterAgent
 
-NaturalLanguageLinterAgent (`nllAgent`) is a Node.js 22+ experiment for turning natural-language rules and long
-documents into inspectable semantic programs. Its executable authoring and persistence format is ESM `.mjs`; human
-inputs and reports are Markdown.
+NaturalLanguageLinterAgent (`nllAgent`) is a Node.js 22+ research environment for compiling natural-language business
+theory into inspectable semantic analyzers. Codex writes executable OntologyJS and CircuitJS during training and writes
+source-grounded LongTextJS for each analysis task. The accepted circuits then run deterministically; a model never
+produces the business verdict directly.
 
-The architecture has three internal JavaScript DSLs:
+All authoritative structured artifacts are ESM `.mjs` modules. Authority, input, reports, and design notes are
+Markdown. There is no JSON semantic format, TypeScript layer, AchillesAgentLib integration, or hidden configuration
+object standing in for a DSL.
 
-- OntologyJS defines typed concepts, roles, constraints, lexicalization, and constructor identity.
-- LongTextJS materializes source-grounded terms, claims, contexts, alternatives, coverage, and explicit gaps.
-- CircuitJS matches the same terms and composes rules, decision tables, dynamic subcircuits, and ordinary JavaScript
-  macro-nodes.
+## The two operations
 
-The DSL values are opaque runtime objects, not configuration records. Ontology constructors create ground `Term`
-instances or typed `Pattern` instances depending on their arguments. `SemanticStore` exposes a stable query and
-transaction boundary while keeping indexes private. Published values between circuit nodes are immutable and
-single-assignment; local variables inside a procedural stage remain normal JavaScript.
-
-## Run the included experiment
-
-`data/editorial-demo/agent.mjs` assembles an executable ontology, materializer, two audit circuits, a planning circuit,
-a controlled-language dialect, and ten source-grounded benchmark cases.
+Train a named agent from one or more ordered theory files:
 
 ```bash
-node bin/nllagent.mjs benchmark --agent editorial-demo
-
-node bin/nllagent.mjs run \
-  --agent editorial-demo \
-  --input data/editorial-demo/benchmark/public/weak-phrase/input.md \
-  --output /tmp/editorial-report.md
-
-node bin/nllagent.mjs plan \
-  --agent editorial-demo \
-  --input data/editorial-demo/examples/planning/idea.md \
-  --output /tmp/editorial-plan.cnl.md
+node bin/nllagent-train.mjs train \
+  --agent privacy-retention \
+  --theory policies/retention.md \
+  --theory policies/exceptions.md \
+  --data-root data
 ```
 
-`run` and `plan` preserve the established CLI use cases. Each invocation also writes reimportable `.mjs` modules
-for the LongText program, semantic result, and trace under the agent workspace. Missing ontology, coverage, capability,
-or execution evidence is reported explicitly rather than converted to a successful verdict.
+Training invokes Codex with `nll-train-agent`, validates the generated ontology, plan, profile, circuits, tests, and
+semantic benchmarks, invokes an independent `nll-review-and-repair` pass, and promotes one immutable build only when all
+gates pass.
 
-## CLI
-
-```text
-nllagent run --agent <name> --input <file.md> --output <report.md>
-nllagent plan --agent <name> --input <idea.md> --output <plan.cnl.md>
-nllagent benchmark --agent <name>
-nllagent learn --agent <name> --rules <folder>
-nllagent agent init|list|inspect
-nllagent issue list
-nllagent feedback add
-nllagent model inspect
-```
-
-The old publication workflow and structured-data flags are intentionally absent. Agent composition happens in
-`agent.mjs`; executable modules, source files, and Markdown reports are the durable repository artifacts.
-
-The default `foundation-core@2` materializes a deliberately narrow controlled form for literal state assertions and
-checks explicit polarity conflicts. Use `--foundation off` when an agent supplies a deliberately different world.
-Changing political, legal, geographic, economic, or social facts never belong in the timeless core.
-
-## Authoring model
-
-A typical agent owns:
-
-```text
-data/my-agent/
-  agent.mjs
-  authority/
-  ontologies/
-  longtext/
-  circuits/
-  cnl/
-  benchmark/
-```
-
-`agent.mjs` imports and composes those modules with normal ESM. LongText modules describe what the source expresses;
-they do not contain findings. Circuits read through semantic queries and publish validated terms through atomic
-transactions. Procedural operators may use loops, recursion, classes, exceptions, and `async/await`, but interact
-with semantic state only through `ExecutionContext`.
-
-## Validation
+Analyze one document with exactly one accepted agent build:
 
 ```bash
+node bin/nllagent-analyze.mjs analyze \
+  --agent privacy-retention \
+  --task policy-review-2026-07 \
+  --input documents/customer-policy.md \
+  --output reports/customer-policy.md \
+  --data-root data
+```
+
+Analysis pins the current build, compiles an exact context from that build, and invokes Codex with `nll-analyze-task`
+to write task-local LongTextJS. The host validates Unicode spans, ontology types, alternatives, and coverage before
+running the frozen circuits. The task cannot edit or retrain the selected agent.
+
+The unified `bin/nllagent.mjs` exposes the same `train` and `analyze` commands plus deterministic benchmark and
+inspection operations. Run `node bin/nllagent.mjs --help` for the full surface.
+
+## Semantic architecture
+
+- OntologyJS defines qualified sorts, concepts, roles, cardinalities, subtyping, lexicalization, and opaque
+  constructors.
+- LongTextJS is the ground program of one source revision: terms, claims, mentions, contexts, alternatives, coverage,
+  gaps, and exact anchors.
+- CircuitJS defines typed query, four-valued decisions, derivation, verification, dynamic subcircuits, controlled
+  generation, and ordinary JavaScript macro-nodes.
+- SemanticStore is the single typed term graph. Circuits see query and transaction APIs, not physical indexes.
+- The public execution graph uses immutable single-producer values. Normal local mutation, loops, recursion, classes,
+  and `async/await` remain available inside a typed macro-node.
+
+Generated circuits normally compose the SDK catalog in [`src/sdk/`](src/sdk/). It maps the MethodCatalog to concrete
+query, truth, constraint, relation, rewrite, proof, synthesis, witness, and refinement providers. Custom code is used
+when a domain algorithm is genuinely irregular, with effects and assurance boundaries declared explicitly.
+
+## Persistent environment
+
+```text
+data/
+  agents/<agent-id>/
+    builds/<immutable-build-id>/
+    current/
+    training-runs/<run-id>/
+  tasks/<task-id>/
+    input/
+    pin/
+    generation/
+    longtext/
+    output/
+```
+
+An environment can hold many unrelated trained agents. Every task pins one build and context digest before Codex reads
+the source. Retraining never changes an existing task.
+
+## Skills and native tools
+
+Only three nll product skills are used:
+
+- `nll-train-agent`: complete theory compilation;
+- `nll-analyze-task`: one source to task-local LongTextJS;
+- `nll-review-and-repair`: independent trace/authority review and layer-correct repair.
+
+Their SKILL.md files link detailed theory references and execute context validators. Deterministic authoring tools are
+available through `node tools/nll.mjs`, including source, ontology, context, plan, circuit, LongText, engine, benchmark,
+and RulePack checks.
+
+## Validation and documentation
+
+```bash
+node --test
+node experiments/architecture/run.mjs
 node scripts/check.mjs
 ```
 
-The check runs unit and integration tests, the five architecture experiments, the editorial benchmark, specification
-matrix generation, documentation link checks, module syntax checks, and the repository-format audit.
+Realistic forward evaluations live under [`agentsEval/`](agentsEval/). They use medium-size authority and input
+documents, generated code, concrete task outputs, independent review, mutation evidence, and phase-separated timing.
 
-The five experiments under `experiments/architecture/` resolved the former open questions: hybrid term identity,
-the ontology-behavior boundary, factorized lazy alternatives, exact model-artifact reuse, and exact critical-slot CNL
-round-trip.
-
-## Reading path
-
-Start with [the quick tutorial](docs/quick-tutorial.html), then read
-[the architecture](docs/architecture.html), [OntologyJS](docs/ontologyjs.html),
-[LongTextJS](docs/longtextjs.html), [CircuitJS](docs/circuitjs.html),
-[SemanticStore](docs/semantic-store.html), and [runtime semantics](docs/runtime.html).
-[Controlled generation](docs/generation.html), [benchmarks](docs/benchmark.html), and
-[the experiments](docs/experiments.html) cover the verification boundary.
-
-The contiguous DS set under [`docs/specs/`](docs/specs/) is authoritative. The
-[specification matrix](docs/specs/matrix.md) provides the complete contract map.
-[Current serious issues](serious_issues.md) records only gaps that remain true of this implementation.
+Start with [the documentation index](docs/index.html), [the quick tutorial](docs/quick-tutorial.html), and the
+[functional specification](docs/FS.md). The contiguous [DS specifications](docs/specs/matrix.md) are architectural
+authority. [serious_issues.md](serious_issues.md) lists only current bounded implementation gaps.

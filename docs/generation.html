@@ -1,16 +1,34 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controlled generation</title><link rel="stylesheet" href="styles.css"></head><body><main><nav><a href="index.html">Start</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="cli.html">CLI</a> · <a href="experiments.html">Experiments</a></nav><h1>Controlled generation starts from meaning</h1><p class="lead">A circuit emits a complete CNLFrame. A deterministic dialect renders it, parses the text again, and accepts it only when every critical slot survives.</p>
-<pre><code>const frame = cnlFrame(
-  'obligation',
-  actor('controller'),
-  modality('MUST'),
-  action('erase'),
-  object('personal-data'),
-  time('five-years-after-collection'),
-  exception('documented-legal-duty')
-);
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controlled generation</title><link rel="stylesheet" href="styles.css"></head><body><main>
+<nav><a href="index.html">Start</a> · <a href="circuitjs.html">CircuitJS</a> · <a href="runtime.html">Runtime</a> · <a href="experiments.html">Experiments</a></nav>
+<h1>Controlled repair starts from a typed frame</h1>
+<p class="lead">nllAgent never treats a fluent sentence as proof that a repair preserved policy. The circuit first constructs the intended semantic frame; a paired deterministic dialect renders and parses it; the comparator checks protected meaning.</p>
 
-const document = renderVerified(frame, normativeDialect);</code></pre>
-<p>The comparator checks frame kind, actor, modality, action, object, negation, time, condition, exception, authority, and every domain slot. Surface variation is acceptable only if parsing reconstructs the same frame.</p>
-<h2>Longer model-assisted text</h2><p>A stage may build a semantic plan and call a writer. The result is a generated document tied to the plan and model artifact. It must be materialized as LongTextJS and audited again. A fluent draft is not a verified controlled-language artifact.</p>
-<p>The included editorial agent implements deterministic plan generation and round-trip. Automated revision and reanalysis for arbitrary writers remain partial.</p>
-<p>Contract: <a href="specsLoader.html">DS019</a>.</p></main></body></html>
+<h2>Retention repair</h2>
+<p>A source clause permits ten years “for convenience,” while authority allows five years except for a documented legal obligation. Replacing <em>ten</em> with <em>five</em> alone can lose the conditional exception. The repair circuit instead constructs two frames:</p>
+<pre><code>obligation(
+  actor(controller),
+  action(erase),
+  object(personalData),
+  deadline(noLaterThan(yearsAfter(collection, 5)))
+)
+
+permission(
+  actor(controller),
+  action(retainLonger),
+  object(personalData),
+  condition(documentedLegalObligationRequiresLongerPeriod)
+)</code></pre>
+<p>The renderer may produce a canonical two-sentence clause. Acceptance requires the parser to reconstruct both frames with the same actor, modality, action, object, deadline origin, quantification, and exception.</p>
+
+<h2>Bounded synthesis</h2>
+<p>SynthesisEngine searches only a typed finite grammar. Cost prefers preserving grounded values and making a minimal change. Every candidate is applied to a semantic copy and re-executed through the original rule circuit. A candidate that still violates the rule or invents an authority fact is rejected. Exhausted budget produces no repair, not the least-wrong sentence.</p>
+
+<h2>What is not verified generation</h2>
+<p>A long narrative drafted by Codex is an external workspace artifact. If used, it must become a new source revision, be materialized as LongTextJS, and pass the appropriate circuits. It does not receive CNL assurance and cannot write itself into the accepted agent or authority.</p>
+
+<h2>Language variants</h2>
+<p>An English and Romanian dialect may share ontology frames only when each has its own paired parser and both reconstruct the protected slots. Translation quality without round-trip evidence is not semantic equivalence.</p>
+<p>Normative contract: DS016.</p>
+</main></body></html>

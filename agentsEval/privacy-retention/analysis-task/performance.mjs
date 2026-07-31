@@ -1,0 +1,13 @@
+export const sourceWords = 1913;
+export const sourceCodePoints = 13546;
+export const units = 18;
+export const terms = 37;
+export const claims = 17;
+export const gaps = 1;
+export const findings = 6;
+export const traceEvents = 40;
+export const materializationAverageMs = 3.1361049333333333;
+export const materializationMaximumMs = 4.148223999999999;
+export const deterministicAverageMs = 1.3240012333333349;
+export const deterministicMaximumMs = 2.378247000000016;
+export const residentSetBytes = 90251264;
